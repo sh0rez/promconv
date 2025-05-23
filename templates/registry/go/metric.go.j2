@@ -1,0 +1,80 @@
+package {{ctx.root_namespace | replace("go", "golang")}}
+
+import (
+       "github.com/prometheus/client_golang/prometheus"
+)
+
+{% set attributes = ctx.attributes | attribute_sort %}
+
+import (
+{% for pkg in attributes | map(attribute="name") | map("attribute_namespace") %}
+   {%- if pkg != ctx.root_namespace -%}
+      "shorez.de/promconv/otel/{{pkg}}";
+   {%- endif -%}
+{%- endfor%}
+)
+
+{% set Name = ctx.metric_name[(ctx.root_namespace | length)+1:] %}
+
+{% set Type = Name | pascal_case %}
+{% set AttrExtra = Type + "Optional" %}
+
+{% set InstrMap = {
+   "histogram": "Histogram",
+   "gauge": "Gauge",
+   "counter": "Counter",
+   "updowncounter": "Gauge",
+}%}
+{% set Instr = InstrMap[ctx.instrument] | default("TODO_"+ctx.instrument) %}
+
+// {{ctx.brief | trim}}
+type {{Type}} struct {
+     *prometheus.{{Instr}}Vec
+}
+
+func New{{Type}}() {{Type}} {
+     labels := []string{
+        {%- for attr in attributes %} "{{attr.name | snake_case}}", {% endfor -%}
+     }
+     return {{Type}}{ {{Instr}}Vec: prometheus.New{{Instr}}Vec(prometheus.{{Instr}}Opts{
+            Namespace: "{{ctx.root_namespace}}",
+            Name: "{{Name | snake_case}}",
+            Help: "{{ctx.brief | trim }}",
+     }, labels)}
+}
+
+
+func (m {{Type}}) With(
+{%- for attr in attributes | required -%}
+    {%- set id = attr.name | split_id -%}
+    {%- set name = id[1:] | join(".") | pascal_case -%}
+    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
+    {{name | camel_case | replace("type", "kind")}} {{type}}Attr{{name}},
+{%- endfor -%}
+extra {{AttrExtra-}}
+) prometheus.{{Instr | replace("Histogram", "Observer")}} {
+     return m.WithLabelValues(
+        {% for attr in attributes | required -%}
+            {%- set id = attr.name | split_id -%}
+            {%- set name = id[1:] | join(".") | pascal_case -%}
+            string({{name | camel_case | replace("type", "kind")}}),
+        {%  endfor -%}
+        {% for attr in attributes | not_required -%}
+            string(extra.{{attr.name | pascal_case}}),
+        {% endfor %}
+     )
+}
+
+type {{AttrExtra}} struct {
+{% for attr in attributes | not_required -%}
+    {%- set id = attr.name | split_id -%}
+    {%- set name = id[1:] | join(".") | pascal_case -%}
+    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
+    // {{attr.brief | trim}}
+    {{ attr.name | pascal_case}} {{type}}Attr{{name|pascal_case}} `otel:"{{attr.name}}"`
+{% endfor %}
+}
+
+/*
+{{ debug() }}
+*/

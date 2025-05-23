@@ -1,0 +1,21 @@
+templates:
+  - template: metric.go.j2
+    application_mode: each
+    file_name: '{{ctx.root_namespace}}/{{ctx.id | snake_case}}.go'
+    filter: >
+      semconv_metrics
+  - template: attr.go.j2
+    application_mode: each
+    file_name: '{{ctx.root_namespace}}/attributes.go'
+    filter: >
+      semconv_grouped_attributes
+
+comment_formats:
+  go:
+    format: markdown
+    prefix: "// "
+    indent_first_level_list_items: true
+    shortcut_reference_link: true
+    trim: true
+    remove_trailing_dots: true
+default_comment_format: go
