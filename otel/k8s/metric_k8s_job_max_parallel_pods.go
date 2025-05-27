@@ -18,11 +18,15 @@ func NewJobMaxParallelPods() JobMaxParallelPods {
 	}, labels)}
 }
 
-func (m JobMaxParallelPods) With(extra JobMaxParallelPodsOptional) prometheus.Gauge {
+func (m JobMaxParallelPods) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = JobMaxParallelPodsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type JobMaxParallelPodsOptional struct {
+type JobMaxParallelPodsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "JobMaxParallelPodsOptional",
+        "AttrExtra": "JobMaxParallelPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

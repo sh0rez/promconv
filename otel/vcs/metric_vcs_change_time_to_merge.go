@@ -18,20 +18,30 @@ func NewChangeTimeToMerge() ChangeTimeToMerge {
 	}, labels)}
 }
 
-func (m ChangeTimeToMerge) With(refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra ChangeTimeToMergeOptional) prometheus.Gauge {
+func (m ChangeTimeToMerge) With(refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
+	AttrVcsOwnerName() AttrOwnerName
+	AttrVcsRefBaseName() AttrRefBaseName
+	AttrVcsRepositoryName() AttrRepositoryName
+	AttrVcsProviderName() AttrProviderName
+	AttrVcsRefBaseRevision() AttrRefBaseRevision
+	AttrVcsRefHeadRevision() AttrRefHeadRevision
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ChangeTimeToMergeExtra{}
+	}
 	return m.WithLabelValues(
 		string(refHeadName),
 		string(repositoryUrlFull),
-		string(extra.VcsOwnerName),
-		string(extra.VcsRefBaseName),
-		string(extra.VcsRepositoryName),
-		string(extra.VcsProviderName),
-		string(extra.VcsRefBaseRevision),
-		string(extra.VcsRefHeadRevision),
+		string(extra.AttrVcsOwnerName()),
+		string(extra.AttrVcsRefBaseName()),
+		string(extra.AttrVcsRepositoryName()),
+		string(extra.AttrVcsProviderName()),
+		string(extra.AttrVcsRefBaseRevision()),
+		string(extra.AttrVcsRefHeadRevision()),
 	)
 }
 
-type ChangeTimeToMergeOptional struct {
+type ChangeTimeToMergeExtra struct {
 	// The group owner within the version control system.
 	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
 	// The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.
@@ -46,13 +56,26 @@ type ChangeTimeToMergeOptional struct {
 	VcsRefHeadRevision AttrRefHeadRevision `otel:"vcs.ref.head.revision"`
 }
 
+func (a ChangeTimeToMergeExtra) AttrVcsOwnerName() AttrOwnerName     { return a.VcsOwnerName }
+func (a ChangeTimeToMergeExtra) AttrVcsRefBaseName() AttrRefBaseName { return a.VcsRefBaseName }
+func (a ChangeTimeToMergeExtra) AttrVcsRepositoryName() AttrRepositoryName {
+	return a.VcsRepositoryName
+}
+func (a ChangeTimeToMergeExtra) AttrVcsProviderName() AttrProviderName { return a.VcsProviderName }
+func (a ChangeTimeToMergeExtra) AttrVcsRefBaseRevision() AttrRefBaseRevision {
+	return a.VcsRefBaseRevision
+}
+func (a ChangeTimeToMergeExtra) AttrVcsRefHeadRevision() AttrRefHeadRevision {
+	return a.VcsRefHeadRevision
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ChangeTimeToMergeOptional",
+        "AttrExtra": "ChangeTimeToMergeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

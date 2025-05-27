@@ -18,11 +18,15 @@ func NewEventloopDelayMax() EventloopDelayMax {
 	}, labels)}
 }
 
-func (m EventloopDelayMax) With(extra EventloopDelayMaxOptional) prometheus.Gauge {
+func (m EventloopDelayMax) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = EventloopDelayMaxExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type EventloopDelayMaxOptional struct {
+type EventloopDelayMaxExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopDelayMaxOptional",
+        "AttrExtra": "EventloopDelayMaxExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

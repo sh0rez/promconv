@@ -22,18 +22,31 @@ func NewPodNetworkErrors() PodNetworkErrors {
 	}, labels)}
 }
 
-func (m PodNetworkErrors) With(extra PodNetworkErrorsOptional) prometheus.Counter {
+func (m PodNetworkErrors) With(extra interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) prometheus.Counter {
+	if extra == nil {
+		extra = PodNetworkErrorsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkInterfaceName),
-		string(extra.NetworkIoDirection),
+		string(extra.AttrNetworkInterfaceName()),
+		string(extra.AttrNetworkIoDirection()),
 	)
 }
 
-type PodNetworkErrorsOptional struct {
+type PodNetworkErrorsExtra struct {
 	// The network interface name.
 	NetworkInterfaceName network.AttrInterfaceName `otel:"network.interface.name"`
 	// The network IO operation direction.
 	NetworkIoDirection network.AttrIoDirection `otel:"network.io.direction"`
+}
+
+func (a PodNetworkErrorsExtra) AttrNetworkInterfaceName() network.AttrInterfaceName {
+	return a.NetworkInterfaceName
+}
+func (a PodNetworkErrorsExtra) AttrNetworkIoDirection() network.AttrIoDirection {
+	return a.NetworkIoDirection
 }
 
 /*
@@ -42,7 +55,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PodNetworkErrorsOptional",
+        "AttrExtra": "PodNetworkErrorsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

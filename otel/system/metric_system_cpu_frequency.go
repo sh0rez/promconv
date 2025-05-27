@@ -18,11 +18,15 @@ func NewCpuFrequency() CpuFrequency {
 	}, labels)}
 }
 
-func (m CpuFrequency) With(extra CpuFrequencyOptional) prometheus.Gauge {
+func (m CpuFrequency) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = CpuFrequencyExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type CpuFrequencyOptional struct {
+type CpuFrequencyExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuFrequencyOptional",
+        "AttrExtra": "CpuFrequencyExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

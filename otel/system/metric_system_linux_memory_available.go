@@ -18,11 +18,15 @@ func NewLinuxMemoryAvailable() LinuxMemoryAvailable {
 	}, labels)}
 }
 
-func (m LinuxMemoryAvailable) With(extra LinuxMemoryAvailableOptional) prometheus.Gauge {
+func (m LinuxMemoryAvailable) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = LinuxMemoryAvailableExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type LinuxMemoryAvailableOptional struct {
+type LinuxMemoryAvailableExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "LinuxMemoryAvailableOptional",
+        "AttrExtra": "LinuxMemoryAvailableExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

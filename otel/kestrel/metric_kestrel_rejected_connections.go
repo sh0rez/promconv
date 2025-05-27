@@ -23,16 +23,24 @@ func NewRejectedConnections() RejectedConnections {
 	}, labels)}
 }
 
-func (m RejectedConnections) With(extra RejectedConnectionsOptional) prometheus.Counter {
+func (m RejectedConnections) With(extra interface {
+	AttrNetworkTransport() network.AttrTransport
+	AttrNetworkType() network.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Counter {
+	if extra == nil {
+		extra = RejectedConnectionsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkTransport),
-		string(extra.NetworkType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrNetworkTransport()),
+		string(extra.AttrNetworkType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type RejectedConnectionsOptional struct {
+type RejectedConnectionsExtra struct {
 	// [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
 	NetworkTransport network.AttrTransport `otel:"network.transport"`
 	// [OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.
@@ -43,13 +51,20 @@ type RejectedConnectionsOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a RejectedConnectionsExtra) AttrNetworkTransport() network.AttrTransport {
+	return a.NetworkTransport
+}
+func (a RejectedConnectionsExtra) AttrNetworkType() network.AttrType     { return a.NetworkType }
+func (a RejectedConnectionsExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a RejectedConnectionsExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RejectedConnectionsOptional",
+        "AttrExtra": "RejectedConnectionsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

@@ -18,16 +18,23 @@ func NewTimeouts() Timeouts {
 	}, labels)}
 }
 
-func (m Timeouts) With(extra TimeoutsOptional) prometheus.Counter {
+func (m Timeouts) With(extra interface {
+	AttrFaasTrigger() AttrTrigger
+}) prometheus.Counter {
+	if extra == nil {
+		extra = TimeoutsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.FaasTrigger),
+		string(extra.AttrFaasTrigger()),
 	)
 }
 
-type TimeoutsOptional struct {
+type TimeoutsExtra struct {
 	// Type of the trigger which caused this function invocation.
 	FaasTrigger AttrTrigger `otel:"faas.trigger"`
 }
+
+func (a TimeoutsExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "TimeoutsOptional",
+        "AttrExtra": "TimeoutsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

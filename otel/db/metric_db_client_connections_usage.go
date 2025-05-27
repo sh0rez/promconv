@@ -18,14 +18,18 @@ func NewClientConnectionsUsage() ClientConnectionsUsage {
 	}, labels)}
 }
 
-func (m ClientConnectionsUsage) With(clientConnectionsPoolName AttrClientConnectionsPoolName, clientConnectionsState AttrClientConnectionsState, extra ClientConnectionsUsageOptional) prometheus.Gauge {
+func (m ClientConnectionsUsage) With(clientConnectionsPoolName AttrClientConnectionsPoolName, clientConnectionsState AttrClientConnectionsState, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ClientConnectionsUsageExtra{}
+	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),
 		string(clientConnectionsState),
 	)
 }
 
-type ClientConnectionsUsageOptional struct {
+type ClientConnectionsUsageExtra struct {
 }
 
 /*
@@ -34,7 +38,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientConnectionsUsageOptional",
+        "AttrExtra": "ClientConnectionsUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

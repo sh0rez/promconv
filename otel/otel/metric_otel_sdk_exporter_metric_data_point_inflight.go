@@ -22,16 +22,24 @@ func NewSdkExporterMetricDataPointInflight() SdkExporterMetricDataPointInflight 
 	}, labels)}
 }
 
-func (m SdkExporterMetricDataPointInflight) With(extra SdkExporterMetricDataPointInflightOptional) prometheus.Gauge {
+func (m SdkExporterMetricDataPointInflight) With(extra interface {
+	AttrOtelComponentName() AttrComponentName
+	AttrOtelComponentType() AttrComponentType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = SdkExporterMetricDataPointInflightExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.OtelComponentName),
-		string(extra.OtelComponentType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrOtelComponentName()),
+		string(extra.AttrOtelComponentType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type SdkExporterMetricDataPointInflightOptional struct {
+type SdkExporterMetricDataPointInflightExtra struct {
 	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
 	OtelComponentName AttrComponentName `otel:"otel.component.name"`
 	// A name identifying the type of the OpenTelemetry component.
@@ -42,13 +50,26 @@ type SdkExporterMetricDataPointInflightOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a SdkExporterMetricDataPointInflightExtra) AttrOtelComponentName() AttrComponentName {
+	return a.OtelComponentName
+}
+func (a SdkExporterMetricDataPointInflightExtra) AttrOtelComponentType() AttrComponentType {
+	return a.OtelComponentType
+}
+func (a SdkExporterMetricDataPointInflightExtra) AttrServerAddress() server.AttrAddress {
+	return a.ServerAddress
+}
+func (a SdkExporterMetricDataPointInflightExtra) AttrServerPort() server.AttrPort {
+	return a.ServerPort
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkExporterMetricDataPointInflightOptional",
+        "AttrExtra": "SdkExporterMetricDataPointInflightExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -233,6 +254,36 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
                     "examples": [
                         "batching_span_processor",
@@ -371,36 +422,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": "string",
-                },
-                {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "int",
                 },
             ],
             "brief": "The number of metric data points which were passed to the exporter, but that have not been exported yet (neither successful, nor failed)",

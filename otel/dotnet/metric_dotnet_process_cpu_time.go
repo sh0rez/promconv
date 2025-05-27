@@ -22,13 +22,17 @@ func NewProcessCpuTime() ProcessCpuTime {
 	}, labels)}
 }
 
-func (m ProcessCpuTime) With(mode cpu.AttrMode, extra ProcessCpuTimeOptional) prometheus.Counter {
+func (m ProcessCpuTime) With(mode cpu.AttrMode, extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ProcessCpuTimeExtra{}
+	}
 	return m.WithLabelValues(
 		string(mode),
 	)
 }
 
-type ProcessCpuTimeOptional struct {
+type ProcessCpuTimeExtra struct {
 }
 
 /*
@@ -37,7 +41,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessCpuTimeOptional",
+        "AttrExtra": "ProcessCpuTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

@@ -25,18 +25,28 @@ func NewTlsHandshakeDuration() TlsHandshakeDuration {
 	}, labels)}
 }
 
-func (m TlsHandshakeDuration) With(extra TlsHandshakeDurationOptional) prometheus.Observer {
+func (m TlsHandshakeDuration) With(extra interface {
+	AttrErrorType() error.AttrType
+	AttrNetworkTransport() network.AttrTransport
+	AttrNetworkType() network.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+	AttrTlsProtocolVersion() tls.AttrProtocolVersion
+}) prometheus.Observer {
+	if extra == nil {
+		extra = TlsHandshakeDurationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ErrorType),
-		string(extra.NetworkTransport),
-		string(extra.NetworkType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
-		string(extra.TlsProtocolVersion),
+		string(extra.AttrErrorType()),
+		string(extra.AttrNetworkTransport()),
+		string(extra.AttrNetworkType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
+		string(extra.AttrTlsProtocolVersion()),
 	)
 }
 
-type TlsHandshakeDurationOptional struct {
+type TlsHandshakeDurationExtra struct {
 	// The full name of exception type.
 	ErrorType error.AttrType `otel:"error.type"`
 	// [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
@@ -51,13 +61,24 @@ type TlsHandshakeDurationOptional struct {
 	TlsProtocolVersion tls.AttrProtocolVersion `otel:"tls.protocol.version"`
 }
 
+func (a TlsHandshakeDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a TlsHandshakeDurationExtra) AttrNetworkTransport() network.AttrTransport {
+	return a.NetworkTransport
+}
+func (a TlsHandshakeDurationExtra) AttrNetworkType() network.AttrType     { return a.NetworkType }
+func (a TlsHandshakeDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a TlsHandshakeDurationExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+func (a TlsHandshakeDurationExtra) AttrTlsProtocolVersion() tls.AttrProtocolVersion {
+	return a.TlsProtocolVersion
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "TlsHandshakeDurationOptional",
+        "AttrExtra": "TlsHandshakeDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -251,17 +272,6 @@ State {
                     "type": "int",
                 },
                 {
-                    "brief": "Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)\n",
-                    "examples": [
-                        "1.2",
-                        "3",
-                    ],
-                    "name": "tls.protocol.version",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.",
                     "examples": [
                         "ipv4",
@@ -376,6 +386,17 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)\n",
+                    "examples": [
+                        "1.2",
+                        "3",
+                    ],
+                    "name": "tls.protocol.version",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
             ],
             "brief": "The duration of TLS handshakes on the server.",

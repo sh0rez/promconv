@@ -18,11 +18,15 @@ func NewGoroutineCount() GoroutineCount {
 	}, labels)}
 }
 
-func (m GoroutineCount) With(extra GoroutineCountOptional) prometheus.Gauge {
+func (m GoroutineCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = GoroutineCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type GoroutineCountOptional struct {
+type GoroutineCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GoroutineCountOptional",
+        "AttrExtra": "GoroutineCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

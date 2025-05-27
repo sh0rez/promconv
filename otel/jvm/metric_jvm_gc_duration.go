@@ -18,15 +18,22 @@ func NewGcDuration() GcDuration {
 	}, labels)}
 }
 
-func (m GcDuration) With(extra GcDurationOptional) prometheus.Observer {
+func (m GcDuration) With(extra interface {
+	AttrJvmGcAction() AttrGcAction
+	AttrJvmGcName() AttrGcName
+	AttrJvmGcCause() AttrGcCause
+}) prometheus.Observer {
+	if extra == nil {
+		extra = GcDurationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.JvmGcAction),
-		string(extra.JvmGcName),
-		string(extra.JvmGcCause),
+		string(extra.AttrJvmGcAction()),
+		string(extra.AttrJvmGcName()),
+		string(extra.AttrJvmGcCause()),
 	)
 }
 
-type GcDurationOptional struct {
+type GcDurationExtra struct {
 	// Name of the garbage collector action.
 	JvmGcAction AttrGcAction `otel:"jvm.gc.action"`
 	// Name of the garbage collector.
@@ -35,13 +42,17 @@ type GcDurationOptional struct {
 	JvmGcCause AttrGcCause `otel:"jvm.gc.cause"`
 }
 
+func (a GcDurationExtra) AttrJvmGcAction() AttrGcAction { return a.JvmGcAction }
+func (a GcDurationExtra) AttrJvmGcName() AttrGcName     { return a.JvmGcName }
+func (a GcDurationExtra) AttrJvmGcCause() AttrGcCause   { return a.JvmGcCause }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcDurationOptional",
+        "AttrExtra": "GcDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

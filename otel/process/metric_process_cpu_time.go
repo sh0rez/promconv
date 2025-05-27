@@ -22,16 +22,23 @@ func NewCpuTime() CpuTime {
 	}, labels)}
 }
 
-func (m CpuTime) With(extra CpuTimeOptional) prometheus.Counter {
+func (m CpuTime) With(extra interface {
+	AttrCpuMode() cpu.AttrMode
+}) prometheus.Counter {
+	if extra == nil {
+		extra = CpuTimeExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.CpuMode),
+		string(extra.AttrCpuMode()),
 	)
 }
 
-type CpuTimeOptional struct {
+type CpuTimeExtra struct {
 	// A process SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
 	CpuMode cpu.AttrMode `otel:"cpu.mode"`
 }
+
+func (a CpuTimeExtra) AttrCpuMode() cpu.AttrMode { return a.CpuMode }
 
 /*
 State {
@@ -39,7 +46,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuTimeOptional",
+        "AttrExtra": "CpuTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

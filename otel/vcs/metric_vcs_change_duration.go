@@ -18,18 +18,25 @@ func NewChangeDuration() ChangeDuration {
 	}, labels)}
 }
 
-func (m ChangeDuration) With(changeState AttrChangeState, refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra ChangeDurationOptional) prometheus.Gauge {
+func (m ChangeDuration) With(changeState AttrChangeState, refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
+	AttrVcsOwnerName() AttrOwnerName
+	AttrVcsRepositoryName() AttrRepositoryName
+	AttrVcsProviderName() AttrProviderName
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ChangeDurationExtra{}
+	}
 	return m.WithLabelValues(
 		string(changeState),
 		string(refHeadName),
 		string(repositoryUrlFull),
-		string(extra.VcsOwnerName),
-		string(extra.VcsRepositoryName),
-		string(extra.VcsProviderName),
+		string(extra.AttrVcsOwnerName()),
+		string(extra.AttrVcsRepositoryName()),
+		string(extra.AttrVcsProviderName()),
 	)
 }
 
-type ChangeDurationOptional struct {
+type ChangeDurationExtra struct {
 	// The group owner within the version control system.
 	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
 	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
@@ -38,13 +45,17 @@ type ChangeDurationOptional struct {
 	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
 }
 
+func (a ChangeDurationExtra) AttrVcsOwnerName() AttrOwnerName           { return a.VcsOwnerName }
+func (a ChangeDurationExtra) AttrVcsRepositoryName() AttrRepositoryName { return a.VcsRepositoryName }
+func (a ChangeDurationExtra) AttrVcsProviderName() AttrProviderName     { return a.VcsProviderName }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ChangeDurationOptional",
+        "AttrExtra": "ChangeDurationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

@@ -23,19 +23,28 @@ func NewClientOperationDuration() ClientOperationDuration {
 	}, labels)}
 }
 
-func (m ClientOperationDuration) With(operationName AttrOperationName, system AttrSystem, extra ClientOperationDurationOptional) prometheus.Observer {
+func (m ClientOperationDuration) With(operationName AttrOperationName, system AttrSystem, extra interface {
+	AttrErrorType() error.AttrType
+	AttrGenAiRequestModel() AttrRequestModel
+	AttrServerPort() server.AttrPort
+	AttrGenAiResponseModel() AttrResponseModel
+	AttrServerAddress() server.AttrAddress
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientOperationDurationExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
 		string(system),
-		string(extra.ErrorType),
-		string(extra.GenAiRequestModel),
-		string(extra.ServerPort),
-		string(extra.GenAiResponseModel),
-		string(extra.ServerAddress),
+		string(extra.AttrErrorType()),
+		string(extra.AttrGenAiRequestModel()),
+		string(extra.AttrServerPort()),
+		string(extra.AttrGenAiResponseModel()),
+		string(extra.AttrServerAddress()),
 	)
 }
 
-type ClientOperationDurationOptional struct {
+type ClientOperationDurationExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// The name of the GenAI model a request is being made to.
@@ -48,13 +57,23 @@ type ClientOperationDurationOptional struct {
 	ServerAddress server.AttrAddress `otel:"server.address"`
 }
 
+func (a ClientOperationDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a ClientOperationDurationExtra) AttrGenAiRequestModel() AttrRequestModel {
+	return a.GenAiRequestModel
+}
+func (a ClientOperationDurationExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+func (a ClientOperationDurationExtra) AttrGenAiResponseModel() AttrResponseModel {
+	return a.GenAiResponseModel
+}
+func (a ClientOperationDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientOperationDurationOptional",
+        "AttrExtra": "ClientOperationDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -362,34 +381,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "GenAI server address.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "GenAI server port.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If `server.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "The name of the model that generated the response.",
                     "examples": [
                         "gpt-4-0613",
@@ -466,6 +457,34 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "GenAI server address.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "GenAI server port.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If `server.address` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
                 },
                 {
                     "brief": "Describes a class of error the operation ended with.\n",

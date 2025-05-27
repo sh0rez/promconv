@@ -18,11 +18,15 @@ func NewSdkProcessorSpanProcessedCount() SdkProcessorSpanProcessedCount {
 	}, labels)}
 }
 
-func (m SdkProcessorSpanProcessedCount) With(extra SdkProcessorSpanProcessedCountOptional) prometheus.Gauge {
+func (m SdkProcessorSpanProcessedCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = SdkProcessorSpanProcessedCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type SdkProcessorSpanProcessedCountOptional struct {
+type SdkProcessorSpanProcessedCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkProcessorSpanProcessedCountOptional",
+        "AttrExtra": "SdkProcessorSpanProcessedCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

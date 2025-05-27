@@ -18,11 +18,15 @@ func NewSystemCpuLoad1m() SystemCpuLoad1m {
 	}, labels)}
 }
 
-func (m SystemCpuLoad1m) With(extra SystemCpuLoad1mOptional) prometheus.Gauge {
+func (m SystemCpuLoad1m) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = SystemCpuLoad1mExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type SystemCpuLoad1mOptional struct {
+type SystemCpuLoad1mExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SystemCpuLoad1mOptional",
+        "AttrExtra": "SystemCpuLoad1mExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

@@ -18,11 +18,15 @@ func NewDeploymentDesiredPods() DeploymentDesiredPods {
 	}, labels)}
 }
 
-func (m DeploymentDesiredPods) With(extra DeploymentDesiredPodsOptional) prometheus.Gauge {
+func (m DeploymentDesiredPods) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = DeploymentDesiredPodsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type DeploymentDesiredPodsOptional struct {
+type DeploymentDesiredPodsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DeploymentDesiredPodsOptional",
+        "AttrExtra": "DeploymentDesiredPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

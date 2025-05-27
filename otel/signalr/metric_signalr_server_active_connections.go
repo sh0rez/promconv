@@ -18,19 +18,30 @@ func NewServerActiveConnections() ServerActiveConnections {
 	}, labels)}
 }
 
-func (m ServerActiveConnections) With(extra ServerActiveConnectionsOptional) prometheus.Gauge {
+func (m ServerActiveConnections) With(extra interface {
+	AttrSignalrConnectionStatus() AttrConnectionStatus
+	AttrSignalrTransport() AttrTransport
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ServerActiveConnectionsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SignalrConnectionStatus),
-		string(extra.SignalrTransport),
+		string(extra.AttrSignalrConnectionStatus()),
+		string(extra.AttrSignalrTransport()),
 	)
 }
 
-type ServerActiveConnectionsOptional struct {
+type ServerActiveConnectionsExtra struct {
 	// SignalR HTTP connection closure status.
 	SignalrConnectionStatus AttrConnectionStatus `otel:"signalr.connection.status"`
 	// [SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)
 	SignalrTransport AttrTransport `otel:"signalr.transport"`
 }
+
+func (a ServerActiveConnectionsExtra) AttrSignalrConnectionStatus() AttrConnectionStatus {
+	return a.SignalrConnectionStatus
+}
+func (a ServerActiveConnectionsExtra) AttrSignalrTransport() AttrTransport { return a.SignalrTransport }
 
 /*
 State {
@@ -38,7 +49,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ServerActiveConnectionsOptional",
+        "AttrExtra": "ServerActiveConnectionsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

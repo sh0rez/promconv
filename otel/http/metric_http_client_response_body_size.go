@@ -25,21 +25,31 @@ func NewClientResponseBodySize() ClientResponseBodySize {
 	}, labels)}
 }
 
-func (m ClientResponseBodySize) With(requestMethod AttrRequestMethod, address server.AttrAddress, port server.AttrPort, extra ClientResponseBodySizeOptional) prometheus.Observer {
+func (m ClientResponseBodySize) With(requestMethod AttrRequestMethod, address server.AttrAddress, port server.AttrPort, extra interface {
+	AttrErrorType() error.AttrType
+	AttrHttpResponseStatusCode() AttrResponseStatusCode
+	AttrNetworkProtocolName() network.AttrProtocolName
+	AttrUrlTemplate() url.AttrTemplate
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	AttrUrlScheme() url.AttrScheme
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientResponseBodySizeExtra{}
+	}
 	return m.WithLabelValues(
 		string(requestMethod),
 		string(address),
 		string(port),
-		string(extra.ErrorType),
-		string(extra.HttpResponseStatusCode),
-		string(extra.NetworkProtocolName),
-		string(extra.UrlTemplate),
-		string(extra.NetworkProtocolVersion),
-		string(extra.UrlScheme),
+		string(extra.AttrErrorType()),
+		string(extra.AttrHttpResponseStatusCode()),
+		string(extra.AttrNetworkProtocolName()),
+		string(extra.AttrUrlTemplate()),
+		string(extra.AttrNetworkProtocolVersion()),
+		string(extra.AttrUrlScheme()),
 	)
 }
 
-type ClientResponseBodySizeOptional struct {
+type ClientResponseBodySizeExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// [HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).
@@ -54,13 +64,26 @@ type ClientResponseBodySizeOptional struct {
 	UrlScheme url.AttrScheme `otel:"url.scheme"`
 }
 
+func (a ClientResponseBodySizeExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a ClientResponseBodySizeExtra) AttrHttpResponseStatusCode() AttrResponseStatusCode {
+	return a.HttpResponseStatusCode
+}
+func (a ClientResponseBodySizeExtra) AttrNetworkProtocolName() network.AttrProtocolName {
+	return a.NetworkProtocolName
+}
+func (a ClientResponseBodySizeExtra) AttrUrlTemplate() url.AttrTemplate { return a.UrlTemplate }
+func (a ClientResponseBodySizeExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.NetworkProtocolVersion
+}
+func (a ClientResponseBodySizeExtra) AttrUrlScheme() url.AttrScheme { return a.UrlScheme }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientResponseBodySizeOptional",
+        "AttrExtra": "ClientResponseBodySizeExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -292,6 +315,85 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "timeout",
+                        "java.net.UnknownHostException",
+                        "server_certificate_invalid",
+                        "500",
+                    ],
+                    "name": "error.type",
+                    "note": "If the request fails with an error before response status code was sent or received,\n`error.type` SHOULD be set to exception type (its fully-qualified class name, if applicable)\nor a component-specific low cardinality error identifier.\n\nIf response status code was sent or received and status indicates an error according to [HTTP span status definition](/docs/http/http-spans.md),\n`error.type` SHOULD be set to the status code number (represented as a string), an exception type (if thrown) or a component-specific error identifier.\n\nThe `error.type` value SHOULD be predictable and SHOULD have low cardinality.\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low, but\ntelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time, when no\nadditional filters are applied.\n\nIf the request has completed successfully, instrumentations SHOULD NOT set `error.type`.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If request has ended with an error.",
+                    },
+                    "stability": "stable",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
+                    "brief": "[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).",
+                    "examples": [
+                        200,
+                    ],
+                    "name": "http.response.status_code",
+                    "requirement_level": {
+                        "conditionally_required": "If and only if one was received/sent.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
+                    "brief": "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.",
+                    "examples": [
+                        "http",
+                        "spdy",
+                    ],
+                    "name": "network.protocol.name",
+                    "note": "The value SHOULD be normalized to lowercase.",
+                    "requirement_level": {
+                        "conditionally_required": "If not `http` and `network.protocol.version` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The actual version of the protocol used for network communication.",
+                    "examples": [
+                        "1.0",
+                        "1.1",
+                        "2",
+                        "3",
+                    ],
+                    "name": "network.protocol.version",
+                    "note": "If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
+                    "examples": [
+                        "http",
+                        "https",
+                    ],
+                    "name": "url.scheme",
+                    "requirement_level": "opt_in",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "HTTP request method.",
                     "examples": [
                         "GET",
@@ -389,74 +491,6 @@ State {
                     },
                 },
                 {
-                    "brief": "[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).",
-                    "examples": [
-                        200,
-                    ],
-                    "name": "http.response.status_code",
-                    "requirement_level": {
-                        "conditionally_required": "If and only if one was received/sent.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "timeout",
-                        "java.net.UnknownHostException",
-                        "server_certificate_invalid",
-                        "500",
-                    ],
-                    "name": "error.type",
-                    "note": "If the request fails with an error before response status code was sent or received,\n`error.type` SHOULD be set to exception type (its fully-qualified class name, if applicable)\nor a component-specific low cardinality error identifier.\n\nIf response status code was sent or received and status indicates an error according to [HTTP span status definition](/docs/http/http-spans.md),\n`error.type` SHOULD be set to the status code number (represented as a string), an exception type (if thrown) or a component-specific error identifier.\n\nThe `error.type` value SHOULD be predictable and SHOULD have low cardinality.\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low, but\ntelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time, when no\nadditional filters are applied.\n\nIf the request has completed successfully, instrumentations SHOULD NOT set `error.type`.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If request has ended with an error.",
-                    },
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
-                },
-                {
-                    "brief": "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.",
-                    "examples": [
-                        "http",
-                        "spdy",
-                    ],
-                    "name": "network.protocol.name",
-                    "note": "The value SHOULD be normalized to lowercase.",
-                    "requirement_level": {
-                        "conditionally_required": "If not `http` and `network.protocol.version` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The actual version of the protocol used for network communication.",
-                    "examples": [
-                        "1.0",
-                        "1.1",
-                        "2",
-                        "3",
-                    ],
-                    "name": "network.protocol.version",
-                    "note": "If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
                     "brief": "Host identifier of the [\"URI origin\"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to.\n",
                     "examples": [
                         "example.com",
@@ -481,17 +515,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
-                    "examples": [
-                        "http",
-                        "https",
-                    ],
-                    "name": "url.scheme",
-                    "requirement_level": "opt_in",
-                    "stability": "stable",
-                    "type": "string",
                 },
                 {
                     "brief": "The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).\n",

@@ -18,13 +18,17 @@ func NewGcDuration() GcDuration {
 	}, labels)}
 }
 
-func (m GcDuration) With(gcType AttrGcType, extra GcDurationOptional) prometheus.Observer {
+func (m GcDuration) With(gcType AttrGcType, extra interface {
+}) prometheus.Observer {
+	if extra == nil {
+		extra = GcDurationExtra{}
+	}
 	return m.WithLabelValues(
 		string(gcType),
 	)
 }
 
-type GcDurationOptional struct {
+type GcDurationExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcDurationOptional",
+        "AttrExtra": "GcDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

@@ -18,13 +18,17 @@ func NewClientConnectionsMax() ClientConnectionsMax {
 	}, labels)}
 }
 
-func (m ClientConnectionsMax) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra ClientConnectionsMaxOptional) prometheus.Gauge {
+func (m ClientConnectionsMax) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ClientConnectionsMaxExtra{}
+	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),
 	)
 }
 
-type ClientConnectionsMaxOptional struct {
+type ClientConnectionsMaxExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientConnectionsMaxOptional",
+        "AttrExtra": "ClientConnectionsMaxExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

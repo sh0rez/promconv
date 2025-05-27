@@ -18,16 +18,23 @@ func NewColdstarts() Coldstarts {
 	}, labels)}
 }
 
-func (m Coldstarts) With(extra ColdstartsOptional) prometheus.Counter {
+func (m Coldstarts) With(extra interface {
+	AttrFaasTrigger() AttrTrigger
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ColdstartsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.FaasTrigger),
+		string(extra.AttrFaasTrigger()),
 	)
 }
 
-type ColdstartsOptional struct {
+type ColdstartsExtra struct {
 	// Type of the trigger which caused this function invocation.
 	FaasTrigger AttrTrigger `otel:"faas.trigger"`
 }
+
+func (a ColdstartsExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ColdstartsOptional",
+        "AttrExtra": "ColdstartsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

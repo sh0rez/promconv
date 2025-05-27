@@ -18,11 +18,15 @@ func NewMemoryLimit() MemoryLimit {
 	}, labels)}
 }
 
-func (m MemoryLimit) With(extra MemoryLimitOptional) prometheus.Gauge {
+func (m MemoryLimit) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryLimitExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type MemoryLimitOptional struct {
+type MemoryLimitExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryLimitOptional",
+        "AttrExtra": "MemoryLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

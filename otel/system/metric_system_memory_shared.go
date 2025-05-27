@@ -18,11 +18,15 @@ func NewMemoryShared() MemoryShared {
 	}, labels)}
 }
 
-func (m MemoryShared) With(extra MemorySharedOptional) prometheus.Gauge {
+func (m MemoryShared) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemorySharedExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type MemorySharedOptional struct {
+type MemorySharedExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemorySharedOptional",
+        "AttrExtra": "MemorySharedExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

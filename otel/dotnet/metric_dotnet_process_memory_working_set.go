@@ -18,11 +18,15 @@ func NewProcessMemoryWorkingSet() ProcessMemoryWorkingSet {
 	}, labels)}
 }
 
-func (m ProcessMemoryWorkingSet) With(extra ProcessMemoryWorkingSetOptional) prometheus.Gauge {
+func (m ProcessMemoryWorkingSet) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ProcessMemoryWorkingSetExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ProcessMemoryWorkingSetOptional struct {
+type ProcessMemoryWorkingSetExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessMemoryWorkingSetOptional",
+        "AttrExtra": "ProcessMemoryWorkingSetExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

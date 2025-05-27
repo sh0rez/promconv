@@ -18,16 +18,23 @@ func NewMemoryUsed() MemoryUsed {
 	}, labels)}
 }
 
-func (m MemoryUsed) With(extra MemoryUsedOptional) prometheus.Gauge {
+func (m MemoryUsed) With(extra interface {
+	AttrGoMemoryType() AttrMemoryType
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryUsedExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.GoMemoryType),
+		string(extra.AttrGoMemoryType()),
 	)
 }
 
-type MemoryUsedOptional struct {
+type MemoryUsedExtra struct {
 	// The type of memory.
 	GoMemoryType AttrMemoryType `otel:"go.memory.type"`
 }
+
+func (a MemoryUsedExtra) AttrGoMemoryType() AttrMemoryType { return a.GoMemoryType }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryUsedOptional",
+        "AttrExtra": "MemoryUsedExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

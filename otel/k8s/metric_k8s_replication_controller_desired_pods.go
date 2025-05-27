@@ -18,11 +18,15 @@ func NewReplicationControllerDesiredPods() ReplicationControllerDesiredPods {
 	}, labels)}
 }
 
-func (m ReplicationControllerDesiredPods) With(extra ReplicationControllerDesiredPodsOptional) prometheus.Gauge {
+func (m ReplicationControllerDesiredPods) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ReplicationControllerDesiredPodsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ReplicationControllerDesiredPodsOptional struct {
+type ReplicationControllerDesiredPodsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ReplicationControllerDesiredPodsOptional",
+        "AttrExtra": "ReplicationControllerDesiredPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

@@ -18,16 +18,23 @@ func NewDiskIoTime() DiskIoTime {
 	}, labels)}
 }
 
-func (m DiskIoTime) With(extra DiskIoTimeOptional) prometheus.Counter {
+func (m DiskIoTime) With(extra interface {
+	AttrSystemDevice() AttrDevice
+}) prometheus.Counter {
+	if extra == nil {
+		extra = DiskIoTimeExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemDevice),
+		string(extra.AttrSystemDevice()),
 	)
 }
 
-type DiskIoTimeOptional struct {
+type DiskIoTimeExtra struct {
 	// The device identifier
 	SystemDevice AttrDevice `otel:"system.device"`
 }
+
+func (a DiskIoTimeExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DiskIoTimeOptional",
+        "AttrExtra": "DiskIoTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

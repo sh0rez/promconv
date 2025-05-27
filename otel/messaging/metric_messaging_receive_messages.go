@@ -23,16 +23,23 @@ func NewReceiveMessages() ReceiveMessages {
 	}, labels)}
 }
 
-func (m ReceiveMessages) With(operationName AttrOperationName, extra ReceiveMessagesOptional) prometheus.Counter {
+func (m ReceiveMessages) With(operationName AttrOperationName, extra interface {
+	AttrErrorType() error.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ReceiveMessagesExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
-		string(extra.ErrorType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrErrorType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type ReceiveMessagesOptional struct {
+type ReceiveMessagesExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
@@ -41,13 +48,17 @@ type ReceiveMessagesOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a ReceiveMessagesExtra) AttrErrorType() error.AttrType         { return a.ErrorType }
+func (a ReceiveMessagesExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ReceiveMessagesExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ReceiveMessagesOptional",
+        "AttrExtra": "ReceiveMessagesExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

@@ -18,11 +18,15 @@ func NewServerResponseSize() ServerResponseSize {
 	}, labels)}
 }
 
-func (m ServerResponseSize) With(extra ServerResponseSizeOptional) prometheus.Observer {
+func (m ServerResponseSize) With(extra interface {
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ServerResponseSizeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ServerResponseSizeOptional struct {
+type ServerResponseSizeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ServerResponseSizeOptional",
+        "AttrExtra": "ServerResponseSizeExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

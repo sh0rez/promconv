@@ -18,11 +18,15 @@ func NewClientDuration() ClientDuration {
 	}, labels)}
 }
 
-func (m ClientDuration) With(extra ClientDurationOptional) prometheus.Observer {
+func (m ClientDuration) With(extra interface {
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientDurationExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ClientDurationOptional struct {
+type ClientDurationExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientDurationOptional",
+        "AttrExtra": "ClientDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

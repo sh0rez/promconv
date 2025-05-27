@@ -18,15 +18,24 @@ func NewBufferMemoryUsage() BufferMemoryUsage {
 	}, labels)}
 }
 
-func (m BufferMemoryUsage) With(extra BufferMemoryUsageOptional) prometheus.Gauge {
+func (m BufferMemoryUsage) With(extra interface {
+	AttrJvmBufferPoolName() AttrBufferPoolName
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = BufferMemoryUsageExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.JvmBufferPoolName),
+		string(extra.AttrJvmBufferPoolName()),
 	)
 }
 
-type BufferMemoryUsageOptional struct {
+type BufferMemoryUsageExtra struct {
 	// Name of the buffer pool.
 	JvmBufferPoolName AttrBufferPoolName `otel:"jvm.buffer.pool.name"`
+}
+
+func (a BufferMemoryUsageExtra) AttrJvmBufferPoolName() AttrBufferPoolName {
+	return a.JvmBufferPoolName
 }
 
 /*
@@ -35,7 +44,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "BufferMemoryUsageOptional",
+        "AttrExtra": "BufferMemoryUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

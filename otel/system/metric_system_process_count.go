@@ -18,16 +18,23 @@ func NewProcessCount() ProcessCount {
 	}, labels)}
 }
 
-func (m ProcessCount) With(extra ProcessCountOptional) prometheus.Gauge {
+func (m ProcessCount) With(extra interface {
+	AttrSystemProcessStatus() AttrProcessStatus
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ProcessCountExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemProcessStatus),
+		string(extra.AttrSystemProcessStatus()),
 	)
 }
 
-type ProcessCountOptional struct {
+type ProcessCountExtra struct {
 	// The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)
 	SystemProcessStatus AttrProcessStatus `otel:"system.process.status"`
 }
+
+func (a ProcessCountExtra) AttrSystemProcessStatus() AttrProcessStatus { return a.SystemProcessStatus }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessCountOptional",
+        "AttrExtra": "ProcessCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

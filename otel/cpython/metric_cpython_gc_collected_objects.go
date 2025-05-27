@@ -18,13 +18,17 @@ func NewGcCollectedObjects() GcCollectedObjects {
 	}, labels)}
 }
 
-func (m GcCollectedObjects) With(gcGeneration AttrGcGeneration, extra GcCollectedObjectsOptional) prometheus.Counter {
+func (m GcCollectedObjects) With(gcGeneration AttrGcGeneration, extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = GcCollectedObjectsExtra{}
+	}
 	return m.WithLabelValues(
 		string(gcGeneration),
 	)
 }
 
-type GcCollectedObjectsOptional struct {
+type GcCollectedObjectsExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcCollectedObjectsOptional",
+        "AttrExtra": "GcCollectedObjectsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

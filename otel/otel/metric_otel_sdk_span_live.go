@@ -18,15 +18,24 @@ func NewSdkSpanLive() SdkSpanLive {
 	}, labels)}
 }
 
-func (m SdkSpanLive) With(extra SdkSpanLiveOptional) prometheus.Gauge {
+func (m SdkSpanLive) With(extra interface {
+	AttrOtelSpanSamplingResult() AttrSpanSamplingResult
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = SdkSpanLiveExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.OtelSpanSamplingResult),
+		string(extra.AttrOtelSpanSamplingResult()),
 	)
 }
 
-type SdkSpanLiveOptional struct {
+type SdkSpanLiveExtra struct {
 	// The result value of the sampler for this span
 	OtelSpanSamplingResult AttrSpanSamplingResult `otel:"otel.span.sampling_result"`
+}
+
+func (a SdkSpanLiveExtra) AttrOtelSpanSamplingResult() AttrSpanSamplingResult {
+	return a.OtelSpanSamplingResult
 }
 
 /*
@@ -35,7 +44,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkSpanLiveOptional",
+        "AttrExtra": "SdkSpanLiveExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

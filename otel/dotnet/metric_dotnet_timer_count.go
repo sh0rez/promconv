@@ -18,11 +18,15 @@ func NewTimerCount() TimerCount {
 	}, labels)}
 }
 
-func (m TimerCount) With(extra TimerCountOptional) prometheus.Gauge {
+func (m TimerCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = TimerCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type TimerCountOptional struct {
+type TimerCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "TimerCountOptional",
+        "AttrExtra": "TimerCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

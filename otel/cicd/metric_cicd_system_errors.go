@@ -22,14 +22,18 @@ func NewSystemErrors() SystemErrors {
 	}, labels)}
 }
 
-func (m SystemErrors) With(systemComponent AttrSystemComponent, kind error.AttrType, extra SystemErrorsOptional) prometheus.Counter {
+func (m SystemErrors) With(systemComponent AttrSystemComponent, kind error.AttrType, extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = SystemErrorsExtra{}
+	}
 	return m.WithLabelValues(
 		string(systemComponent),
 		string(kind),
 	)
 }
 
-type SystemErrorsOptional struct {
+type SystemErrorsExtra struct {
 }
 
 /*
@@ -38,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SystemErrorsOptional",
+        "AttrExtra": "SystemErrorsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

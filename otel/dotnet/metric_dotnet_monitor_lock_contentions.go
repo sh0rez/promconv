@@ -18,11 +18,15 @@ func NewMonitorLockContentions() MonitorLockContentions {
 	}, labels)}
 }
 
-func (m MonitorLockContentions) With(extra MonitorLockContentionsOptional) prometheus.Counter {
+func (m MonitorLockContentions) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = MonitorLockContentionsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type MonitorLockContentionsOptional struct {
+type MonitorLockContentionsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MonitorLockContentionsOptional",
+        "AttrExtra": "MonitorLockContentionsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

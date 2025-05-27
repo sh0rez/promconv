@@ -18,11 +18,15 @@ func NewThreadPoolQueueLength() ThreadPoolQueueLength {
 	}, labels)}
 }
 
-func (m ThreadPoolQueueLength) With(extra ThreadPoolQueueLengthOptional) prometheus.Gauge {
+func (m ThreadPoolQueueLength) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ThreadPoolQueueLengthExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ThreadPoolQueueLengthOptional struct {
+type ThreadPoolQueueLengthExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ThreadPoolQueueLengthOptional",
+        "AttrExtra": "ThreadPoolQueueLengthExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

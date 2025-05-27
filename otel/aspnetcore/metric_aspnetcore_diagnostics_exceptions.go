@@ -22,17 +22,26 @@ func NewDiagnosticsExceptions() DiagnosticsExceptions {
 	}, labels)}
 }
 
-func (m DiagnosticsExceptions) With(diagnosticsExceptionResult AttrDiagnosticsExceptionResult, kind error.AttrType, extra DiagnosticsExceptionsOptional) prometheus.Counter {
+func (m DiagnosticsExceptions) With(diagnosticsExceptionResult AttrDiagnosticsExceptionResult, kind error.AttrType, extra interface {
+	AttrAspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType
+}) prometheus.Counter {
+	if extra == nil {
+		extra = DiagnosticsExceptionsExtra{}
+	}
 	return m.WithLabelValues(
 		string(diagnosticsExceptionResult),
 		string(kind),
-		string(extra.AspnetcoreDiagnosticsHandlerType),
+		string(extra.AttrAspnetcoreDiagnosticsHandlerType()),
 	)
 }
 
-type DiagnosticsExceptionsOptional struct {
+type DiagnosticsExceptionsExtra struct {
 	// Full type name of the [`IExceptionHandler`](https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) implementation that handled the exception.
 	AspnetcoreDiagnosticsHandlerType AttrDiagnosticsHandlerType `otel:"aspnetcore.diagnostics.handler.type"`
+}
+
+func (a DiagnosticsExceptionsExtra) AttrAspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType {
+	return a.AspnetcoreDiagnosticsHandlerType
 }
 
 /*
@@ -41,7 +50,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DiagnosticsExceptionsOptional",
+        "AttrExtra": "DiagnosticsExceptionsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

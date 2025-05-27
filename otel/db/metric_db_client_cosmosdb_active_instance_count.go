@@ -22,18 +22,29 @@ func NewClientCosmosdbActiveInstanceCount() ClientCosmosdbActiveInstanceCount {
 	}, labels)}
 }
 
-func (m ClientCosmosdbActiveInstanceCount) With(extra ClientCosmosdbActiveInstanceCountOptional) prometheus.Gauge {
+func (m ClientCosmosdbActiveInstanceCount) With(extra interface {
+	AttrServerPort() server.AttrPort
+	AttrServerAddress() server.AttrAddress
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ClientCosmosdbActiveInstanceCountExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ServerPort),
-		string(extra.ServerAddress),
+		string(extra.AttrServerPort()),
+		string(extra.AttrServerAddress()),
 	)
 }
 
-type ClientCosmosdbActiveInstanceCountOptional struct {
+type ClientCosmosdbActiveInstanceCountExtra struct {
 	// Server port number.
 	ServerPort server.AttrPort `otel:"server.port"`
 	// Name of the database host.
 	ServerAddress server.AttrAddress `otel:"server.address"`
+}
+
+func (a ClientCosmosdbActiveInstanceCountExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+func (a ClientCosmosdbActiveInstanceCountExtra) AttrServerAddress() server.AttrAddress {
+	return a.ServerAddress
 }
 
 /*
@@ -42,7 +53,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientCosmosdbActiveInstanceCountOptional",
+        "AttrExtra": "ClientCosmosdbActiveInstanceCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

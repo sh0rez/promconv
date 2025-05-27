@@ -18,13 +18,17 @@ func NewHeapSpaceAvailableSize() HeapSpaceAvailableSize {
 	}, labels)}
 }
 
-func (m HeapSpaceAvailableSize) With(heapSpaceName AttrHeapSpaceName, extra HeapSpaceAvailableSizeOptional) prometheus.Gauge {
+func (m HeapSpaceAvailableSize) With(heapSpaceName AttrHeapSpaceName, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = HeapSpaceAvailableSizeExtra{}
+	}
 	return m.WithLabelValues(
 		string(heapSpaceName),
 	)
 }
 
-type HeapSpaceAvailableSizeOptional struct {
+type HeapSpaceAvailableSizeExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "HeapSpaceAvailableSizeOptional",
+        "AttrExtra": "HeapSpaceAvailableSizeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

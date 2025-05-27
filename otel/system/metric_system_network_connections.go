@@ -21,15 +21,22 @@ func NewNetworkConnections() NetworkConnections {
 	}, labels)}
 }
 
-func (m NetworkConnections) With(extra NetworkConnectionsOptional) prometheus.Gauge {
+func (m NetworkConnections) With(extra interface {
+	AttrNetworkConnectionState() network.AttrConnectionState
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+	AttrNetworkTransport() network.AttrTransport
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = NetworkConnectionsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkConnectionState),
-		string(extra.NetworkInterfaceName),
-		string(extra.NetworkTransport),
+		string(extra.AttrNetworkConnectionState()),
+		string(extra.AttrNetworkInterfaceName()),
+		string(extra.AttrNetworkTransport()),
 	)
 }
 
-type NetworkConnectionsOptional struct {
+type NetworkConnectionsExtra struct {
 	// The state of network connection
 	NetworkConnectionState network.AttrConnectionState `otel:"network.connection.state"`
 	// The network interface name.
@@ -38,13 +45,23 @@ type NetworkConnectionsOptional struct {
 	NetworkTransport network.AttrTransport `otel:"network.transport"`
 }
 
+func (a NetworkConnectionsExtra) AttrNetworkConnectionState() network.AttrConnectionState {
+	return a.NetworkConnectionState
+}
+func (a NetworkConnectionsExtra) AttrNetworkInterfaceName() network.AttrInterfaceName {
+	return a.NetworkInterfaceName
+}
+func (a NetworkConnectionsExtra) AttrNetworkTransport() network.AttrTransport {
+	return a.NetworkTransport
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NetworkConnectionsOptional",
+        "AttrExtra": "NetworkConnectionsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

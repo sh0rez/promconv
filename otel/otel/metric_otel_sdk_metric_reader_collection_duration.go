@@ -22,15 +22,22 @@ func NewSdkMetricReaderCollectionDuration() SdkMetricReaderCollectionDuration {
 	}, labels)}
 }
 
-func (m SdkMetricReaderCollectionDuration) With(extra SdkMetricReaderCollectionDurationOptional) prometheus.Observer {
+func (m SdkMetricReaderCollectionDuration) With(extra interface {
+	AttrErrorType() error.AttrType
+	AttrOtelComponentName() AttrComponentName
+	AttrOtelComponentType() AttrComponentType
+}) prometheus.Observer {
+	if extra == nil {
+		extra = SdkMetricReaderCollectionDurationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ErrorType),
-		string(extra.OtelComponentName),
-		string(extra.OtelComponentType),
+		string(extra.AttrErrorType()),
+		string(extra.AttrOtelComponentName()),
+		string(extra.AttrOtelComponentType()),
 	)
 }
 
-type SdkMetricReaderCollectionDurationOptional struct {
+type SdkMetricReaderCollectionDurationExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
@@ -39,13 +46,21 @@ type SdkMetricReaderCollectionDurationOptional struct {
 	OtelComponentType AttrComponentType `otel:"otel.component.type"`
 }
 
+func (a SdkMetricReaderCollectionDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a SdkMetricReaderCollectionDurationExtra) AttrOtelComponentName() AttrComponentName {
+	return a.OtelComponentName
+}
+func (a SdkMetricReaderCollectionDurationExtra) AttrOtelComponentType() AttrComponentType {
+	return a.OtelComponentType
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkMetricReaderCollectionDurationOptional",
+        "AttrExtra": "SdkMetricReaderCollectionDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -226,6 +241,32 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "timeout",
+                        "java.net.UnknownHostException",
+                        "server_certificate_invalid",
+                        "500",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
                     "examples": [
                         "batching_span_processor",
@@ -364,32 +405,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": "string",
-                },
-                {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "timeout",
-                        "java.net.UnknownHostException",
-                        "server_certificate_invalid",
-                        "500",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
                 },
             ],
             "brief": "The duration of the collect operation of the metric reader.",

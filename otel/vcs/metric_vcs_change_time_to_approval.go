@@ -18,20 +18,30 @@ func NewChangeTimeToApproval() ChangeTimeToApproval {
 	}, labels)}
 }
 
-func (m ChangeTimeToApproval) With(refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra ChangeTimeToApprovalOptional) prometheus.Gauge {
+func (m ChangeTimeToApproval) With(refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
+	AttrVcsOwnerName() AttrOwnerName
+	AttrVcsRefBaseName() AttrRefBaseName
+	AttrVcsRepositoryName() AttrRepositoryName
+	AttrVcsProviderName() AttrProviderName
+	AttrVcsRefBaseRevision() AttrRefBaseRevision
+	AttrVcsRefHeadRevision() AttrRefHeadRevision
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ChangeTimeToApprovalExtra{}
+	}
 	return m.WithLabelValues(
 		string(refHeadName),
 		string(repositoryUrlFull),
-		string(extra.VcsOwnerName),
-		string(extra.VcsRefBaseName),
-		string(extra.VcsRepositoryName),
-		string(extra.VcsProviderName),
-		string(extra.VcsRefBaseRevision),
-		string(extra.VcsRefHeadRevision),
+		string(extra.AttrVcsOwnerName()),
+		string(extra.AttrVcsRefBaseName()),
+		string(extra.AttrVcsRepositoryName()),
+		string(extra.AttrVcsProviderName()),
+		string(extra.AttrVcsRefBaseRevision()),
+		string(extra.AttrVcsRefHeadRevision()),
 	)
 }
 
-type ChangeTimeToApprovalOptional struct {
+type ChangeTimeToApprovalExtra struct {
 	// The group owner within the version control system.
 	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
 	// The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.
@@ -46,13 +56,26 @@ type ChangeTimeToApprovalOptional struct {
 	VcsRefHeadRevision AttrRefHeadRevision `otel:"vcs.ref.head.revision"`
 }
 
+func (a ChangeTimeToApprovalExtra) AttrVcsOwnerName() AttrOwnerName     { return a.VcsOwnerName }
+func (a ChangeTimeToApprovalExtra) AttrVcsRefBaseName() AttrRefBaseName { return a.VcsRefBaseName }
+func (a ChangeTimeToApprovalExtra) AttrVcsRepositoryName() AttrRepositoryName {
+	return a.VcsRepositoryName
+}
+func (a ChangeTimeToApprovalExtra) AttrVcsProviderName() AttrProviderName { return a.VcsProviderName }
+func (a ChangeTimeToApprovalExtra) AttrVcsRefBaseRevision() AttrRefBaseRevision {
+	return a.VcsRefBaseRevision
+}
+func (a ChangeTimeToApprovalExtra) AttrVcsRefHeadRevision() AttrRefHeadRevision {
+	return a.VcsRefHeadRevision
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ChangeTimeToApprovalOptional",
+        "AttrExtra": "ChangeTimeToApprovalExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

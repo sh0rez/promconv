@@ -21,19 +21,28 @@ func NewDiskMerged() DiskMerged {
 	}, labels)}
 }
 
-func (m DiskMerged) With(extra DiskMergedOptional) prometheus.Counter {
+func (m DiskMerged) With(extra interface {
+	AttrDiskIoDirection() disk.AttrIoDirection
+	AttrSystemDevice() AttrDevice
+}) prometheus.Counter {
+	if extra == nil {
+		extra = DiskMergedExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.DiskIoDirection),
-		string(extra.SystemDevice),
+		string(extra.AttrDiskIoDirection()),
+		string(extra.AttrSystemDevice()),
 	)
 }
 
-type DiskMergedOptional struct {
+type DiskMergedExtra struct {
 	// The disk IO operation direction.
 	DiskIoDirection disk.AttrIoDirection `otel:"disk.io.direction"`
 	// The device identifier
 	SystemDevice AttrDevice `otel:"system.device"`
 }
+
+func (a DiskMergedExtra) AttrDiskIoDirection() disk.AttrIoDirection { return a.DiskIoDirection }
+func (a DiskMergedExtra) AttrSystemDevice() AttrDevice              { return a.SystemDevice }
 
 /*
 State {
@@ -41,7 +50,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DiskMergedOptional",
+        "AttrExtra": "DiskMergedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

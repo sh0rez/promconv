@@ -24,22 +24,35 @@ func NewCosmosdbClientOperationRequestCharge() CosmosdbClientOperationRequestCha
 	}, labels)}
 }
 
-func (m CosmosdbClientOperationRequestCharge) With(operationName db.AttrOperationName, extra CosmosdbClientOperationRequestChargeOptional) prometheus.Observer {
+func (m CosmosdbClientOperationRequestCharge) With(operationName db.AttrOperationName, extra interface {
+	AttrAzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
+	AttrAzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode
+	AttrDbCollectionName() db.AttrCollectionName
+	AttrDbNamespace() db.AttrNamespace
+	AttrDbResponseStatusCode() db.AttrResponseStatusCode
+	AttrErrorType() error.AttrType
+	AttrServerPort() server.AttrPort
+	AttrAzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions
+	AttrServerAddress() server.AttrAddress
+}) prometheus.Observer {
+	if extra == nil {
+		extra = CosmosdbClientOperationRequestChargeExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
-		string(extra.AzureCosmosdbConsistencyLevel),
-		string(extra.AzureCosmosdbResponseSubStatusCode),
-		string(extra.DbCollectionName),
-		string(extra.DbNamespace),
-		string(extra.DbResponseStatusCode),
-		string(extra.ErrorType),
-		string(extra.ServerPort),
-		string(extra.AzureCosmosdbOperationContactedRegions),
-		string(extra.ServerAddress),
+		string(extra.AttrAzureCosmosdbConsistencyLevel()),
+		string(extra.AttrAzureCosmosdbResponseSubStatusCode()),
+		string(extra.AttrDbCollectionName()),
+		string(extra.AttrDbNamespace()),
+		string(extra.AttrDbResponseStatusCode()),
+		string(extra.AttrErrorType()),
+		string(extra.AttrServerPort()),
+		string(extra.AttrAzureCosmosdbOperationContactedRegions()),
+		string(extra.AttrServerAddress()),
 	)
 }
 
-type CosmosdbClientOperationRequestChargeOptional struct {
+type CosmosdbClientOperationRequestChargeExtra struct {
 	// Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).
 	AzureCosmosdbConsistencyLevel AttrCosmosdbConsistencyLevel `otel:"azure.cosmosdb.consistency.level"`
 	// Cosmos DB sub status code.
@@ -60,13 +73,39 @@ type CosmosdbClientOperationRequestChargeOptional struct {
 	ServerAddress server.AttrAddress `otel:"server.address"`
 }
 
+func (a CosmosdbClientOperationRequestChargeExtra) AttrAzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel {
+	return a.AzureCosmosdbConsistencyLevel
+}
+func (a CosmosdbClientOperationRequestChargeExtra) AttrAzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode {
+	return a.AzureCosmosdbResponseSubStatusCode
+}
+func (a CosmosdbClientOperationRequestChargeExtra) AttrDbCollectionName() db.AttrCollectionName {
+	return a.DbCollectionName
+}
+func (a CosmosdbClientOperationRequestChargeExtra) AttrDbNamespace() db.AttrNamespace {
+	return a.DbNamespace
+}
+func (a CosmosdbClientOperationRequestChargeExtra) AttrDbResponseStatusCode() db.AttrResponseStatusCode {
+	return a.DbResponseStatusCode
+}
+func (a CosmosdbClientOperationRequestChargeExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a CosmosdbClientOperationRequestChargeExtra) AttrServerPort() server.AttrPort {
+	return a.ServerPort
+}
+func (a CosmosdbClientOperationRequestChargeExtra) AttrAzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions {
+	return a.AzureCosmosdbOperationContactedRegions
+}
+func (a CosmosdbClientOperationRequestChargeExtra) AttrServerAddress() server.AttrAddress {
+	return a.ServerAddress
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CosmosdbClientOperationRequestChargeOptional",
+        "AttrExtra": "CosmosdbClientOperationRequestChargeExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -311,6 +350,19 @@ State {
                     "type": "int",
                 },
                 {
+                    "brief": "The name of the database, fully qualified within the server address and port.\n",
+                    "examples": [
+                        "customers",
+                        "test.users",
+                    ],
+                    "name": "db.namespace",
+                    "requirement_level": {
+                        "conditionally_required": "If available.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "Database response status code.",
                     "examples": [
                         "102",
@@ -415,45 +467,6 @@ State {
                     },
                 },
                 {
-                    "brief": "Cosmos DB sub status code.",
-                    "examples": [
-                        1000,
-                        1002,
-                    ],
-                    "name": "azure.cosmosdb.response.sub_status_code",
-                    "requirement_level": {
-                        "conditionally_required": "when response was received and contained sub-code.",
-                    },
-                    "stability": "development",
-                    "type": "int",
-                },
-                {
-                    "brief": "The name of the database, fully qualified within the server address and port.\n",
-                    "examples": [
-                        "customers",
-                        "test.users",
-                    ],
-                    "name": "db.namespace",
-                    "requirement_level": {
-                        "conditionally_required": "If available.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The name of the operation or command being executed.\n",
-                    "examples": [
-                        "findAndModify",
-                        "HMSET",
-                        "SELECT",
-                    ],
-                    "name": "db.operation.name",
-                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nThe operation name SHOULD NOT be extracted from `db.query.text`,\nwhen the database system supports query text with multiple operations\nin non-batch operations.\n\nIf spaces can occur in the operation name, multiple consecutive spaces\nSHOULD be normalized to a single space.\n\nFor batch operations, if the individual operations are known to have the same operation name\nthen that operation name SHOULD be used prepended by `BATCH `,\notherwise `db.operation.name` SHOULD be `BATCH` or some other database\nsystem specific term if more applicable.\n",
-                    "requirement_level": "required",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
                     "brief": "List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.\n",
                     "examples": [
                         [
@@ -471,6 +484,19 @@ State {
                     "type": "string[]",
                 },
                 {
+                    "brief": "Cosmos DB sub status code.",
+                    "examples": [
+                        1000,
+                        1002,
+                    ],
+                    "name": "azure.cosmosdb.response.sub_status_code",
+                    "requirement_level": {
+                        "conditionally_required": "when response was received and contained sub-code.",
+                    },
+                    "stability": "development",
+                    "type": "int",
+                },
+                {
                     "brief": "Cosmos DB container name.\n",
                     "examples": [
                         "public.users",
@@ -481,6 +507,19 @@ State {
                     "requirement_level": {
                         "conditionally_required": "If available.",
                     },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The name of the operation or command being executed.\n",
+                    "examples": [
+                        "findAndModify",
+                        "HMSET",
+                        "SELECT",
+                    ],
+                    "name": "db.operation.name",
+                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nThe operation name SHOULD NOT be extracted from `db.query.text`,\nwhen the database system supports query text with multiple operations\nin non-batch operations.\n\nIf spaces can occur in the operation name, multiple consecutive spaces\nSHOULD be normalized to a single space.\n\nFor batch operations, if the individual operations are known to have the same operation name\nthen that operation name SHOULD be used prepended by `BATCH `,\notherwise `db.operation.name` SHOULD be `BATCH` or some other database\nsystem specific term if more applicable.\n",
+                    "requirement_level": "required",
                     "stability": "stable",
                     "type": "string",
                 },

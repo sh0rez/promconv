@@ -18,16 +18,23 @@ func NewInitDuration() InitDuration {
 	}, labels)}
 }
 
-func (m InitDuration) With(extra InitDurationOptional) prometheus.Observer {
+func (m InitDuration) With(extra interface {
+	AttrFaasTrigger() AttrTrigger
+}) prometheus.Observer {
+	if extra == nil {
+		extra = InitDurationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.FaasTrigger),
+		string(extra.AttrFaasTrigger()),
 	)
 }
 
-type InitDurationOptional struct {
+type InitDurationExtra struct {
 	// Type of the trigger which caused this function invocation.
 	FaasTrigger AttrTrigger `otel:"faas.trigger"`
 }
+
+func (a InitDurationExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "InitDurationOptional",
+        "AttrExtra": "InitDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

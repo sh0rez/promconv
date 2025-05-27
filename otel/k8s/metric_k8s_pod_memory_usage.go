@@ -18,11 +18,15 @@ func NewPodMemoryUsage() PodMemoryUsage {
 	}, labels)}
 }
 
-func (m PodMemoryUsage) With(extra PodMemoryUsageOptional) prometheus.Gauge {
+func (m PodMemoryUsage) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = PodMemoryUsageExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type PodMemoryUsageOptional struct {
+type PodMemoryUsageExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PodMemoryUsageOptional",
+        "AttrExtra": "PodMemoryUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

@@ -18,14 +18,18 @@ func NewPipelineRunActive() PipelineRunActive {
 	}, labels)}
 }
 
-func (m PipelineRunActive) With(pipelineName AttrPipelineName, pipelineRunState AttrPipelineRunState, extra PipelineRunActiveOptional) prometheus.Gauge {
+func (m PipelineRunActive) With(pipelineName AttrPipelineName, pipelineRunState AttrPipelineRunState, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = PipelineRunActiveExtra{}
+	}
 	return m.WithLabelValues(
 		string(pipelineName),
 		string(pipelineRunState),
 	)
 }
 
-type PipelineRunActiveOptional struct {
+type PipelineRunActiveExtra struct {
 }
 
 /*
@@ -34,7 +38,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PipelineRunActiveOptional",
+        "AttrExtra": "PipelineRunActiveExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

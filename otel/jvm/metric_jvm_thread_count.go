@@ -18,19 +18,28 @@ func NewThreadCount() ThreadCount {
 	}, labels)}
 }
 
-func (m ThreadCount) With(extra ThreadCountOptional) prometheus.Gauge {
+func (m ThreadCount) With(extra interface {
+	AttrJvmThreadDaemon() AttrThreadDaemon
+	AttrJvmThreadState() AttrThreadState
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ThreadCountExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.JvmThreadDaemon),
-		string(extra.JvmThreadState),
+		string(extra.AttrJvmThreadDaemon()),
+		string(extra.AttrJvmThreadState()),
 	)
 }
 
-type ThreadCountOptional struct {
+type ThreadCountExtra struct {
 	// Whether the thread is daemon or not.
 	JvmThreadDaemon AttrThreadDaemon `otel:"jvm.thread.daemon"`
 	// State of the thread.
 	JvmThreadState AttrThreadState `otel:"jvm.thread.state"`
 }
+
+func (a ThreadCountExtra) AttrJvmThreadDaemon() AttrThreadDaemon { return a.JvmThreadDaemon }
+func (a ThreadCountExtra) AttrJvmThreadState() AttrThreadState   { return a.JvmThreadState }
 
 /*
 State {
@@ -38,7 +47,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ThreadCountOptional",
+        "AttrExtra": "ThreadCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

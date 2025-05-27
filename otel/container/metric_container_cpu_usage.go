@@ -22,16 +22,23 @@ func NewCpuUsage() CpuUsage {
 	}, labels)}
 }
 
-func (m CpuUsage) With(extra CpuUsageOptional) prometheus.Gauge {
+func (m CpuUsage) With(extra interface {
+	AttrCpuMode() cpu.AttrMode
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = CpuUsageExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.CpuMode),
+		string(extra.AttrCpuMode()),
 	)
 }
 
-type CpuUsageOptional struct {
+type CpuUsageExtra struct {
 	// The CPU mode for this data point. A container's CPU metric SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
 	CpuMode cpu.AttrMode `otel:"cpu.mode"`
 }
+
+func (a CpuUsageExtra) AttrCpuMode() cpu.AttrMode { return a.CpuMode }
 
 /*
 State {
@@ -39,7 +46,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuUsageOptional",
+        "AttrExtra": "CpuUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

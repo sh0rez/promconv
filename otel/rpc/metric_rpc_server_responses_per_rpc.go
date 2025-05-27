@@ -18,11 +18,15 @@ func NewServerResponsesPerRpc() ServerResponsesPerRpc {
 	}, labels)}
 }
 
-func (m ServerResponsesPerRpc) With(extra ServerResponsesPerRpcOptional) prometheus.Observer {
+func (m ServerResponsesPerRpc) With(extra interface {
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ServerResponsesPerRpcExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ServerResponsesPerRpcOptional struct {
+type ServerResponsesPerRpcExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ServerResponsesPerRpcOptional",
+        "AttrExtra": "ServerResponsesPerRpcExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

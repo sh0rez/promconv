@@ -18,11 +18,15 @@ func NewNodeMemoryUsage() NodeMemoryUsage {
 	}, labels)}
 }
 
-func (m NodeMemoryUsage) With(extra NodeMemoryUsageOptional) prometheus.Gauge {
+func (m NodeMemoryUsage) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = NodeMemoryUsageExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type NodeMemoryUsageOptional struct {
+type NodeMemoryUsageExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeMemoryUsageOptional",
+        "AttrExtra": "NodeMemoryUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

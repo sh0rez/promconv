@@ -17,19 +17,30 @@ func NewPagingOperations() PagingOperations {
 	}, labels)}
 }
 
-func (m PagingOperations) With(extra PagingOperationsOptional) prometheus.Counter {
+func (m PagingOperations) With(extra interface {
+	AttrSystemPagingDirection() AttrPagingDirection
+	AttrSystemPagingType() AttrPagingType
+}) prometheus.Counter {
+	if extra == nil {
+		extra = PagingOperationsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemPagingDirection),
-		string(extra.SystemPagingType),
+		string(extra.AttrSystemPagingDirection()),
+		string(extra.AttrSystemPagingType()),
 	)
 }
 
-type PagingOperationsOptional struct {
+type PagingOperationsExtra struct {
 	// The paging access direction
 	SystemPagingDirection AttrPagingDirection `otel:"system.paging.direction"`
 	// The memory paging type
 	SystemPagingType AttrPagingType `otel:"system.paging.type"`
 }
+
+func (a PagingOperationsExtra) AttrSystemPagingDirection() AttrPagingDirection {
+	return a.SystemPagingDirection
+}
+func (a PagingOperationsExtra) AttrSystemPagingType() AttrPagingType { return a.SystemPagingType }
 
 /*
 State {
@@ -37,7 +48,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PagingOperationsOptional",
+        "AttrExtra": "PagingOperationsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

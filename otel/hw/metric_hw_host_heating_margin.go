@@ -18,20 +18,29 @@ func NewHostHeatingMargin() HostHeatingMargin {
 	}, labels)}
 }
 
-func (m HostHeatingMargin) With(id AttrId, extra HostHeatingMarginOptional) prometheus.Gauge {
+func (m HostHeatingMargin) With(id AttrId, extra interface {
+	AttrHwName() AttrName
+	AttrHwParent() AttrParent
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = HostHeatingMarginExtra{}
+	}
 	return m.WithLabelValues(
 		string(id),
-		string(extra.HwName),
-		string(extra.HwParent),
+		string(extra.AttrHwName()),
+		string(extra.AttrHwParent()),
 	)
 }
 
-type HostHeatingMarginOptional struct {
+type HostHeatingMarginExtra struct {
 	// An easily-recognizable name for the hardware component
 	HwName AttrName `otel:"hw.name"`
 	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
 	HwParent AttrParent `otel:"hw.parent"`
 }
+
+func (a HostHeatingMarginExtra) AttrHwName() AttrName     { return a.HwName }
+func (a HostHeatingMarginExtra) AttrHwParent() AttrParent { return a.HwParent }
 
 /*
 State {
@@ -39,7 +48,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "HostHeatingMarginOptional",
+        "AttrExtra": "HostHeatingMarginExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

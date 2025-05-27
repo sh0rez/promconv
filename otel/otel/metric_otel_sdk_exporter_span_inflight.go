@@ -22,16 +22,24 @@ func NewSdkExporterSpanInflight() SdkExporterSpanInflight {
 	}, labels)}
 }
 
-func (m SdkExporterSpanInflight) With(extra SdkExporterSpanInflightOptional) prometheus.Gauge {
+func (m SdkExporterSpanInflight) With(extra interface {
+	AttrOtelComponentName() AttrComponentName
+	AttrOtelComponentType() AttrComponentType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = SdkExporterSpanInflightExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.OtelComponentName),
-		string(extra.OtelComponentType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrOtelComponentName()),
+		string(extra.AttrOtelComponentType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type SdkExporterSpanInflightOptional struct {
+type SdkExporterSpanInflightExtra struct {
 	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
 	OtelComponentName AttrComponentName `otel:"otel.component.name"`
 	// A name identifying the type of the OpenTelemetry component.
@@ -42,13 +50,22 @@ type SdkExporterSpanInflightOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a SdkExporterSpanInflightExtra) AttrOtelComponentName() AttrComponentName {
+	return a.OtelComponentName
+}
+func (a SdkExporterSpanInflightExtra) AttrOtelComponentType() AttrComponentType {
+	return a.OtelComponentType
+}
+func (a SdkExporterSpanInflightExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a SdkExporterSpanInflightExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkExporterSpanInflightOptional",
+        "AttrExtra": "SdkExporterSpanInflightExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -233,6 +250,36 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
                     "examples": [
                         "batching_span_processor",
@@ -371,36 +418,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": "string",
-                },
-                {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "int",
                 },
             ],
             "brief": "The number of spans which were passed to the exporter, but that have not been exported yet (neither successful, nor failed)",

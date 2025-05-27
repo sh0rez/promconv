@@ -18,11 +18,15 @@ func NewClassLoaded() ClassLoaded {
 	}, labels)}
 }
 
-func (m ClassLoaded) With(extra ClassLoadedOptional) prometheus.Counter {
+func (m ClassLoaded) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ClassLoadedExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ClassLoadedOptional struct {
+type ClassLoadedExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClassLoadedOptional",
+        "AttrExtra": "ClassLoadedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

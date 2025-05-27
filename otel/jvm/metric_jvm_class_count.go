@@ -18,11 +18,15 @@ func NewClassCount() ClassCount {
 	}, labels)}
 }
 
-func (m ClassCount) With(extra ClassCountOptional) prometheus.Gauge {
+func (m ClassCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ClassCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ClassCountOptional struct {
+type ClassCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClassCountOptional",
+        "AttrExtra": "ClassCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

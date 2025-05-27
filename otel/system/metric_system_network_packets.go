@@ -21,19 +21,30 @@ func NewNetworkPackets() NetworkPackets {
 	}, labels)}
 }
 
-func (m NetworkPackets) With(extra NetworkPacketsOptional) prometheus.Counter {
+func (m NetworkPackets) With(extra interface {
+	AttrNetworkIoDirection() network.AttrIoDirection
+	AttrSystemDevice() AttrDevice
+}) prometheus.Counter {
+	if extra == nil {
+		extra = NetworkPacketsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkIoDirection),
-		string(extra.SystemDevice),
+		string(extra.AttrNetworkIoDirection()),
+		string(extra.AttrSystemDevice()),
 	)
 }
 
-type NetworkPacketsOptional struct {
+type NetworkPacketsExtra struct {
 	// The network IO operation direction.
 	NetworkIoDirection network.AttrIoDirection `otel:"network.io.direction"`
 	// The device identifier
 	SystemDevice AttrDevice `otel:"system.device"`
 }
+
+func (a NetworkPacketsExtra) AttrNetworkIoDirection() network.AttrIoDirection {
+	return a.NetworkIoDirection
+}
+func (a NetworkPacketsExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
 
 /*
 State {
@@ -41,7 +52,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NetworkPacketsOptional",
+        "AttrExtra": "NetworkPacketsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -96,6 +107,16 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "The device identifier",
+                    "examples": [
+                        "(identifier)",
+                    ],
+                    "name": "system.device",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
+                },
+                {
                     "brief": "The network IO operation direction.",
                     "examples": [
                         "transmit",
@@ -124,16 +145,6 @@ State {
                             },
                         ],
                     },
-                },
-                {
-                    "brief": "The device identifier",
-                    "examples": [
-                        "(identifier)",
-                    ],
-                    "name": "system.device",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
                 },
             ],
             "entity_associations": [

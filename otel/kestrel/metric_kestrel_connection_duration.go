@@ -25,20 +25,32 @@ func NewConnectionDuration() ConnectionDuration {
 	}, labels)}
 }
 
-func (m ConnectionDuration) With(extra ConnectionDurationOptional) prometheus.Observer {
+func (m ConnectionDuration) With(extra interface {
+	AttrErrorType() error.AttrType
+	AttrNetworkProtocolName() network.AttrProtocolName
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	AttrNetworkTransport() network.AttrTransport
+	AttrNetworkType() network.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+	AttrTlsProtocolVersion() tls.AttrProtocolVersion
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ConnectionDurationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ErrorType),
-		string(extra.NetworkProtocolName),
-		string(extra.NetworkProtocolVersion),
-		string(extra.NetworkTransport),
-		string(extra.NetworkType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
-		string(extra.TlsProtocolVersion),
+		string(extra.AttrErrorType()),
+		string(extra.AttrNetworkProtocolName()),
+		string(extra.AttrNetworkProtocolVersion()),
+		string(extra.AttrNetworkTransport()),
+		string(extra.AttrNetworkType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
+		string(extra.AttrTlsProtocolVersion()),
 	)
 }
 
-type ConnectionDurationOptional struct {
+type ConnectionDurationExtra struct {
 	// The full name of exception type.
 	ErrorType error.AttrType `otel:"error.type"`
 	// [OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.
@@ -57,13 +69,30 @@ type ConnectionDurationOptional struct {
 	TlsProtocolVersion tls.AttrProtocolVersion `otel:"tls.protocol.version"`
 }
 
+func (a ConnectionDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a ConnectionDurationExtra) AttrNetworkProtocolName() network.AttrProtocolName {
+	return a.NetworkProtocolName
+}
+func (a ConnectionDurationExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.NetworkProtocolVersion
+}
+func (a ConnectionDurationExtra) AttrNetworkTransport() network.AttrTransport {
+	return a.NetworkTransport
+}
+func (a ConnectionDurationExtra) AttrNetworkType() network.AttrType     { return a.NetworkType }
+func (a ConnectionDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ConnectionDurationExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+func (a ConnectionDurationExtra) AttrTlsProtocolVersion() tls.AttrProtocolVersion {
+	return a.TlsProtocolVersion
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ConnectionDurationOptional",
+        "AttrExtra": "ConnectionDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -293,17 +322,6 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)\n",
-                    "examples": [
-                        "1.2",
-                        "3",
-                    ],
-                    "name": "tls.protocol.version",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.",
                     "examples": [
                         "ipv4",
@@ -429,6 +447,17 @@ State {
                     "note": "The value SHOULD be normalized to lowercase.",
                     "requirement_level": "recommended",
                     "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)\n",
+                    "examples": [
+                        "1.2",
+                        "3",
+                    ],
+                    "name": "tls.protocol.version",
+                    "requirement_level": "recommended",
+                    "stability": "development",
                     "type": "string",
                 },
             ],

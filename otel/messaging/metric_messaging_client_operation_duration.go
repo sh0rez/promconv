@@ -23,23 +23,36 @@ func NewClientOperationDuration() ClientOperationDuration {
 	}, labels)}
 }
 
-func (m ClientOperationDuration) With(operationName AttrOperationName, system AttrSystem, extra ClientOperationDurationOptional) prometheus.Observer {
+func (m ClientOperationDuration) With(operationName AttrOperationName, system AttrSystem, extra interface {
+	AttrErrorType() error.AttrType
+	AttrMessagingConsumerGroupName() AttrConsumerGroupName
+	AttrMessagingDestinationName() AttrDestinationName
+	AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
+	AttrMessagingDestinationTemplate() AttrDestinationTemplate
+	AttrMessagingOperationType() AttrOperationType
+	AttrServerAddress() server.AttrAddress
+	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
+	AttrServerPort() server.AttrPort
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientOperationDurationExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
 		string(system),
-		string(extra.ErrorType),
-		string(extra.MessagingConsumerGroupName),
-		string(extra.MessagingDestinationName),
-		string(extra.MessagingDestinationSubscriptionName),
-		string(extra.MessagingDestinationTemplate),
-		string(extra.MessagingOperationType),
-		string(extra.ServerAddress),
-		string(extra.MessagingDestinationPartitionId),
-		string(extra.ServerPort),
+		string(extra.AttrErrorType()),
+		string(extra.AttrMessagingConsumerGroupName()),
+		string(extra.AttrMessagingDestinationName()),
+		string(extra.AttrMessagingDestinationSubscriptionName()),
+		string(extra.AttrMessagingDestinationTemplate()),
+		string(extra.AttrMessagingOperationType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrMessagingDestinationPartitionId()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type ClientOperationDurationOptional struct {
+type ClientOperationDurationExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// The name of the consumer group with which a consumer is associated.
@@ -60,13 +73,35 @@ type ClientOperationDurationOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a ClientOperationDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a ClientOperationDurationExtra) AttrMessagingConsumerGroupName() AttrConsumerGroupName {
+	return a.MessagingConsumerGroupName
+}
+func (a ClientOperationDurationExtra) AttrMessagingDestinationName() AttrDestinationName {
+	return a.MessagingDestinationName
+}
+func (a ClientOperationDurationExtra) AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName {
+	return a.MessagingDestinationSubscriptionName
+}
+func (a ClientOperationDurationExtra) AttrMessagingDestinationTemplate() AttrDestinationTemplate {
+	return a.MessagingDestinationTemplate
+}
+func (a ClientOperationDurationExtra) AttrMessagingOperationType() AttrOperationType {
+	return a.MessagingOperationType
+}
+func (a ClientOperationDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ClientOperationDurationExtra) AttrMessagingDestinationPartitionId() AttrDestinationPartitionId {
+	return a.MessagingDestinationPartitionId
+}
+func (a ClientOperationDurationExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientOperationDurationOptional",
+        "AttrExtra": "ClientOperationDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -380,14 +415,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.\n",
-                    "examples": "1",
-                    "name": "messaging.destination.partition.id",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "Server port number.",
                     "examples": [
                         80,
@@ -399,6 +426,14 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": "int",
+                },
+                {
+                    "brief": "The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.\n",
+                    "examples": "1",
+                    "name": "messaging.destination.partition.id",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
                 {
                     "brief": "Describes a class of error the operation ended with.\n",

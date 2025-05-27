@@ -18,11 +18,15 @@ func NewGcPauseTime() GcPauseTime {
 	}, labels)}
 }
 
-func (m GcPauseTime) With(extra GcPauseTimeOptional) prometheus.Counter {
+func (m GcPauseTime) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = GcPauseTimeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type GcPauseTimeOptional struct {
+type GcPauseTimeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcPauseTimeOptional",
+        "AttrExtra": "GcPauseTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

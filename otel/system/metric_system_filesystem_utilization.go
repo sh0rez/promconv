@@ -17,17 +17,26 @@ func NewFilesystemUtilization() FilesystemUtilization {
 	}, labels)}
 }
 
-func (m FilesystemUtilization) With(extra FilesystemUtilizationOptional) prometheus.Gauge {
+func (m FilesystemUtilization) With(extra interface {
+	AttrSystemDevice() AttrDevice
+	AttrSystemFilesystemMode() AttrFilesystemMode
+	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
+	AttrSystemFilesystemState() AttrFilesystemState
+	AttrSystemFilesystemType() AttrFilesystemType
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = FilesystemUtilizationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemDevice),
-		string(extra.SystemFilesystemMode),
-		string(extra.SystemFilesystemMountpoint),
-		string(extra.SystemFilesystemState),
-		string(extra.SystemFilesystemType),
+		string(extra.AttrSystemDevice()),
+		string(extra.AttrSystemFilesystemMode()),
+		string(extra.AttrSystemFilesystemMountpoint()),
+		string(extra.AttrSystemFilesystemState()),
+		string(extra.AttrSystemFilesystemType()),
 	)
 }
 
-type FilesystemUtilizationOptional struct {
+type FilesystemUtilizationExtra struct {
 	// Identifier for the device where the filesystem resides.
 	SystemDevice AttrDevice `otel:"system.device"`
 	// The filesystem mode
@@ -40,13 +49,27 @@ type FilesystemUtilizationOptional struct {
 	SystemFilesystemType AttrFilesystemType `otel:"system.filesystem.type"`
 }
 
+func (a FilesystemUtilizationExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
+func (a FilesystemUtilizationExtra) AttrSystemFilesystemMode() AttrFilesystemMode {
+	return a.SystemFilesystemMode
+}
+func (a FilesystemUtilizationExtra) AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint {
+	return a.SystemFilesystemMountpoint
+}
+func (a FilesystemUtilizationExtra) AttrSystemFilesystemState() AttrFilesystemState {
+	return a.SystemFilesystemState
+}
+func (a FilesystemUtilizationExtra) AttrSystemFilesystemType() AttrFilesystemType {
+	return a.SystemFilesystemType
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "FilesystemUtilizationOptional",
+        "AttrExtra": "FilesystemUtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

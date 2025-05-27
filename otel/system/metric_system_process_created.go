@@ -18,11 +18,15 @@ func NewProcessCreated() ProcessCreated {
 	}, labels)}
 }
 
-func (m ProcessCreated) With(extra ProcessCreatedOptional) prometheus.Counter {
+func (m ProcessCreated) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ProcessCreatedExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ProcessCreatedOptional struct {
+type ProcessCreatedExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessCreatedOptional",
+        "AttrExtra": "ProcessCreatedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

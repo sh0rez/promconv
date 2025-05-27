@@ -17,16 +17,23 @@ func NewPagingFaults() PagingFaults {
 	}, labels)}
 }
 
-func (m PagingFaults) With(extra PagingFaultsOptional) prometheus.Counter {
+func (m PagingFaults) With(extra interface {
+	AttrSystemPagingType() AttrPagingType
+}) prometheus.Counter {
+	if extra == nil {
+		extra = PagingFaultsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemPagingType),
+		string(extra.AttrSystemPagingType()),
 	)
 }
 
-type PagingFaultsOptional struct {
+type PagingFaultsExtra struct {
 	// The memory paging type
 	SystemPagingType AttrPagingType `otel:"system.paging.type"`
 }
+
+func (a PagingFaultsExtra) AttrSystemPagingType() AttrPagingType { return a.SystemPagingType }
 
 /*
 State {
@@ -34,7 +41,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PagingFaultsOptional",
+        "AttrExtra": "PagingFaultsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

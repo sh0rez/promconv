@@ -18,15 +18,24 @@ func NewSdkSpanEnded() SdkSpanEnded {
 	}, labels)}
 }
 
-func (m SdkSpanEnded) With(extra SdkSpanEndedOptional) prometheus.Counter {
+func (m SdkSpanEnded) With(extra interface {
+	AttrOtelSpanSamplingResult() AttrSpanSamplingResult
+}) prometheus.Counter {
+	if extra == nil {
+		extra = SdkSpanEndedExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.OtelSpanSamplingResult),
+		string(extra.AttrOtelSpanSamplingResult()),
 	)
 }
 
-type SdkSpanEndedOptional struct {
+type SdkSpanEndedExtra struct {
 	// The result value of the sampler for this span
 	OtelSpanSamplingResult AttrSpanSamplingResult `otel:"otel.span.sampling_result"`
+}
+
+func (a SdkSpanEndedExtra) AttrOtelSpanSamplingResult() AttrSpanSamplingResult {
+	return a.OtelSpanSamplingResult
 }
 
 /*
@@ -35,7 +44,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkSpanEndedOptional",
+        "AttrExtra": "SdkSpanEndedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

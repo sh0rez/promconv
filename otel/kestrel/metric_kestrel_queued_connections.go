@@ -23,16 +23,24 @@ func NewQueuedConnections() QueuedConnections {
 	}, labels)}
 }
 
-func (m QueuedConnections) With(extra QueuedConnectionsOptional) prometheus.Gauge {
+func (m QueuedConnections) With(extra interface {
+	AttrNetworkTransport() network.AttrTransport
+	AttrNetworkType() network.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = QueuedConnectionsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkTransport),
-		string(extra.NetworkType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrNetworkTransport()),
+		string(extra.AttrNetworkType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type QueuedConnectionsOptional struct {
+type QueuedConnectionsExtra struct {
 	// [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
 	NetworkTransport network.AttrTransport `otel:"network.transport"`
 	// [OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.
@@ -43,13 +51,20 @@ type QueuedConnectionsOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a QueuedConnectionsExtra) AttrNetworkTransport() network.AttrTransport {
+	return a.NetworkTransport
+}
+func (a QueuedConnectionsExtra) AttrNetworkType() network.AttrType     { return a.NetworkType }
+func (a QueuedConnectionsExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a QueuedConnectionsExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "QueuedConnectionsOptional",
+        "AttrExtra": "QueuedConnectionsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

@@ -18,16 +18,23 @@ func NewCpuUsage() CpuUsage {
 	}, labels)}
 }
 
-func (m CpuUsage) With(extra CpuUsageOptional) prometheus.Observer {
+func (m CpuUsage) With(extra interface {
+	AttrFaasTrigger() AttrTrigger
+}) prometheus.Observer {
+	if extra == nil {
+		extra = CpuUsageExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.FaasTrigger),
+		string(extra.AttrFaasTrigger()),
 	)
 }
 
-type CpuUsageOptional struct {
+type CpuUsageExtra struct {
 	// Type of the trigger which caused this function invocation.
 	FaasTrigger AttrTrigger `otel:"faas.trigger"`
 }
+
+func (a CpuUsageExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuUsageOptional",
+        "AttrExtra": "CpuUsageExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

@@ -18,11 +18,15 @@ func NewDaemonsetMisscheduledNodes() DaemonsetMisscheduledNodes {
 	}, labels)}
 }
 
-func (m DaemonsetMisscheduledNodes) With(extra DaemonsetMisscheduledNodesOptional) prometheus.Gauge {
+func (m DaemonsetMisscheduledNodes) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = DaemonsetMisscheduledNodesExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type DaemonsetMisscheduledNodesOptional struct {
+type DaemonsetMisscheduledNodesExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DaemonsetMisscheduledNodesOptional",
+        "AttrExtra": "DaemonsetMisscheduledNodesExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

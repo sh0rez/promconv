@@ -24,18 +24,25 @@ func NewClientOpenConnections() ClientOpenConnections {
 	}, labels)}
 }
 
-func (m ClientOpenConnections) With(connectionState AttrConnectionState, address server.AttrAddress, port server.AttrPort, extra ClientOpenConnectionsOptional) prometheus.Gauge {
+func (m ClientOpenConnections) With(connectionState AttrConnectionState, address server.AttrAddress, port server.AttrPort, extra interface {
+	AttrNetworkPeerAddress() network.AttrPeerAddress
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	AttrUrlScheme() url.AttrScheme
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ClientOpenConnectionsExtra{}
+	}
 	return m.WithLabelValues(
 		string(connectionState),
 		string(address),
 		string(port),
-		string(extra.NetworkPeerAddress),
-		string(extra.NetworkProtocolVersion),
-		string(extra.UrlScheme),
+		string(extra.AttrNetworkPeerAddress()),
+		string(extra.AttrNetworkProtocolVersion()),
+		string(extra.AttrUrlScheme()),
 	)
 }
 
-type ClientOpenConnectionsOptional struct {
+type ClientOpenConnectionsExtra struct {
 	// Peer address of the network connection - IP address or Unix domain socket name.
 	NetworkPeerAddress network.AttrPeerAddress `otel:"network.peer.address"`
 	// The actual version of the protocol used for network communication.
@@ -44,13 +51,21 @@ type ClientOpenConnectionsOptional struct {
 	UrlScheme url.AttrScheme `otel:"url.scheme"`
 }
 
+func (a ClientOpenConnectionsExtra) AttrNetworkPeerAddress() network.AttrPeerAddress {
+	return a.NetworkPeerAddress
+}
+func (a ClientOpenConnectionsExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.NetworkProtocolVersion
+}
+func (a ClientOpenConnectionsExtra) AttrUrlScheme() url.AttrScheme { return a.UrlScheme }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientOpenConnectionsOptional",
+        "AttrExtra": "ClientOpenConnectionsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -179,6 +194,17 @@ State {
                     "type": "string",
                 },
                 {
+                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
+                    "examples": [
+                        "http",
+                        "https",
+                    ],
+                    "name": "url.scheme",
+                    "requirement_level": "opt_in",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "Port identifier of the [\"URI origin\"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to.\n",
                     "examples": [
                         80,
@@ -190,17 +216,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
-                    "examples": [
-                        "http",
-                        "https",
-                    ],
-                    "name": "url.scheme",
-                    "requirement_level": "opt_in",
-                    "stability": "stable",
-                    "type": "string",
                 },
                 {
                     "brief": "State of the HTTP connection in the HTTP connection pool.",

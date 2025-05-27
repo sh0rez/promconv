@@ -18,16 +18,23 @@ func NewDiskLimit() DiskLimit {
 	}, labels)}
 }
 
-func (m DiskLimit) With(extra DiskLimitOptional) prometheus.Gauge {
+func (m DiskLimit) With(extra interface {
+	AttrSystemDevice() AttrDevice
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = DiskLimitExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemDevice),
+		string(extra.AttrSystemDevice()),
 	)
 }
 
-type DiskLimitOptional struct {
+type DiskLimitExtra struct {
 	// The device identifier
 	SystemDevice AttrDevice `otel:"system.device"`
 }
+
+func (a DiskLimitExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DiskLimitOptional",
+        "AttrExtra": "DiskLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

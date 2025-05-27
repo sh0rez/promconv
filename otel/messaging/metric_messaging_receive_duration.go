@@ -23,16 +23,23 @@ func NewReceiveDuration() ReceiveDuration {
 	}, labels)}
 }
 
-func (m ReceiveDuration) With(operationName AttrOperationName, extra ReceiveDurationOptional) prometheus.Observer {
+func (m ReceiveDuration) With(operationName AttrOperationName, extra interface {
+	AttrErrorType() error.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ReceiveDurationExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
-		string(extra.ErrorType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrErrorType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type ReceiveDurationOptional struct {
+type ReceiveDurationExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
@@ -41,13 +48,17 @@ type ReceiveDurationOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a ReceiveDurationExtra) AttrErrorType() error.AttrType         { return a.ErrorType }
+func (a ReceiveDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ReceiveDurationExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ReceiveDurationOptional",
+        "AttrExtra": "ReceiveDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

@@ -18,11 +18,15 @@ func NewMemoryAllocated() MemoryAllocated {
 	}, labels)}
 }
 
-func (m MemoryAllocated) With(extra MemoryAllocatedOptional) prometheus.Counter {
+func (m MemoryAllocated) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = MemoryAllocatedExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type MemoryAllocatedOptional struct {
+type MemoryAllocatedExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryAllocatedOptional",
+        "AttrExtra": "MemoryAllocatedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

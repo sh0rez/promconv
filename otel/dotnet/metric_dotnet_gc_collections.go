@@ -18,13 +18,17 @@ func NewGcCollections() GcCollections {
 	}, labels)}
 }
 
-func (m GcCollections) With(gcHeapGeneration AttrGcHeapGeneration, extra GcCollectionsOptional) prometheus.Counter {
+func (m GcCollections) With(gcHeapGeneration AttrGcHeapGeneration, extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = GcCollectionsExtra{}
+	}
 	return m.WithLabelValues(
 		string(gcHeapGeneration),
 	)
 }
 
-type GcCollectionsOptional struct {
+type GcCollectionsExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcCollectionsOptional",
+        "AttrExtra": "GcCollectionsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

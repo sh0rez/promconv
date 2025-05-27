@@ -18,11 +18,15 @@ func NewMemoryGcGoal() MemoryGcGoal {
 	}, labels)}
 }
 
-func (m MemoryGcGoal) With(extra MemoryGcGoalOptional) prometheus.Gauge {
+func (m MemoryGcGoal) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryGcGoalExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type MemoryGcGoalOptional struct {
+type MemoryGcGoalExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryGcGoalOptional",
+        "AttrExtra": "MemoryGcGoalExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

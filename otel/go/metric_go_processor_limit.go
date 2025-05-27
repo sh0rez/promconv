@@ -18,11 +18,15 @@ func NewProcessorLimit() ProcessorLimit {
 	}, labels)}
 }
 
-func (m ProcessorLimit) With(extra ProcessorLimitOptional) prometheus.Gauge {
+func (m ProcessorLimit) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ProcessorLimitExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ProcessorLimitOptional struct {
+type ProcessorLimitExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessorLimitOptional",
+        "AttrExtra": "ProcessorLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

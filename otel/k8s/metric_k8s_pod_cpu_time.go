@@ -18,11 +18,15 @@ func NewPodCpuTime() PodCpuTime {
 	}, labels)}
 }
 
-func (m PodCpuTime) With(extra PodCpuTimeOptional) prometheus.Counter {
+func (m PodCpuTime) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = PodCpuTimeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type PodCpuTimeOptional struct {
+type PodCpuTimeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PodCpuTimeOptional",
+        "AttrExtra": "PodCpuTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

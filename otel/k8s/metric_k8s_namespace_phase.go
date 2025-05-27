@@ -18,13 +18,17 @@ func NewNamespacePhase() NamespacePhase {
 	}, labels)}
 }
 
-func (m NamespacePhase) With(namespacePhase AttrNamespacePhase, extra NamespacePhaseOptional) prometheus.Gauge {
+func (m NamespacePhase) With(namespacePhase AttrNamespacePhase, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = NamespacePhaseExtra{}
+	}
 	return m.WithLabelValues(
 		string(namespacePhase),
 	)
 }
 
-type NamespacePhaseOptional struct {
+type NamespacePhaseExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NamespacePhaseOptional",
+        "AttrExtra": "NamespacePhaseExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

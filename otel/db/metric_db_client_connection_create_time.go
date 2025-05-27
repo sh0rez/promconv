@@ -18,13 +18,17 @@ func NewClientConnectionCreateTime() ClientConnectionCreateTime {
 	}, labels)}
 }
 
-func (m ClientConnectionCreateTime) With(clientConnectionPoolName AttrClientConnectionPoolName, extra ClientConnectionCreateTimeOptional) prometheus.Observer {
+func (m ClientConnectionCreateTime) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientConnectionCreateTimeExtra{}
+	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),
 	)
 }
 
-type ClientConnectionCreateTimeOptional struct {
+type ClientConnectionCreateTimeExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientConnectionCreateTimeOptional",
+        "AttrExtra": "ClientConnectionCreateTimeExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

@@ -22,14 +22,18 @@ func NewPipelineRunErrors() PipelineRunErrors {
 	}, labels)}
 }
 
-func (m PipelineRunErrors) With(pipelineName AttrPipelineName, kind error.AttrType, extra PipelineRunErrorsOptional) prometheus.Counter {
+func (m PipelineRunErrors) With(pipelineName AttrPipelineName, kind error.AttrType, extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = PipelineRunErrorsExtra{}
+	}
 	return m.WithLabelValues(
 		string(pipelineName),
 		string(kind),
 	)
 }
 
-type PipelineRunErrorsOptional struct {
+type PipelineRunErrorsExtra struct {
 }
 
 /*
@@ -38,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PipelineRunErrorsOptional",
+        "AttrExtra": "PipelineRunErrorsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -92,6 +96,19 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "The human readable name of the pipeline within a CI/CD system.\n",
+                    "examples": [
+                        "Build and Test",
+                        "Lint",
+                        "Deploy Go Project",
+                        "deploy_to_environment",
+                    ],
+                    "name": "cicd.pipeline.name",
+                    "requirement_level": "required",
+                    "stability": "development",
+                    "type": "string",
+                },
+                {
                     "brief": "Describes a class of error the operation ended with.\n",
                     "examples": [
                         "timeout",
@@ -116,19 +133,6 @@ State {
                             },
                         ],
                     },
-                },
-                {
-                    "brief": "The human readable name of the pipeline within a CI/CD system.\n",
-                    "examples": [
-                        "Build and Test",
-                        "Lint",
-                        "Deploy Go Project",
-                        "deploy_to_environment",
-                    ],
-                    "name": "cicd.pipeline.name",
-                    "requirement_level": "required",
-                    "stability": "development",
-                    "type": "string",
                 },
             ],
             "brief": "The number of errors encountered in pipeline runs (eg. compile, test failures).",

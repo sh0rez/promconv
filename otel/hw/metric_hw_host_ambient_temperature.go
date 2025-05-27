@@ -18,20 +18,29 @@ func NewHostAmbientTemperature() HostAmbientTemperature {
 	}, labels)}
 }
 
-func (m HostAmbientTemperature) With(id AttrId, extra HostAmbientTemperatureOptional) prometheus.Gauge {
+func (m HostAmbientTemperature) With(id AttrId, extra interface {
+	AttrHwName() AttrName
+	AttrHwParent() AttrParent
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = HostAmbientTemperatureExtra{}
+	}
 	return m.WithLabelValues(
 		string(id),
-		string(extra.HwName),
-		string(extra.HwParent),
+		string(extra.AttrHwName()),
+		string(extra.AttrHwParent()),
 	)
 }
 
-type HostAmbientTemperatureOptional struct {
+type HostAmbientTemperatureExtra struct {
 	// An easily-recognizable name for the hardware component
 	HwName AttrName `otel:"hw.name"`
 	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
 	HwParent AttrParent `otel:"hw.parent"`
 }
+
+func (a HostAmbientTemperatureExtra) AttrHwName() AttrName     { return a.HwName }
+func (a HostAmbientTemperatureExtra) AttrHwParent() AttrParent { return a.HwParent }
 
 /*
 State {
@@ -39,7 +48,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "HostAmbientTemperatureOptional",
+        "AttrExtra": "HostAmbientTemperatureExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

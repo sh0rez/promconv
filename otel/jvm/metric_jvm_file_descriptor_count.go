@@ -18,11 +18,15 @@ func NewFileDescriptorCount() FileDescriptorCount {
 	}, labels)}
 }
 
-func (m FileDescriptorCount) With(extra FileDescriptorCountOptional) prometheus.Gauge {
+func (m FileDescriptorCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = FileDescriptorCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type FileDescriptorCountOptional struct {
+type FileDescriptorCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "FileDescriptorCountOptional",
+        "AttrExtra": "FileDescriptorCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

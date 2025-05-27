@@ -18,11 +18,15 @@ func NewJitCompiledMethods() JitCompiledMethods {
 	}, labels)}
 }
 
-func (m JitCompiledMethods) With(extra JitCompiledMethodsOptional) prometheus.Counter {
+func (m JitCompiledMethods) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = JitCompiledMethodsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type JitCompiledMethodsOptional struct {
+type JitCompiledMethodsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "JitCompiledMethodsOptional",
+        "AttrExtra": "JitCompiledMethodsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

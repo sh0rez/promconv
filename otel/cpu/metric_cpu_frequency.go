@@ -18,16 +18,23 @@ func NewFrequency() Frequency {
 	}, labels)}
 }
 
-func (m Frequency) With(extra FrequencyOptional) prometheus.Gauge {
+func (m Frequency) With(extra interface {
+	AttrCpuLogicalNumber() AttrLogicalNumber
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = FrequencyExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.CpuLogicalNumber),
+		string(extra.AttrCpuLogicalNumber()),
 	)
 }
 
-type FrequencyOptional struct {
+type FrequencyExtra struct {
 	// The logical CPU number [0..n-1]
 	CpuLogicalNumber AttrLogicalNumber `otel:"cpu.logical_number"`
 }
+
+func (a FrequencyExtra) AttrCpuLogicalNumber() AttrLogicalNumber { return a.CpuLogicalNumber }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "FrequencyOptional",
+        "AttrExtra": "FrequencyExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

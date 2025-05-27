@@ -18,11 +18,15 @@ func NewSdkSpanLiveCount() SdkSpanLiveCount {
 	}, labels)}
 }
 
-func (m SdkSpanLiveCount) With(extra SdkSpanLiveCountOptional) prometheus.Gauge {
+func (m SdkSpanLiveCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = SdkSpanLiveCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type SdkSpanLiveCountOptional struct {
+type SdkSpanLiveCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkSpanLiveCountOptional",
+        "AttrExtra": "SdkSpanLiveCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

@@ -18,11 +18,15 @@ func NewCpuLogicalCount() CpuLogicalCount {
 	}, labels)}
 }
 
-func (m CpuLogicalCount) With(extra CpuLogicalCountOptional) prometheus.Gauge {
+func (m CpuLogicalCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = CpuLogicalCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type CpuLogicalCountOptional struct {
+type CpuLogicalCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuLogicalCountOptional",
+        "AttrExtra": "CpuLogicalCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

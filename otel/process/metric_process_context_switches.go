@@ -18,15 +18,24 @@ func NewContextSwitches() ContextSwitches {
 	}, labels)}
 }
 
-func (m ContextSwitches) With(extra ContextSwitchesOptional) prometheus.Counter {
+func (m ContextSwitches) With(extra interface {
+	AttrProcessContextSwitchType() AttrContextSwitchType
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ContextSwitchesExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ProcessContextSwitchType),
+		string(extra.AttrProcessContextSwitchType()),
 	)
 }
 
-type ContextSwitchesOptional struct {
+type ContextSwitchesExtra struct {
 	// Specifies whether the context switches for this data point were voluntary or involuntary.
 	ProcessContextSwitchType AttrContextSwitchType `otel:"process.context_switch_type"`
+}
+
+func (a ContextSwitchesExtra) AttrProcessContextSwitchType() AttrContextSwitchType {
+	return a.ProcessContextSwitchType
 }
 
 /*
@@ -35,7 +44,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ContextSwitchesOptional",
+        "AttrExtra": "ContextSwitchesExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

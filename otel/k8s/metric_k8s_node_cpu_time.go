@@ -18,11 +18,15 @@ func NewNodeCpuTime() NodeCpuTime {
 	}, labels)}
 }
 
-func (m NodeCpuTime) With(extra NodeCpuTimeOptional) prometheus.Counter {
+func (m NodeCpuTime) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = NodeCpuTimeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type NodeCpuTimeOptional struct {
+type NodeCpuTimeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeCpuTimeOptional",
+        "AttrExtra": "NodeCpuTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

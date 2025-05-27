@@ -22,15 +22,22 @@ func NewSdkProcessorSpanProcessed() SdkProcessorSpanProcessed {
 	}, labels)}
 }
 
-func (m SdkProcessorSpanProcessed) With(extra SdkProcessorSpanProcessedOptional) prometheus.Counter {
+func (m SdkProcessorSpanProcessed) With(extra interface {
+	AttrErrorType() error.AttrType
+	AttrOtelComponentName() AttrComponentName
+	AttrOtelComponentType() AttrComponentType
+}) prometheus.Counter {
+	if extra == nil {
+		extra = SdkProcessorSpanProcessedExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ErrorType),
-		string(extra.OtelComponentName),
-		string(extra.OtelComponentType),
+		string(extra.AttrErrorType()),
+		string(extra.AttrOtelComponentName()),
+		string(extra.AttrOtelComponentType()),
 	)
 }
 
-type SdkProcessorSpanProcessedOptional struct {
+type SdkProcessorSpanProcessedExtra struct {
 	// A low-cardinality description of the failure reason. SDK Batching Span Processors MUST use `queue_full` for spans dropped due to a full queue.
 	ErrorType error.AttrType `otel:"error.type"`
 	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
@@ -39,13 +46,21 @@ type SdkProcessorSpanProcessedOptional struct {
 	OtelComponentType AttrComponentType `otel:"otel.component.type"`
 }
 
+func (a SdkProcessorSpanProcessedExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a SdkProcessorSpanProcessedExtra) AttrOtelComponentName() AttrComponentName {
+	return a.OtelComponentName
+}
+func (a SdkProcessorSpanProcessedExtra) AttrOtelComponentType() AttrComponentType {
+	return a.OtelComponentType
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkProcessorSpanProcessedOptional",
+        "AttrExtra": "SdkProcessorSpanProcessedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

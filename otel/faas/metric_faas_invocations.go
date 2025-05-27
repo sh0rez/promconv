@@ -18,16 +18,23 @@ func NewInvocations() Invocations {
 	}, labels)}
 }
 
-func (m Invocations) With(extra InvocationsOptional) prometheus.Counter {
+func (m Invocations) With(extra interface {
+	AttrFaasTrigger() AttrTrigger
+}) prometheus.Counter {
+	if extra == nil {
+		extra = InvocationsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.FaasTrigger),
+		string(extra.AttrFaasTrigger()),
 	)
 }
 
-type InvocationsOptional struct {
+type InvocationsExtra struct {
 	// Type of the trigger which caused this function invocation.
 	FaasTrigger AttrTrigger `otel:"faas.trigger"`
 }
+
+func (a InvocationsExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "InvocationsOptional",
+        "AttrExtra": "InvocationsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

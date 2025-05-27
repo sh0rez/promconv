@@ -18,11 +18,15 @@ func NewJobFailedPods() JobFailedPods {
 	}, labels)}
 }
 
-func (m JobFailedPods) With(extra JobFailedPodsOptional) prometheus.Gauge {
+func (m JobFailedPods) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = JobFailedPodsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type JobFailedPodsOptional struct {
+type JobFailedPodsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "JobFailedPodsOptional",
+        "AttrExtra": "JobFailedPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

@@ -18,16 +18,23 @@ func NewBufferCount() BufferCount {
 	}, labels)}
 }
 
-func (m BufferCount) With(extra BufferCountOptional) prometheus.Gauge {
+func (m BufferCount) With(extra interface {
+	AttrJvmBufferPoolName() AttrBufferPoolName
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = BufferCountExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.JvmBufferPoolName),
+		string(extra.AttrJvmBufferPoolName()),
 	)
 }
 
-type BufferCountOptional struct {
+type BufferCountExtra struct {
 	// Name of the buffer pool.
 	JvmBufferPoolName AttrBufferPoolName `otel:"jvm.buffer.pool.name"`
 }
+
+func (a BufferCountExtra) AttrJvmBufferPoolName() AttrBufferPoolName { return a.JvmBufferPoolName }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "BufferCountOptional",
+        "AttrExtra": "BufferCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

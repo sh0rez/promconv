@@ -25,19 +25,30 @@ func NewSdkExporterOperationDuration() SdkExporterOperationDuration {
 	}, labels)}
 }
 
-func (m SdkExporterOperationDuration) With(extra SdkExporterOperationDurationOptional) prometheus.Observer {
+func (m SdkExporterOperationDuration) With(extra interface {
+	AttrErrorType() error.AttrType
+	AttrHttpResponseStatusCode() http.AttrResponseStatusCode
+	AttrOtelComponentName() AttrComponentName
+	AttrOtelComponentType() AttrComponentType
+	AttrRpcGrpcStatusCode() rpc.AttrGrpcStatusCode
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Observer {
+	if extra == nil {
+		extra = SdkExporterOperationDurationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ErrorType),
-		string(extra.HttpResponseStatusCode),
-		string(extra.OtelComponentName),
-		string(extra.OtelComponentType),
-		string(extra.RpcGrpcStatusCode),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrErrorType()),
+		string(extra.AttrHttpResponseStatusCode()),
+		string(extra.AttrOtelComponentName()),
+		string(extra.AttrOtelComponentType()),
+		string(extra.AttrRpcGrpcStatusCode()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type SdkExporterOperationDurationOptional struct {
+type SdkExporterOperationDurationExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// The HTTP status code of the last HTTP request performed in scope of this export call.
@@ -54,13 +65,31 @@ type SdkExporterOperationDurationOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a SdkExporterOperationDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a SdkExporterOperationDurationExtra) AttrHttpResponseStatusCode() http.AttrResponseStatusCode {
+	return a.HttpResponseStatusCode
+}
+func (a SdkExporterOperationDurationExtra) AttrOtelComponentName() AttrComponentName {
+	return a.OtelComponentName
+}
+func (a SdkExporterOperationDurationExtra) AttrOtelComponentType() AttrComponentType {
+	return a.OtelComponentType
+}
+func (a SdkExporterOperationDurationExtra) AttrRpcGrpcStatusCode() rpc.AttrGrpcStatusCode {
+	return a.RpcGrpcStatusCode
+}
+func (a SdkExporterOperationDurationExtra) AttrServerAddress() server.AttrAddress {
+	return a.ServerAddress
+}
+func (a SdkExporterOperationDurationExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkExporterOperationDurationOptional",
+        "AttrExtra": "SdkExporterOperationDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -434,18 +463,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.\n",
-                    "examples": [
-                        "otlp_grpc_span_exporter/0",
-                        "custom-name",
-                    ],
-                    "name": "otel.component.name",
-                    "note": "Implementations SHOULD ensure a low cardinality for this attribute, even across application or SDK restarts.\nE.g. implementations MUST NOT use UUIDs as values for this attribute.\n\nImplementations MAY achieve these goals by following a `<otel.component.type>/<instance-counter>` pattern, e.g. `batching_span_processor/0`.\nHereby `otel.component.type` refers to the corresponding attribute value of the component.\n\nThe value of `instance-counter` MAY be automatically assigned by the component and uniqueness within the enclosing SDK instance MUST be guaranteed.\nFor example, `<instance-counter>` MAY be implemented by using a monotonically increasing counter (starting with `0`), which is incremented every time an\ninstance of the given component type is started.\n\nWith this implementation, for example the first Batching Span Processor would have `batching_span_processor/0`\nas `otel.component.name`, the second one `batching_span_processor/1` and so on.\nThese values will therefore be reused in the case of an application restart.\n",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
                     "examples": [
                         "example.com",
@@ -474,6 +491,18 @@ State {
                     },
                     "stability": "stable",
                     "type": "int",
+                },
+                {
+                    "brief": "A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.\n",
+                    "examples": [
+                        "otlp_grpc_span_exporter/0",
+                        "custom-name",
+                    ],
+                    "name": "otel.component.name",
+                    "note": "Implementations SHOULD ensure a low cardinality for this attribute, even across application or SDK restarts.\nE.g. implementations MUST NOT use UUIDs as values for this attribute.\n\nImplementations MAY achieve these goals by following a `<otel.component.type>/<instance-counter>` pattern, e.g. `batching_span_processor/0`.\nHereby `otel.component.type` refers to the corresponding attribute value of the component.\n\nThe value of `instance-counter` MAY be automatically assigned by the component and uniqueness within the enclosing SDK instance MUST be guaranteed.\nFor example, `<instance-counter>` MAY be implemented by using a monotonically increasing counter (starting with `0`), which is incremented every time an\ninstance of the given component type is started.\n\nWith this implementation, for example the first Batching Span Processor would have `batching_span_processor/0`\nas `otel.component.name`, the second one `batching_span_processor/1` and so on.\nThese values will therefore be reused in the case of an application restart.\n",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
                 {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",

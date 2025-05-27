@@ -18,11 +18,15 @@ func NewGcHeapTotalAllocated() GcHeapTotalAllocated {
 	}, labels)}
 }
 
-func (m GcHeapTotalAllocated) With(extra GcHeapTotalAllocatedOptional) prometheus.Counter {
+func (m GcHeapTotalAllocated) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = GcHeapTotalAllocatedExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type GcHeapTotalAllocatedOptional struct {
+type GcHeapTotalAllocatedExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcHeapTotalAllocatedOptional",
+        "AttrExtra": "GcHeapTotalAllocatedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

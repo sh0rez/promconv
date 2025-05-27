@@ -18,11 +18,15 @@ func NewEventloopDelayMean() EventloopDelayMean {
 	}, labels)}
 }
 
-func (m EventloopDelayMean) With(extra EventloopDelayMeanOptional) prometheus.Gauge {
+func (m EventloopDelayMean) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = EventloopDelayMeanExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type EventloopDelayMeanOptional struct {
+type EventloopDelayMeanExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopDelayMeanOptional",
+        "AttrExtra": "EventloopDelayMeanExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

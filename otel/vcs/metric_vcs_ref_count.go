@@ -18,17 +18,24 @@ func NewRefCount() RefCount {
 	}, labels)}
 }
 
-func (m RefCount) With(refType AttrRefType, repositoryUrlFull AttrRepositoryUrlFull, extra RefCountOptional) prometheus.Gauge {
+func (m RefCount) With(refType AttrRefType, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
+	AttrVcsOwnerName() AttrOwnerName
+	AttrVcsRepositoryName() AttrRepositoryName
+	AttrVcsProviderName() AttrProviderName
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = RefCountExtra{}
+	}
 	return m.WithLabelValues(
 		string(refType),
 		string(repositoryUrlFull),
-		string(extra.VcsOwnerName),
-		string(extra.VcsRepositoryName),
-		string(extra.VcsProviderName),
+		string(extra.AttrVcsOwnerName()),
+		string(extra.AttrVcsRepositoryName()),
+		string(extra.AttrVcsProviderName()),
 	)
 }
 
-type RefCountOptional struct {
+type RefCountExtra struct {
 	// The group owner within the version control system.
 	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
 	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
@@ -37,13 +44,17 @@ type RefCountOptional struct {
 	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
 }
 
+func (a RefCountExtra) AttrVcsOwnerName() AttrOwnerName           { return a.VcsOwnerName }
+func (a RefCountExtra) AttrVcsRepositoryName() AttrRepositoryName { return a.VcsRepositoryName }
+func (a RefCountExtra) AttrVcsProviderName() AttrProviderName     { return a.VcsProviderName }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RefCountOptional",
+        "AttrExtra": "RefCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

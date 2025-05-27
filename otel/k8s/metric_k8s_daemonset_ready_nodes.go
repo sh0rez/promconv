@@ -18,11 +18,15 @@ func NewDaemonsetReadyNodes() DaemonsetReadyNodes {
 	}, labels)}
 }
 
-func (m DaemonsetReadyNodes) With(extra DaemonsetReadyNodesOptional) prometheus.Gauge {
+func (m DaemonsetReadyNodes) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = DaemonsetReadyNodesExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type DaemonsetReadyNodesOptional struct {
+type DaemonsetReadyNodesExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DaemonsetReadyNodesOptional",
+        "AttrExtra": "DaemonsetReadyNodesExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

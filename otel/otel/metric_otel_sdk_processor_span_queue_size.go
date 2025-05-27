@@ -18,18 +18,31 @@ func NewSdkProcessorSpanQueueSize() SdkProcessorSpanQueueSize {
 	}, labels)}
 }
 
-func (m SdkProcessorSpanQueueSize) With(extra SdkProcessorSpanQueueSizeOptional) prometheus.Gauge {
+func (m SdkProcessorSpanQueueSize) With(extra interface {
+	AttrOtelComponentName() AttrComponentName
+	AttrOtelComponentType() AttrComponentType
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = SdkProcessorSpanQueueSizeExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.OtelComponentName),
-		string(extra.OtelComponentType),
+		string(extra.AttrOtelComponentName()),
+		string(extra.AttrOtelComponentType()),
 	)
 }
 
-type SdkProcessorSpanQueueSizeOptional struct {
+type SdkProcessorSpanQueueSizeExtra struct {
 	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
 	OtelComponentName AttrComponentName `otel:"otel.component.name"`
 	// A name identifying the type of the OpenTelemetry component.
 	OtelComponentType AttrComponentType `otel:"otel.component.type"`
+}
+
+func (a SdkProcessorSpanQueueSizeExtra) AttrOtelComponentName() AttrComponentName {
+	return a.OtelComponentName
+}
+func (a SdkProcessorSpanQueueSizeExtra) AttrOtelComponentType() AttrComponentType {
+	return a.OtelComponentType
 }
 
 /*
@@ -38,7 +51,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkProcessorSpanQueueSizeOptional",
+        "AttrExtra": "SdkProcessorSpanQueueSizeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

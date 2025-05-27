@@ -24,17 +24,24 @@ func NewClientConnectionDuration() ClientConnectionDuration {
 	}, labels)}
 }
 
-func (m ClientConnectionDuration) With(address server.AttrAddress, port server.AttrPort, extra ClientConnectionDurationOptional) prometheus.Observer {
+func (m ClientConnectionDuration) With(address server.AttrAddress, port server.AttrPort, extra interface {
+	AttrNetworkPeerAddress() network.AttrPeerAddress
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	AttrUrlScheme() url.AttrScheme
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientConnectionDurationExtra{}
+	}
 	return m.WithLabelValues(
 		string(address),
 		string(port),
-		string(extra.NetworkPeerAddress),
-		string(extra.NetworkProtocolVersion),
-		string(extra.UrlScheme),
+		string(extra.AttrNetworkPeerAddress()),
+		string(extra.AttrNetworkProtocolVersion()),
+		string(extra.AttrUrlScheme()),
 	)
 }
 
-type ClientConnectionDurationOptional struct {
+type ClientConnectionDurationExtra struct {
 	// Peer address of the network connection - IP address or Unix domain socket name.
 	NetworkPeerAddress network.AttrPeerAddress `otel:"network.peer.address"`
 	// The actual version of the protocol used for network communication.
@@ -43,13 +50,21 @@ type ClientConnectionDurationOptional struct {
 	UrlScheme url.AttrScheme `otel:"url.scheme"`
 }
 
+func (a ClientConnectionDurationExtra) AttrNetworkPeerAddress() network.AttrPeerAddress {
+	return a.NetworkPeerAddress
+}
+func (a ClientConnectionDurationExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.NetworkProtocolVersion
+}
+func (a ClientConnectionDurationExtra) AttrUrlScheme() url.AttrScheme { return a.UrlScheme }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientConnectionDurationOptional",
+        "AttrExtra": "ClientConnectionDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -147,6 +162,17 @@ State {
                     "type": "string",
                 },
                 {
+                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
+                    "examples": [
+                        "http",
+                        "https",
+                    ],
+                    "name": "url.scheme",
+                    "requirement_level": "opt_in",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "Port identifier of the [\"URI origin\"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to.\n",
                     "examples": [
                         80,
@@ -158,17 +184,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
-                    "examples": [
-                        "http",
-                        "https",
-                    ],
-                    "name": "url.scheme",
-                    "requirement_level": "opt_in",
-                    "stability": "stable",
-                    "type": "string",
                 },
                 {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",

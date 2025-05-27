@@ -22,19 +22,27 @@ func NewClientTokenUsage() ClientTokenUsage {
 	}, labels)}
 }
 
-func (m ClientTokenUsage) With(operationName AttrOperationName, system AttrSystem, tokenType AttrTokenType, extra ClientTokenUsageOptional) prometheus.Observer {
+func (m ClientTokenUsage) With(operationName AttrOperationName, system AttrSystem, tokenType AttrTokenType, extra interface {
+	AttrGenAiRequestModel() AttrRequestModel
+	AttrServerPort() server.AttrPort
+	AttrGenAiResponseModel() AttrResponseModel
+	AttrServerAddress() server.AttrAddress
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientTokenUsageExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
 		string(system),
 		string(tokenType),
-		string(extra.GenAiRequestModel),
-		string(extra.ServerPort),
-		string(extra.GenAiResponseModel),
-		string(extra.ServerAddress),
+		string(extra.AttrGenAiRequestModel()),
+		string(extra.AttrServerPort()),
+		string(extra.AttrGenAiResponseModel()),
+		string(extra.AttrServerAddress()),
 	)
 }
 
-type ClientTokenUsageOptional struct {
+type ClientTokenUsageExtra struct {
 	// The name of the GenAI model a request is being made to.
 	GenAiRequestModel AttrRequestModel `otel:"gen_ai.request.model"`
 	// GenAI server port.
@@ -45,13 +53,20 @@ type ClientTokenUsageOptional struct {
 	ServerAddress server.AttrAddress `otel:"server.address"`
 }
 
+func (a ClientTokenUsageExtra) AttrGenAiRequestModel() AttrRequestModel { return a.GenAiRequestModel }
+func (a ClientTokenUsageExtra) AttrServerPort() server.AttrPort         { return a.ServerPort }
+func (a ClientTokenUsageExtra) AttrGenAiResponseModel() AttrResponseModel {
+	return a.GenAiResponseModel
+}
+func (a ClientTokenUsageExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientTokenUsageOptional",
+        "AttrExtra": "ClientTokenUsageExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -370,34 +385,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "GenAI server address.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "GenAI server port.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If `server.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "The name of the model that generated the response.",
                     "examples": [
                         "gpt-4-0613",
@@ -474,6 +461,34 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "GenAI server address.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "GenAI server port.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If `server.address` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
                 },
                 {
                     "brief": "The Generative AI product as identified by the client or server instrumentation.",

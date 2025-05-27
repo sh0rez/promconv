@@ -18,13 +18,17 @@ func NewMemoryHeapLimit() MemoryHeapLimit {
 	}, labels)}
 }
 
-func (m MemoryHeapLimit) With(heapSpaceName AttrHeapSpaceName, extra MemoryHeapLimitOptional) prometheus.Gauge {
+func (m MemoryHeapLimit) With(heapSpaceName AttrHeapSpaceName, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryHeapLimitExtra{}
+	}
 	return m.WithLabelValues(
 		string(heapSpaceName),
 	)
 }
 
-type MemoryHeapLimitOptional struct {
+type MemoryHeapLimitExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryHeapLimitOptional",
+        "AttrExtra": "MemoryHeapLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

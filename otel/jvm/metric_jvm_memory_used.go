@@ -18,19 +18,28 @@ func NewMemoryUsed() MemoryUsed {
 	}, labels)}
 }
 
-func (m MemoryUsed) With(extra MemoryUsedOptional) prometheus.Gauge {
+func (m MemoryUsed) With(extra interface {
+	AttrJvmMemoryPoolName() AttrMemoryPoolName
+	AttrJvmMemoryType() AttrMemoryType
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryUsedExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.JvmMemoryPoolName),
-		string(extra.JvmMemoryType),
+		string(extra.AttrJvmMemoryPoolName()),
+		string(extra.AttrJvmMemoryType()),
 	)
 }
 
-type MemoryUsedOptional struct {
+type MemoryUsedExtra struct {
 	// Name of the memory pool.
 	JvmMemoryPoolName AttrMemoryPoolName `otel:"jvm.memory.pool.name"`
 	// The type of memory.
 	JvmMemoryType AttrMemoryType `otel:"jvm.memory.type"`
 }
+
+func (a MemoryUsedExtra) AttrJvmMemoryPoolName() AttrMemoryPoolName { return a.JvmMemoryPoolName }
+func (a MemoryUsedExtra) AttrJvmMemoryType() AttrMemoryType         { return a.JvmMemoryType }
 
 /*
 State {
@@ -38,7 +47,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryUsedOptional",
+        "AttrExtra": "MemoryUsedExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

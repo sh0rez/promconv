@@ -18,11 +18,15 @@ func NewAssemblyCount() AssemblyCount {
 	}, labels)}
 }
 
-func (m AssemblyCount) With(extra AssemblyCountOptional) prometheus.Gauge {
+func (m AssemblyCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = AssemblyCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type AssemblyCountOptional struct {
+type AssemblyCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "AssemblyCountOptional",
+        "AttrExtra": "AssemblyCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

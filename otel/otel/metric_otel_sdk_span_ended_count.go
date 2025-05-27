@@ -18,11 +18,15 @@ func NewSdkSpanEndedCount() SdkSpanEndedCount {
 	}, labels)}
 }
 
-func (m SdkSpanEndedCount) With(extra SdkSpanEndedCountOptional) prometheus.Counter {
+func (m SdkSpanEndedCount) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = SdkSpanEndedCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type SdkSpanEndedCountOptional struct {
+type SdkSpanEndedCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkSpanEndedCountOptional",
+        "AttrExtra": "SdkSpanEndedCountExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

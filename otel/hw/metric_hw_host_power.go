@@ -18,20 +18,29 @@ func NewHostPower() HostPower {
 	}, labels)}
 }
 
-func (m HostPower) With(id AttrId, extra HostPowerOptional) prometheus.Gauge {
+func (m HostPower) With(id AttrId, extra interface {
+	AttrHwName() AttrName
+	AttrHwParent() AttrParent
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = HostPowerExtra{}
+	}
 	return m.WithLabelValues(
 		string(id),
-		string(extra.HwName),
-		string(extra.HwParent),
+		string(extra.AttrHwName()),
+		string(extra.AttrHwParent()),
 	)
 }
 
-type HostPowerOptional struct {
+type HostPowerExtra struct {
 	// An easily-recognizable name for the hardware component
 	HwName AttrName `otel:"hw.name"`
 	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
 	HwParent AttrParent `otel:"hw.parent"`
 }
+
+func (a HostPowerExtra) AttrHwName() AttrName     { return a.HwName }
+func (a HostPowerExtra) AttrHwParent() AttrParent { return a.HwParent }
 
 /*
 State {
@@ -39,7 +48,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "HostPowerOptional",
+        "AttrExtra": "HostPowerExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

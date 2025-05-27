@@ -18,11 +18,15 @@ func NewServerDuration() ServerDuration {
 	}, labels)}
 }
 
-func (m ServerDuration) With(extra ServerDurationOptional) prometheus.Observer {
+func (m ServerDuration) With(extra interface {
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ServerDurationExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ServerDurationOptional struct {
+type ServerDurationExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ServerDurationOptional",
+        "AttrExtra": "ServerDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

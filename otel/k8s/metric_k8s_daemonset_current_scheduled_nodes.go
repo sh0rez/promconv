@@ -18,11 +18,15 @@ func NewDaemonsetCurrentScheduledNodes() DaemonsetCurrentScheduledNodes {
 	}, labels)}
 }
 
-func (m DaemonsetCurrentScheduledNodes) With(extra DaemonsetCurrentScheduledNodesOptional) prometheus.Gauge {
+func (m DaemonsetCurrentScheduledNodes) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = DaemonsetCurrentScheduledNodesExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type DaemonsetCurrentScheduledNodesOptional struct {
+type DaemonsetCurrentScheduledNodesExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DaemonsetCurrentScheduledNodesOptional",
+        "AttrExtra": "DaemonsetCurrentScheduledNodesExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

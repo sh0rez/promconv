@@ -24,24 +24,39 @@ func NewClientResponseReturnedRows() ClientResponseReturnedRows {
 	}, labels)}
 }
 
-func (m ClientResponseReturnedRows) With(systemName AttrSystemName, extra ClientResponseReturnedRowsOptional) prometheus.Observer {
+func (m ClientResponseReturnedRows) With(systemName AttrSystemName, extra interface {
+	AttrDbCollectionName() AttrCollectionName
+	AttrDbNamespace() AttrNamespace
+	AttrDbOperationName() AttrOperationName
+	AttrDbResponseStatusCode() AttrResponseStatusCode
+	AttrErrorType() error.AttrType
+	AttrServerPort() server.AttrPort
+	AttrDbQuerySummary() AttrQuerySummary
+	AttrNetworkPeerAddress() network.AttrPeerAddress
+	AttrNetworkPeerPort() network.AttrPeerPort
+	AttrServerAddress() server.AttrAddress
+	AttrDbQueryText() AttrQueryText
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientResponseReturnedRowsExtra{}
+	}
 	return m.WithLabelValues(
 		string(systemName),
-		string(extra.DbCollectionName),
-		string(extra.DbNamespace),
-		string(extra.DbOperationName),
-		string(extra.DbResponseStatusCode),
-		string(extra.ErrorType),
-		string(extra.ServerPort),
-		string(extra.DbQuerySummary),
-		string(extra.NetworkPeerAddress),
-		string(extra.NetworkPeerPort),
-		string(extra.ServerAddress),
-		string(extra.DbQueryText),
+		string(extra.AttrDbCollectionName()),
+		string(extra.AttrDbNamespace()),
+		string(extra.AttrDbOperationName()),
+		string(extra.AttrDbResponseStatusCode()),
+		string(extra.AttrErrorType()),
+		string(extra.AttrServerPort()),
+		string(extra.AttrDbQuerySummary()),
+		string(extra.AttrNetworkPeerAddress()),
+		string(extra.AttrNetworkPeerPort()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrDbQueryText()),
 	)
 }
 
-type ClientResponseReturnedRowsOptional struct {
+type ClientResponseReturnedRowsExtra struct {
 	// The name of a collection (table, container) within the database.
 	DbCollectionName AttrCollectionName `otel:"db.collection.name"`
 	// The name of the database, fully qualified within the server address and port.
@@ -66,13 +81,39 @@ type ClientResponseReturnedRowsOptional struct {
 	DbQueryText AttrQueryText `otel:"db.query.text"`
 }
 
+func (a ClientResponseReturnedRowsExtra) AttrDbCollectionName() AttrCollectionName {
+	return a.DbCollectionName
+}
+func (a ClientResponseReturnedRowsExtra) AttrDbNamespace() AttrNamespace { return a.DbNamespace }
+func (a ClientResponseReturnedRowsExtra) AttrDbOperationName() AttrOperationName {
+	return a.DbOperationName
+}
+func (a ClientResponseReturnedRowsExtra) AttrDbResponseStatusCode() AttrResponseStatusCode {
+	return a.DbResponseStatusCode
+}
+func (a ClientResponseReturnedRowsExtra) AttrErrorType() error.AttrType   { return a.ErrorType }
+func (a ClientResponseReturnedRowsExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+func (a ClientResponseReturnedRowsExtra) AttrDbQuerySummary() AttrQuerySummary {
+	return a.DbQuerySummary
+}
+func (a ClientResponseReturnedRowsExtra) AttrNetworkPeerAddress() network.AttrPeerAddress {
+	return a.NetworkPeerAddress
+}
+func (a ClientResponseReturnedRowsExtra) AttrNetworkPeerPort() network.AttrPeerPort {
+	return a.NetworkPeerPort
+}
+func (a ClientResponseReturnedRowsExtra) AttrServerAddress() server.AttrAddress {
+	return a.ServerAddress
+}
+func (a ClientResponseReturnedRowsExtra) AttrDbQueryText() AttrQueryText { return a.DbQueryText }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientResponseReturnedRowsOptional",
+        "AttrExtra": "ClientResponseReturnedRowsExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -595,32 +636,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Peer address of the database node where the operation was performed.",
-                    "examples": [
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "network.peer.address",
-                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
-                    "requirement_level": {
-                        "recommended": "If applicable for this database system.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Peer port number of the network connection.",
-                    "examples": [
-                        65123,
-                    ],
-                    "name": "network.peer.port",
-                    "requirement_level": {
-                        "recommended": "If and only if `network.peer.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "Name of the database host.\n",
                     "examples": [
                         "example.com",
@@ -691,6 +706,20 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Peer address of the database node where the operation was performed.",
+                    "examples": [
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "network.peer.address",
+                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
+                    "requirement_level": {
+                        "recommended": "If applicable for this database system.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
                 },
                 {
                     "brief": "Low cardinality summary of a database query.\n",
@@ -1101,6 +1130,18 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Peer port number of the network connection.",
+                    "examples": [
+                        65123,
+                    ],
+                    "name": "network.peer.port",
+                    "requirement_level": {
+                        "recommended": "If and only if `network.peer.address` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "The actual number of records returned by the database operation.",

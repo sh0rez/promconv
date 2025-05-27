@@ -23,21 +23,30 @@ func NewServerActiveRequests() ServerActiveRequests {
 	}, labels)}
 }
 
-func (m ServerActiveRequests) With(requestMethod AttrRequestMethod, scheme url.AttrScheme, extra ServerActiveRequestsOptional) prometheus.Gauge {
+func (m ServerActiveRequests) With(requestMethod AttrRequestMethod, scheme url.AttrScheme, extra interface {
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ServerActiveRequestsExtra{}
+	}
 	return m.WithLabelValues(
 		string(requestMethod),
 		string(scheme),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type ServerActiveRequestsOptional struct {
+type ServerActiveRequestsExtra struct {
 	// Name of the local HTTP server that received the request.
 	ServerAddress server.AttrAddress `otel:"server.address"`
 	// Port of the local HTTP server that received the request.
 	ServerPort server.AttrPort `otel:"server.port"`
 }
+
+func (a ServerActiveRequestsExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ServerActiveRequestsExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
 
 /*
 State {
@@ -45,7 +54,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ServerActiveRequestsOptional",
+        "AttrExtra": "ServerActiveRequestsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

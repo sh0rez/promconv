@@ -18,16 +18,23 @@ func NewNetIo() NetIo {
 	}, labels)}
 }
 
-func (m NetIo) With(extra NetIoOptional) prometheus.Observer {
+func (m NetIo) With(extra interface {
+	AttrFaasTrigger() AttrTrigger
+}) prometheus.Observer {
+	if extra == nil {
+		extra = NetIoExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.FaasTrigger),
+		string(extra.AttrFaasTrigger()),
 	)
 }
 
-type NetIoOptional struct {
+type NetIoExtra struct {
 	// Type of the trigger which caused this function invocation.
 	FaasTrigger AttrTrigger `otel:"faas.trigger"`
 }
+
+func (a NetIoExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NetIoOptional",
+        "AttrExtra": "NetIoExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

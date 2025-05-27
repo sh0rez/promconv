@@ -18,11 +18,15 @@ func NewThreadPoolThreadCount() ThreadPoolThreadCount {
 	}, labels)}
 }
 
-func (m ThreadPoolThreadCount) With(extra ThreadPoolThreadCountOptional) prometheus.Gauge {
+func (m ThreadPoolThreadCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ThreadPoolThreadCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ThreadPoolThreadCountOptional struct {
+type ThreadPoolThreadCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ThreadPoolThreadCountOptional",
+        "AttrExtra": "ThreadPoolThreadCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

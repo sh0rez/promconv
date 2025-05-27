@@ -22,15 +22,22 @@ func NewSdkProcessorLogProcessed() SdkProcessorLogProcessed {
 	}, labels)}
 }
 
-func (m SdkProcessorLogProcessed) With(extra SdkProcessorLogProcessedOptional) prometheus.Counter {
+func (m SdkProcessorLogProcessed) With(extra interface {
+	AttrErrorType() error.AttrType
+	AttrOtelComponentName() AttrComponentName
+	AttrOtelComponentType() AttrComponentType
+}) prometheus.Counter {
+	if extra == nil {
+		extra = SdkProcessorLogProcessedExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ErrorType),
-		string(extra.OtelComponentName),
-		string(extra.OtelComponentType),
+		string(extra.AttrErrorType()),
+		string(extra.AttrOtelComponentName()),
+		string(extra.AttrOtelComponentType()),
 	)
 }
 
-type SdkProcessorLogProcessedOptional struct {
+type SdkProcessorLogProcessedExtra struct {
 	// A low-cardinality description of the failure reason. SDK Batching Log Record Processors MUST use `queue_full` for log records dropped due to a full queue.
 	ErrorType error.AttrType `otel:"error.type"`
 	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
@@ -39,13 +46,21 @@ type SdkProcessorLogProcessedOptional struct {
 	OtelComponentType AttrComponentType `otel:"otel.component.type"`
 }
 
+func (a SdkProcessorLogProcessedExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a SdkProcessorLogProcessedExtra) AttrOtelComponentName() AttrComponentName {
+	return a.OtelComponentName
+}
+func (a SdkProcessorLogProcessedExtra) AttrOtelComponentType() AttrComponentType {
+	return a.OtelComponentType
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkProcessorLogProcessedOptional",
+        "AttrExtra": "SdkProcessorLogProcessedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

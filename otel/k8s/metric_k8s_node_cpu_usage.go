@@ -18,11 +18,15 @@ func NewNodeCpuUsage() NodeCpuUsage {
 	}, labels)}
 }
 
-func (m NodeCpuUsage) With(extra NodeCpuUsageOptional) prometheus.Gauge {
+func (m NodeCpuUsage) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = NodeCpuUsageExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type NodeCpuUsageOptional struct {
+type NodeCpuUsageExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeCpuUsageOptional",
+        "AttrExtra": "NodeCpuUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

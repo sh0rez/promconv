@@ -18,11 +18,15 @@ func NewEventloopUtilization() EventloopUtilization {
 	}, labels)}
 }
 
-func (m EventloopUtilization) With(extra EventloopUtilizationOptional) prometheus.Gauge {
+func (m EventloopUtilization) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = EventloopUtilizationExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type EventloopUtilizationOptional struct {
+type EventloopUtilizationExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopUtilizationOptional",
+        "AttrExtra": "EventloopUtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

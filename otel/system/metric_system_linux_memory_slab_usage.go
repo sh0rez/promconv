@@ -22,15 +22,24 @@ func NewLinuxMemorySlabUsage() LinuxMemorySlabUsage {
 	}, labels)}
 }
 
-func (m LinuxMemorySlabUsage) With(extra LinuxMemorySlabUsageOptional) prometheus.Gauge {
+func (m LinuxMemorySlabUsage) With(extra interface {
+	AttrLinuxMemorySlabState() linux.AttrMemorySlabState
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = LinuxMemorySlabUsageExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.LinuxMemorySlabState),
+		string(extra.AttrLinuxMemorySlabState()),
 	)
 }
 
-type LinuxMemorySlabUsageOptional struct {
+type LinuxMemorySlabUsageExtra struct {
 	// The Linux Slab memory state
 	LinuxMemorySlabState linux.AttrMemorySlabState `otel:"linux.memory.slab.state"`
+}
+
+func (a LinuxMemorySlabUsageExtra) AttrLinuxMemorySlabState() linux.AttrMemorySlabState {
+	return a.LinuxMemorySlabState
 }
 
 /*
@@ -39,7 +48,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "LinuxMemorySlabUsageOptional",
+        "AttrExtra": "LinuxMemorySlabUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

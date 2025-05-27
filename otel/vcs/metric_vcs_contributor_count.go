@@ -18,16 +18,23 @@ func NewContributorCount() ContributorCount {
 	}, labels)}
 }
 
-func (m ContributorCount) With(repositoryUrlFull AttrRepositoryUrlFull, extra ContributorCountOptional) prometheus.Gauge {
+func (m ContributorCount) With(repositoryUrlFull AttrRepositoryUrlFull, extra interface {
+	AttrVcsOwnerName() AttrOwnerName
+	AttrVcsRepositoryName() AttrRepositoryName
+	AttrVcsProviderName() AttrProviderName
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ContributorCountExtra{}
+	}
 	return m.WithLabelValues(
 		string(repositoryUrlFull),
-		string(extra.VcsOwnerName),
-		string(extra.VcsRepositoryName),
-		string(extra.VcsProviderName),
+		string(extra.AttrVcsOwnerName()),
+		string(extra.AttrVcsRepositoryName()),
+		string(extra.AttrVcsProviderName()),
 	)
 }
 
-type ContributorCountOptional struct {
+type ContributorCountExtra struct {
 	// The group owner within the version control system.
 	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
 	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
@@ -36,13 +43,17 @@ type ContributorCountOptional struct {
 	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
 }
 
+func (a ContributorCountExtra) AttrVcsOwnerName() AttrOwnerName           { return a.VcsOwnerName }
+func (a ContributorCountExtra) AttrVcsRepositoryName() AttrRepositoryName { return a.VcsRepositoryName }
+func (a ContributorCountExtra) AttrVcsProviderName() AttrProviderName     { return a.VcsProviderName }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ContributorCountOptional",
+        "AttrExtra": "ContributorCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

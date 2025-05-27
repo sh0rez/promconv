@@ -18,11 +18,15 @@ func NewStatefulsetCurrentPods() StatefulsetCurrentPods {
 	}, labels)}
 }
 
-func (m StatefulsetCurrentPods) With(extra StatefulsetCurrentPodsOptional) prometheus.Gauge {
+func (m StatefulsetCurrentPods) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = StatefulsetCurrentPodsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type StatefulsetCurrentPodsOptional struct {
+type StatefulsetCurrentPodsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "StatefulsetCurrentPodsOptional",
+        "AttrExtra": "StatefulsetCurrentPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

@@ -18,11 +18,15 @@ func NewJitCompilationTime() JitCompilationTime {
 	}, labels)}
 }
 
-func (m JitCompilationTime) With(extra JitCompilationTimeOptional) prometheus.Counter {
+func (m JitCompilationTime) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = JitCompilationTimeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type JitCompilationTimeOptional struct {
+type JitCompilationTimeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "JitCompilationTimeOptional",
+        "AttrExtra": "JitCompilationTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

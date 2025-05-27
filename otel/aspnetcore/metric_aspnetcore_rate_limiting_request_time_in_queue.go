@@ -18,16 +18,25 @@ func NewRateLimitingRequestTimeInQueue() RateLimitingRequestTimeInQueue {
 	}, labels)}
 }
 
-func (m RateLimitingRequestTimeInQueue) With(rateLimitingResult AttrRateLimitingResult, extra RateLimitingRequestTimeInQueueOptional) prometheus.Observer {
+func (m RateLimitingRequestTimeInQueue) With(rateLimitingResult AttrRateLimitingResult, extra interface {
+	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
+}) prometheus.Observer {
+	if extra == nil {
+		extra = RateLimitingRequestTimeInQueueExtra{}
+	}
 	return m.WithLabelValues(
 		string(rateLimitingResult),
-		string(extra.AspnetcoreRateLimitingPolicy),
+		string(extra.AttrAspnetcoreRateLimitingPolicy()),
 	)
 }
 
-type RateLimitingRequestTimeInQueueOptional struct {
+type RateLimitingRequestTimeInQueueExtra struct {
 	// Rate limiting policy name.
 	AspnetcoreRateLimitingPolicy AttrRateLimitingPolicy `otel:"aspnetcore.rate_limiting.policy"`
+}
+
+func (a RateLimitingRequestTimeInQueueExtra) AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy {
+	return a.AspnetcoreRateLimitingPolicy
 }
 
 /*
@@ -36,7 +45,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RateLimitingRequestTimeInQueueOptional",
+        "AttrExtra": "RateLimitingRequestTimeInQueueExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

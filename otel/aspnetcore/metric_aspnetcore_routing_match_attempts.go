@@ -22,20 +22,31 @@ func NewRoutingMatchAttempts() RoutingMatchAttempts {
 	}, labels)}
 }
 
-func (m RoutingMatchAttempts) With(routingMatchStatus AttrRoutingMatchStatus, extra RoutingMatchAttemptsOptional) prometheus.Counter {
+func (m RoutingMatchAttempts) With(routingMatchStatus AttrRoutingMatchStatus, extra interface {
+	AttrAspnetcoreRoutingIsFallback() AttrRoutingIsFallback
+	AttrHttpRoute() http.AttrRoute
+}) prometheus.Counter {
+	if extra == nil {
+		extra = RoutingMatchAttemptsExtra{}
+	}
 	return m.WithLabelValues(
 		string(routingMatchStatus),
-		string(extra.AspnetcoreRoutingIsFallback),
-		string(extra.HttpRoute),
+		string(extra.AttrAspnetcoreRoutingIsFallback()),
+		string(extra.AttrHttpRoute()),
 	)
 }
 
-type RoutingMatchAttemptsOptional struct {
+type RoutingMatchAttemptsExtra struct {
 	// A value that indicates whether the matched route is a fallback route.
 	AspnetcoreRoutingIsFallback AttrRoutingIsFallback `otel:"aspnetcore.routing.is_fallback"`
 	// The matched route, that is, the path template in the format used by the respective server framework.
 	HttpRoute http.AttrRoute `otel:"http.route"`
 }
+
+func (a RoutingMatchAttemptsExtra) AttrAspnetcoreRoutingIsFallback() AttrRoutingIsFallback {
+	return a.AspnetcoreRoutingIsFallback
+}
+func (a RoutingMatchAttemptsExtra) AttrHttpRoute() http.AttrRoute { return a.HttpRoute }
 
 /*
 State {
@@ -43,7 +54,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RoutingMatchAttemptsOptional",
+        "AttrExtra": "RoutingMatchAttemptsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

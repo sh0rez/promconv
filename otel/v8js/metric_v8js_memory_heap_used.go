@@ -18,13 +18,17 @@ func NewMemoryHeapUsed() MemoryHeapUsed {
 	}, labels)}
 }
 
-func (m MemoryHeapUsed) With(heapSpaceName AttrHeapSpaceName, extra MemoryHeapUsedOptional) prometheus.Gauge {
+func (m MemoryHeapUsed) With(heapSpaceName AttrHeapSpaceName, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryHeapUsedExtra{}
+	}
 	return m.WithLabelValues(
 		string(heapSpaceName),
 	)
 }
 
-type MemoryHeapUsedOptional struct {
+type MemoryHeapUsedExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryHeapUsedOptional",
+        "AttrExtra": "MemoryHeapUsedExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

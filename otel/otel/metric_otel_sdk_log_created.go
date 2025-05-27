@@ -18,11 +18,15 @@ func NewSdkLogCreated() SdkLogCreated {
 	}, labels)}
 }
 
-func (m SdkLogCreated) With(extra SdkLogCreatedOptional) prometheus.Counter {
+func (m SdkLogCreated) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = SdkLogCreatedExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type SdkLogCreatedOptional struct {
+type SdkLogCreatedExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkLogCreatedOptional",
+        "AttrExtra": "SdkLogCreatedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

@@ -604,7 +604,7 @@ func (AttrUserAgent) Recommended() {}
                 {
                     "brief": "Deprecated, use `http.response.header.content-length` instead.",
                     "deprecated": {
-                        "note": "hp.response.header.content-length",
+                        "note": "Replaced by `http.response.header.content-length`.",
                         "reason": "uncategorized",
                     },
                     "examples": 3495,

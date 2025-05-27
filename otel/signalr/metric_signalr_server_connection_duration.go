@@ -18,18 +18,31 @@ func NewServerConnectionDuration() ServerConnectionDuration {
 	}, labels)}
 }
 
-func (m ServerConnectionDuration) With(extra ServerConnectionDurationOptional) prometheus.Observer {
+func (m ServerConnectionDuration) With(extra interface {
+	AttrSignalrConnectionStatus() AttrConnectionStatus
+	AttrSignalrTransport() AttrTransport
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ServerConnectionDurationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SignalrConnectionStatus),
-		string(extra.SignalrTransport),
+		string(extra.AttrSignalrConnectionStatus()),
+		string(extra.AttrSignalrTransport()),
 	)
 }
 
-type ServerConnectionDurationOptional struct {
+type ServerConnectionDurationExtra struct {
 	// SignalR HTTP connection closure status.
 	SignalrConnectionStatus AttrConnectionStatus `otel:"signalr.connection.status"`
 	// [SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)
 	SignalrTransport AttrTransport `otel:"signalr.transport"`
+}
+
+func (a ServerConnectionDurationExtra) AttrSignalrConnectionStatus() AttrConnectionStatus {
+	return a.SignalrConnectionStatus
+}
+func (a ServerConnectionDurationExtra) AttrSignalrTransport() AttrTransport {
+	return a.SignalrTransport
 }
 
 /*
@@ -38,7 +51,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ServerConnectionDurationOptional",
+        "AttrExtra": "ServerConnectionDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

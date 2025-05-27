@@ -18,13 +18,17 @@ func NewClientConnectionsPendingRequests() ClientConnectionsPendingRequests {
 	}, labels)}
 }
 
-func (m ClientConnectionsPendingRequests) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra ClientConnectionsPendingRequestsOptional) prometheus.Gauge {
+func (m ClientConnectionsPendingRequests) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ClientConnectionsPendingRequestsExtra{}
+	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),
 	)
 }
 
-type ClientConnectionsPendingRequestsOptional struct {
+type ClientConnectionsPendingRequestsExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientConnectionsPendingRequestsOptional",
+        "AttrExtra": "ClientConnectionsPendingRequestsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

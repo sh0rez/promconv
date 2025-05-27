@@ -17,19 +17,28 @@ func NewPagingUtilization() PagingUtilization {
 	}, labels)}
 }
 
-func (m PagingUtilization) With(extra PagingUtilizationOptional) prometheus.Gauge {
+func (m PagingUtilization) With(extra interface {
+	AttrSystemDevice() AttrDevice
+	AttrSystemPagingState() AttrPagingState
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = PagingUtilizationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemDevice),
-		string(extra.SystemPagingState),
+		string(extra.AttrSystemDevice()),
+		string(extra.AttrSystemPagingState()),
 	)
 }
 
-type PagingUtilizationOptional struct {
+type PagingUtilizationExtra struct {
 	// Unique identifier for the device responsible for managing paging operations.
 	SystemDevice AttrDevice `otel:"system.device"`
 	// The memory paging state
 	SystemPagingState AttrPagingState `otel:"system.paging.state"`
 }
+
+func (a PagingUtilizationExtra) AttrSystemDevice() AttrDevice           { return a.SystemDevice }
+func (a PagingUtilizationExtra) AttrSystemPagingState() AttrPagingState { return a.SystemPagingState }
 
 /*
 State {
@@ -37,7 +46,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PagingUtilizationOptional",
+        "AttrExtra": "PagingUtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

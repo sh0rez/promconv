@@ -18,13 +18,17 @@ func NewClientConnectionsTimeouts() ClientConnectionsTimeouts {
 	}, labels)}
 }
 
-func (m ClientConnectionsTimeouts) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra ClientConnectionsTimeoutsOptional) prometheus.Counter {
+func (m ClientConnectionsTimeouts) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ClientConnectionsTimeoutsExtra{}
+	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),
 	)
 }
 
-type ClientConnectionsTimeoutsOptional struct {
+type ClientConnectionsTimeoutsExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientConnectionsTimeoutsOptional",
+        "AttrExtra": "ClientConnectionsTimeoutsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

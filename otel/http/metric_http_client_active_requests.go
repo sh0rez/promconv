@@ -23,17 +23,24 @@ func NewClientActiveRequests() ClientActiveRequests {
 	}, labels)}
 }
 
-func (m ClientActiveRequests) With(address server.AttrAddress, port server.AttrPort, extra ClientActiveRequestsOptional) prometheus.Gauge {
+func (m ClientActiveRequests) With(address server.AttrAddress, port server.AttrPort, extra interface {
+	AttrUrlTemplate() url.AttrTemplate
+	AttrHttpRequestMethod() AttrRequestMethod
+	AttrUrlScheme() url.AttrScheme
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ClientActiveRequestsExtra{}
+	}
 	return m.WithLabelValues(
 		string(address),
 		string(port),
-		string(extra.UrlTemplate),
-		string(extra.HttpRequestMethod),
-		string(extra.UrlScheme),
+		string(extra.AttrUrlTemplate()),
+		string(extra.AttrHttpRequestMethod()),
+		string(extra.AttrUrlScheme()),
 	)
 }
 
-type ClientActiveRequestsOptional struct {
+type ClientActiveRequestsExtra struct {
 	// The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).
 	UrlTemplate url.AttrTemplate `otel:"url.template"`
 	// HTTP request method.
@@ -42,13 +49,19 @@ type ClientActiveRequestsOptional struct {
 	UrlScheme url.AttrScheme `otel:"url.scheme"`
 }
 
+func (a ClientActiveRequestsExtra) AttrUrlTemplate() url.AttrTemplate { return a.UrlTemplate }
+func (a ClientActiveRequestsExtra) AttrHttpRequestMethod() AttrRequestMethod {
+	return a.HttpRequestMethod
+}
+func (a ClientActiveRequestsExtra) AttrUrlScheme() url.AttrScheme { return a.UrlScheme }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientActiveRequestsOptional",
+        "AttrExtra": "ClientActiveRequestsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -309,6 +322,17 @@ State {
                     },
                 },
                 {
+                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
+                    "examples": [
+                        "http",
+                        "https",
+                    ],
+                    "name": "url.scheme",
+                    "requirement_level": "opt_in",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "Port identifier of the [\"URI origin\"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to.\n",
                     "examples": [
                         80,
@@ -320,17 +344,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
-                    "examples": [
-                        "http",
-                        "https",
-                    ],
-                    "name": "url.scheme",
-                    "requirement_level": "opt_in",
-                    "stability": "stable",
-                    "type": "string",
                 },
                 {
                     "brief": "The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).\n",

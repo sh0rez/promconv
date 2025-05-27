@@ -17,7 +17,7 @@ import (
 {% set Name = ctx.metric_name[(ctx.root_namespace | length)+1:] %}
 
 {% set Type = Name | pascal_case %}
-{% set AttrExtra = Type + "Optional" %}
+{% set AttrExtra = Type + "Extra" %}
 
 {% set InstrMap = {
    "histogram": "Histogram",
@@ -51,8 +51,15 @@ func (m {{Type}}) With(
     {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
     {{name | camel_case | replace("type", "kind")}} {{type}}Attr{{name}},
 {%- endfor -%}
-extra {{AttrExtra-}}
-) prometheus.{{Instr | replace("Histogram", "Observer")}} {
+extra interface {
+{% for attr in attributes | not_required -%}
+    {%- set id = attr.name | split_id -%}
+    {%- set name = id[1:] | join(".") | pascal_case -%}
+    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
+    Attr{{ attr.name | pascal_case}}() {{type}}Attr{{name|pascal_case}}
+{% endfor -%}
+}) prometheus.{{Instr | replace("Histogram", "Observer")}} {
+    if extra == nil { extra = {{AttrExtra}}{} }
      return m.WithLabelValues(
         {% for attr in attributes | required -%}
             {%- set id = attr.name | split_id -%}
@@ -60,7 +67,7 @@ extra {{AttrExtra-}}
             string({{name | camel_case | replace("type", "kind")}}),
         {%  endfor -%}
         {% for attr in attributes | not_required -%}
-            string(extra.{{attr.name | pascal_case}}),
+            string(extra.Attr{{attr.name | pascal_case}}()),
         {% endfor %}
      )
 }
@@ -74,6 +81,13 @@ type {{AttrExtra}} struct {
     {{ attr.name | pascal_case}} {{type}}Attr{{name|pascal_case}} `otel:"{{attr.name}}"`
 {% endfor %}
 }
+
+{% for attr in attributes | not_required -%}
+    {%- set id = attr.name | split_id -%}
+    {%- set name = id[1:] | join(".") | pascal_case -%}
+    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
+    func (a {{AttrExtra}}) Attr{{ attr.name | pascal_case}}() {{type}}Attr{{name|pascal_case}} {return a.{{attr.name|pascal_case}}}
+{% endfor %}
 
 /*
 {{ debug() }}

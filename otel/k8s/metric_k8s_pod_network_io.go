@@ -22,18 +22,31 @@ func NewPodNetworkIo() PodNetworkIo {
 	}, labels)}
 }
 
-func (m PodNetworkIo) With(extra PodNetworkIoOptional) prometheus.Counter {
+func (m PodNetworkIo) With(extra interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) prometheus.Counter {
+	if extra == nil {
+		extra = PodNetworkIoExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkInterfaceName),
-		string(extra.NetworkIoDirection),
+		string(extra.AttrNetworkInterfaceName()),
+		string(extra.AttrNetworkIoDirection()),
 	)
 }
 
-type PodNetworkIoOptional struct {
+type PodNetworkIoExtra struct {
 	// The network interface name.
 	NetworkInterfaceName network.AttrInterfaceName `otel:"network.interface.name"`
 	// The network IO operation direction.
 	NetworkIoDirection network.AttrIoDirection `otel:"network.io.direction"`
+}
+
+func (a PodNetworkIoExtra) AttrNetworkInterfaceName() network.AttrInterfaceName {
+	return a.NetworkInterfaceName
+}
+func (a PodNetworkIoExtra) AttrNetworkIoDirection() network.AttrIoDirection {
+	return a.NetworkIoDirection
 }
 
 /*
@@ -42,7 +55,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PodNetworkIoOptional",
+        "AttrExtra": "PodNetworkIoExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

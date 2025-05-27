@@ -23,20 +23,30 @@ func NewClientSentMessages() ClientSentMessages {
 	}, labels)}
 }
 
-func (m ClientSentMessages) With(operationName AttrOperationName, system AttrSystem, extra ClientSentMessagesOptional) prometheus.Counter {
+func (m ClientSentMessages) With(operationName AttrOperationName, system AttrSystem, extra interface {
+	AttrErrorType() error.AttrType
+	AttrMessagingDestinationName() AttrDestinationName
+	AttrMessagingDestinationTemplate() AttrDestinationTemplate
+	AttrServerAddress() server.AttrAddress
+	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
+	AttrServerPort() server.AttrPort
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ClientSentMessagesExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
 		string(system),
-		string(extra.ErrorType),
-		string(extra.MessagingDestinationName),
-		string(extra.MessagingDestinationTemplate),
-		string(extra.ServerAddress),
-		string(extra.MessagingDestinationPartitionId),
-		string(extra.ServerPort),
+		string(extra.AttrErrorType()),
+		string(extra.AttrMessagingDestinationName()),
+		string(extra.AttrMessagingDestinationTemplate()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrMessagingDestinationPartitionId()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type ClientSentMessagesOptional struct {
+type ClientSentMessagesExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// The message destination name
@@ -51,13 +61,26 @@ type ClientSentMessagesOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a ClientSentMessagesExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a ClientSentMessagesExtra) AttrMessagingDestinationName() AttrDestinationName {
+	return a.MessagingDestinationName
+}
+func (a ClientSentMessagesExtra) AttrMessagingDestinationTemplate() AttrDestinationTemplate {
+	return a.MessagingDestinationTemplate
+}
+func (a ClientSentMessagesExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ClientSentMessagesExtra) AttrMessagingDestinationPartitionId() AttrDestinationPartitionId {
+	return a.MessagingDestinationPartitionId
+}
+func (a ClientSentMessagesExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientSentMessagesOptional",
+        "AttrExtra": "ClientSentMessagesExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -274,14 +297,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.\n",
-                    "examples": "1",
-                    "name": "messaging.destination.partition.id",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "Server port number.",
                     "examples": [
                         80,
@@ -293,6 +308,14 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": "int",
+                },
+                {
+                    "brief": "The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.\n",
+                    "examples": "1",
+                    "name": "messaging.destination.partition.id",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
                 {
                     "brief": "Describes a class of error the operation ended with.\n",

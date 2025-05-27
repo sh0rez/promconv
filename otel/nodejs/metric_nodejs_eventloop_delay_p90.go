@@ -18,11 +18,15 @@ func NewEventloopDelayP90() EventloopDelayP90 {
 	}, labels)}
 }
 
-func (m EventloopDelayP90) With(extra EventloopDelayP90Optional) prometheus.Gauge {
+func (m EventloopDelayP90) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = EventloopDelayP90Extra{}
+	}
 	return m.WithLabelValues()
 }
 
-type EventloopDelayP90Optional struct {
+type EventloopDelayP90Extra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopDelayP90Optional",
+        "AttrExtra": "EventloopDelayP90Extra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

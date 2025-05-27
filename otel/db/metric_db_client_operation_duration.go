@@ -24,25 +24,41 @@ func NewClientOperationDuration() ClientOperationDuration {
 	}, labels)}
 }
 
-func (m ClientOperationDuration) With(systemName AttrSystemName, extra ClientOperationDurationOptional) prometheus.Observer {
+func (m ClientOperationDuration) With(systemName AttrSystemName, extra interface {
+	AttrDbCollectionName() AttrCollectionName
+	AttrDbNamespace() AttrNamespace
+	AttrDbOperationName() AttrOperationName
+	AttrDbResponseStatusCode() AttrResponseStatusCode
+	AttrErrorType() error.AttrType
+	AttrServerPort() server.AttrPort
+	AttrDbQuerySummary() AttrQuerySummary
+	AttrDbStoredProcedureName() AttrStoredProcedureName
+	AttrNetworkPeerAddress() network.AttrPeerAddress
+	AttrNetworkPeerPort() network.AttrPeerPort
+	AttrServerAddress() server.AttrAddress
+	AttrDbQueryText() AttrQueryText
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientOperationDurationExtra{}
+	}
 	return m.WithLabelValues(
 		string(systemName),
-		string(extra.DbCollectionName),
-		string(extra.DbNamespace),
-		string(extra.DbOperationName),
-		string(extra.DbResponseStatusCode),
-		string(extra.ErrorType),
-		string(extra.ServerPort),
-		string(extra.DbQuerySummary),
-		string(extra.DbStoredProcedureName),
-		string(extra.NetworkPeerAddress),
-		string(extra.NetworkPeerPort),
-		string(extra.ServerAddress),
-		string(extra.DbQueryText),
+		string(extra.AttrDbCollectionName()),
+		string(extra.AttrDbNamespace()),
+		string(extra.AttrDbOperationName()),
+		string(extra.AttrDbResponseStatusCode()),
+		string(extra.AttrErrorType()),
+		string(extra.AttrServerPort()),
+		string(extra.AttrDbQuerySummary()),
+		string(extra.AttrDbStoredProcedureName()),
+		string(extra.AttrNetworkPeerAddress()),
+		string(extra.AttrNetworkPeerPort()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrDbQueryText()),
 	)
 }
 
-type ClientOperationDurationOptional struct {
+type ClientOperationDurationExtra struct {
 	// The name of a collection (table, container) within the database.
 	DbCollectionName AttrCollectionName `otel:"db.collection.name"`
 	// The name of the database, fully qualified within the server address and port.
@@ -69,13 +85,38 @@ type ClientOperationDurationOptional struct {
 	DbQueryText AttrQueryText `otel:"db.query.text"`
 }
 
+func (a ClientOperationDurationExtra) AttrDbCollectionName() AttrCollectionName {
+	return a.DbCollectionName
+}
+func (a ClientOperationDurationExtra) AttrDbNamespace() AttrNamespace { return a.DbNamespace }
+func (a ClientOperationDurationExtra) AttrDbOperationName() AttrOperationName {
+	return a.DbOperationName
+}
+func (a ClientOperationDurationExtra) AttrDbResponseStatusCode() AttrResponseStatusCode {
+	return a.DbResponseStatusCode
+}
+func (a ClientOperationDurationExtra) AttrErrorType() error.AttrType        { return a.ErrorType }
+func (a ClientOperationDurationExtra) AttrServerPort() server.AttrPort      { return a.ServerPort }
+func (a ClientOperationDurationExtra) AttrDbQuerySummary() AttrQuerySummary { return a.DbQuerySummary }
+func (a ClientOperationDurationExtra) AttrDbStoredProcedureName() AttrStoredProcedureName {
+	return a.DbStoredProcedureName
+}
+func (a ClientOperationDurationExtra) AttrNetworkPeerAddress() network.AttrPeerAddress {
+	return a.NetworkPeerAddress
+}
+func (a ClientOperationDurationExtra) AttrNetworkPeerPort() network.AttrPeerPort {
+	return a.NetworkPeerPort
+}
+func (a ClientOperationDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ClientOperationDurationExtra) AttrDbQueryText() AttrQueryText        { return a.DbQueryText }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientOperationDurationOptional",
+        "AttrExtra": "ClientOperationDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -611,32 +652,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Peer address of the database node where the operation was performed.",
-                    "examples": [
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "network.peer.address",
-                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
-                    "requirement_level": {
-                        "recommended": "If applicable for this database system.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Peer port number of the network connection.",
-                    "examples": [
-                        65123,
-                    ],
-                    "name": "network.peer.port",
-                    "requirement_level": {
-                        "recommended": "If and only if `network.peer.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "Name of the database host.\n",
                     "examples": [
                         "example.com",
@@ -709,6 +724,33 @@ State {
                     },
                 },
                 {
+                    "brief": "The name of a stored procedure within the database.",
+                    "examples": [
+                        "GetCustomer",
+                    ],
+                    "name": "db.stored_procedure.name",
+                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nFor batch operations, if the individual operations are known to have the same\nstored procedure name then that stored procedure name SHOULD be used.\n",
+                    "requirement_level": {
+                        "recommended": "If operation applies to a specific stored procedure.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Peer address of the database node where the operation was performed.",
+                    "examples": [
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "network.peer.address",
+                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
+                    "requirement_level": {
+                        "recommended": "If applicable for this database system.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "Low cardinality summary of a database query.\n",
                     "examples": [
                         "SELECT wuser_table",
@@ -748,19 +790,6 @@ State {
                     "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nThe operation name SHOULD NOT be extracted from `db.query.text`,\nwhen the database system supports query text with multiple operations\nin non-batch operations.\n\nIf spaces can occur in the operation name, multiple consecutive spaces\nSHOULD be normalized to a single space.\n\nFor batch operations, if the individual operations are known to have the same operation name\nthen that operation name SHOULD be used prepended by `BATCH `,\notherwise `db.operation.name` SHOULD be `BATCH` or some other database\nsystem specific term if more applicable.\n",
                     "requirement_level": {
                         "conditionally_required": "If readily available and if there is a single operation name that describes the database call.\n",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The name of a stored procedure within the database.",
-                    "examples": [
-                        "GetCustomer",
-                    ],
-                    "name": "db.stored_procedure.name",
-                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nFor batch operations, if the individual operations are known to have the same\nstored procedure name then that stored procedure name SHOULD be used.\n",
-                    "requirement_level": {
-                        "recommended": "If operation applies to a specific stored procedure.",
                     },
                     "stability": "stable",
                     "type": "string",
@@ -1130,6 +1159,18 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Peer port number of the network connection.",
+                    "examples": [
+                        65123,
+                    ],
+                    "name": "network.peer.port",
+                    "requirement_level": {
+                        "recommended": "If and only if `network.peer.address` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "Duration of database client operations.",

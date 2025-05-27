@@ -18,11 +18,15 @@ func NewReplicasetAvailablePods() ReplicasetAvailablePods {
 	}, labels)}
 }
 
-func (m ReplicasetAvailablePods) With(extra ReplicasetAvailablePodsOptional) prometheus.Gauge {
+func (m ReplicasetAvailablePods) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ReplicasetAvailablePodsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ReplicasetAvailablePodsOptional struct {
+type ReplicasetAvailablePodsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ReplicasetAvailablePodsOptional",
+        "AttrExtra": "ReplicasetAvailablePodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

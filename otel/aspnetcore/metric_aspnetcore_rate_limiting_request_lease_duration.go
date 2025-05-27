@@ -18,15 +18,24 @@ func NewRateLimitingRequestLeaseDuration() RateLimitingRequestLeaseDuration {
 	}, labels)}
 }
 
-func (m RateLimitingRequestLeaseDuration) With(extra RateLimitingRequestLeaseDurationOptional) prometheus.Observer {
+func (m RateLimitingRequestLeaseDuration) With(extra interface {
+	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
+}) prometheus.Observer {
+	if extra == nil {
+		extra = RateLimitingRequestLeaseDurationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.AspnetcoreRateLimitingPolicy),
+		string(extra.AttrAspnetcoreRateLimitingPolicy()),
 	)
 }
 
-type RateLimitingRequestLeaseDurationOptional struct {
+type RateLimitingRequestLeaseDurationExtra struct {
 	// Rate limiting policy name.
 	AspnetcoreRateLimitingPolicy AttrRateLimitingPolicy `otel:"aspnetcore.rate_limiting.policy"`
+}
+
+func (a RateLimitingRequestLeaseDurationExtra) AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy {
+	return a.AspnetcoreRateLimitingPolicy
 }
 
 /*
@@ -35,7 +44,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RateLimitingRequestLeaseDurationOptional",
+        "AttrExtra": "RateLimitingRequestLeaseDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

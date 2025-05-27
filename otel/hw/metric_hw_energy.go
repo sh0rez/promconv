@@ -18,21 +18,30 @@ func NewEnergy() Energy {
 	}, labels)}
 }
 
-func (m Energy) With(id AttrId, kind AttrType, extra EnergyOptional) prometheus.Counter {
+func (m Energy) With(id AttrId, kind AttrType, extra interface {
+	AttrHwName() AttrName
+	AttrHwParent() AttrParent
+}) prometheus.Counter {
+	if extra == nil {
+		extra = EnergyExtra{}
+	}
 	return m.WithLabelValues(
 		string(id),
 		string(kind),
-		string(extra.HwName),
-		string(extra.HwParent),
+		string(extra.AttrHwName()),
+		string(extra.AttrHwParent()),
 	)
 }
 
-type EnergyOptional struct {
+type EnergyExtra struct {
 	// An easily-recognizable name for the hardware component
 	HwName AttrName `otel:"hw.name"`
 	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
 	HwParent AttrParent `otel:"hw.parent"`
 }
+
+func (a EnergyExtra) AttrHwName() AttrName     { return a.HwName }
+func (a EnergyExtra) AttrHwParent() AttrParent { return a.HwParent }
 
 /*
 State {
@@ -40,7 +49,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EnergyOptional",
+        "AttrExtra": "EnergyExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

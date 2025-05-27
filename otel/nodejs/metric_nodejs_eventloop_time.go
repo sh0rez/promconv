@@ -18,13 +18,17 @@ func NewEventloopTime() EventloopTime {
 	}, labels)}
 }
 
-func (m EventloopTime) With(eventloopState AttrEventloopState, extra EventloopTimeOptional) prometheus.Counter {
+func (m EventloopTime) With(eventloopState AttrEventloopState, extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = EventloopTimeExtra{}
+	}
 	return m.WithLabelValues(
 		string(eventloopState),
 	)
 }
 
-type EventloopTimeOptional struct {
+type EventloopTimeExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopTimeOptional",
+        "AttrExtra": "EventloopTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

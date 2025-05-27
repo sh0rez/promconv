@@ -23,16 +23,23 @@ func NewPublishMessages() PublishMessages {
 	}, labels)}
 }
 
-func (m PublishMessages) With(operationName AttrOperationName, extra PublishMessagesOptional) prometheus.Counter {
+func (m PublishMessages) With(operationName AttrOperationName, extra interface {
+	AttrErrorType() error.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Counter {
+	if extra == nil {
+		extra = PublishMessagesExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
-		string(extra.ErrorType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrErrorType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type PublishMessagesOptional struct {
+type PublishMessagesExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
@@ -41,13 +48,17 @@ type PublishMessagesOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a PublishMessagesExtra) AttrErrorType() error.AttrType         { return a.ErrorType }
+func (a PublishMessagesExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a PublishMessagesExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PublishMessagesOptional",
+        "AttrExtra": "PublishMessagesExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

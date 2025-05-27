@@ -23,19 +23,28 @@ func NewDiskIo() DiskIo {
 	}, labels)}
 }
 
-func (m DiskIo) With(extra DiskIoOptional) prometheus.Counter {
+func (m DiskIo) With(extra interface {
+	AttrDiskIoDirection() disk.AttrIoDirection
+	AttrSystemDevice() system.AttrDevice
+}) prometheus.Counter {
+	if extra == nil {
+		extra = DiskIoExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.DiskIoDirection),
-		string(extra.SystemDevice),
+		string(extra.AttrDiskIoDirection()),
+		string(extra.AttrSystemDevice()),
 	)
 }
 
-type DiskIoOptional struct {
+type DiskIoExtra struct {
 	// The disk IO operation direction.
 	DiskIoDirection disk.AttrIoDirection `otel:"disk.io.direction"`
 	// The device identifier
 	SystemDevice system.AttrDevice `otel:"system.device"`
 }
+
+func (a DiskIoExtra) AttrDiskIoDirection() disk.AttrIoDirection { return a.DiskIoDirection }
+func (a DiskIoExtra) AttrSystemDevice() system.AttrDevice       { return a.SystemDevice }
 
 /*
 State {
@@ -43,7 +52,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DiskIoOptional",
+        "AttrExtra": "DiskIoExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

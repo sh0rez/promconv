@@ -18,18 +18,25 @@ func NewRefTime() RefTime {
 	}, labels)}
 }
 
-func (m RefTime) With(refHeadName AttrRefHeadName, refHeadType AttrRefHeadType, repositoryUrlFull AttrRepositoryUrlFull, extra RefTimeOptional) prometheus.Gauge {
+func (m RefTime) With(refHeadName AttrRefHeadName, refHeadType AttrRefHeadType, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
+	AttrVcsOwnerName() AttrOwnerName
+	AttrVcsRepositoryName() AttrRepositoryName
+	AttrVcsProviderName() AttrProviderName
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = RefTimeExtra{}
+	}
 	return m.WithLabelValues(
 		string(refHeadName),
 		string(refHeadType),
 		string(repositoryUrlFull),
-		string(extra.VcsOwnerName),
-		string(extra.VcsRepositoryName),
-		string(extra.VcsProviderName),
+		string(extra.AttrVcsOwnerName()),
+		string(extra.AttrVcsRepositoryName()),
+		string(extra.AttrVcsProviderName()),
 	)
 }
 
-type RefTimeOptional struct {
+type RefTimeExtra struct {
 	// The group owner within the version control system.
 	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
 	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
@@ -38,13 +45,17 @@ type RefTimeOptional struct {
 	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
 }
 
+func (a RefTimeExtra) AttrVcsOwnerName() AttrOwnerName           { return a.VcsOwnerName }
+func (a RefTimeExtra) AttrVcsRepositoryName() AttrRepositoryName { return a.VcsRepositoryName }
+func (a RefTimeExtra) AttrVcsProviderName() AttrProviderName     { return a.VcsProviderName }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RefTimeOptional",
+        "AttrExtra": "RefTimeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

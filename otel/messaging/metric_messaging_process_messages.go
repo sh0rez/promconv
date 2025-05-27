@@ -23,16 +23,23 @@ func NewProcessMessages() ProcessMessages {
 	}, labels)}
 }
 
-func (m ProcessMessages) With(operationName AttrOperationName, extra ProcessMessagesOptional) prometheus.Counter {
+func (m ProcessMessages) With(operationName AttrOperationName, extra interface {
+	AttrErrorType() error.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ProcessMessagesExtra{}
+	}
 	return m.WithLabelValues(
 		string(operationName),
-		string(extra.ErrorType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrErrorType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type ProcessMessagesOptional struct {
+type ProcessMessagesExtra struct {
 	// Describes a class of error the operation ended with.
 	ErrorType error.AttrType `otel:"error.type"`
 	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
@@ -41,13 +48,17 @@ type ProcessMessagesOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a ProcessMessagesExtra) AttrErrorType() error.AttrType         { return a.ErrorType }
+func (a ProcessMessagesExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ProcessMessagesExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessMessagesOptional",
+        "AttrExtra": "ProcessMessagesExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

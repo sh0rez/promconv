@@ -18,16 +18,24 @@ func NewFilesystemLimit() FilesystemLimit {
 	}, labels)}
 }
 
-func (m FilesystemLimit) With(extra FilesystemLimitOptional) prometheus.Gauge {
+func (m FilesystemLimit) With(extra interface {
+	AttrSystemDevice() AttrDevice
+	AttrSystemFilesystemMode() AttrFilesystemMode
+	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
+	AttrSystemFilesystemType() AttrFilesystemType
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = FilesystemLimitExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemDevice),
-		string(extra.SystemFilesystemMode),
-		string(extra.SystemFilesystemMountpoint),
-		string(extra.SystemFilesystemType),
+		string(extra.AttrSystemDevice()),
+		string(extra.AttrSystemFilesystemMode()),
+		string(extra.AttrSystemFilesystemMountpoint()),
+		string(extra.AttrSystemFilesystemType()),
 	)
 }
 
-type FilesystemLimitOptional struct {
+type FilesystemLimitExtra struct {
 	// Identifier for the device where the filesystem resides.
 	SystemDevice AttrDevice `otel:"system.device"`
 	// The filesystem mode
@@ -38,13 +46,24 @@ type FilesystemLimitOptional struct {
 	SystemFilesystemType AttrFilesystemType `otel:"system.filesystem.type"`
 }
 
+func (a FilesystemLimitExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
+func (a FilesystemLimitExtra) AttrSystemFilesystemMode() AttrFilesystemMode {
+	return a.SystemFilesystemMode
+}
+func (a FilesystemLimitExtra) AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint {
+	return a.SystemFilesystemMountpoint
+}
+func (a FilesystemLimitExtra) AttrSystemFilesystemType() AttrFilesystemType {
+	return a.SystemFilesystemType
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "FilesystemLimitOptional",
+        "AttrExtra": "FilesystemLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

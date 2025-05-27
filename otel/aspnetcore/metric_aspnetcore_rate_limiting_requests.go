@@ -18,16 +18,25 @@ func NewRateLimitingRequests() RateLimitingRequests {
 	}, labels)}
 }
 
-func (m RateLimitingRequests) With(rateLimitingResult AttrRateLimitingResult, extra RateLimitingRequestsOptional) prometheus.Counter {
+func (m RateLimitingRequests) With(rateLimitingResult AttrRateLimitingResult, extra interface {
+	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
+}) prometheus.Counter {
+	if extra == nil {
+		extra = RateLimitingRequestsExtra{}
+	}
 	return m.WithLabelValues(
 		string(rateLimitingResult),
-		string(extra.AspnetcoreRateLimitingPolicy),
+		string(extra.AttrAspnetcoreRateLimitingPolicy()),
 	)
 }
 
-type RateLimitingRequestsOptional struct {
+type RateLimitingRequestsExtra struct {
 	// Rate limiting policy name.
 	AspnetcoreRateLimitingPolicy AttrRateLimitingPolicy `otel:"aspnetcore.rate_limiting.policy"`
+}
+
+func (a RateLimitingRequestsExtra) AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy {
+	return a.AspnetcoreRateLimitingPolicy
 }
 
 /*
@@ -36,7 +45,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RateLimitingRequestsOptional",
+        "AttrExtra": "RateLimitingRequestsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

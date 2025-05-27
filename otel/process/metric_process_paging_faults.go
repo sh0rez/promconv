@@ -18,15 +18,24 @@ func NewPagingFaults() PagingFaults {
 	}, labels)}
 }
 
-func (m PagingFaults) With(extra PagingFaultsOptional) prometheus.Counter {
+func (m PagingFaults) With(extra interface {
+	AttrProcessPagingFaultType() AttrPagingFaultType
+}) prometheus.Counter {
+	if extra == nil {
+		extra = PagingFaultsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.ProcessPagingFaultType),
+		string(extra.AttrProcessPagingFaultType()),
 	)
 }
 
-type PagingFaultsOptional struct {
+type PagingFaultsExtra struct {
 	// The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.
 	ProcessPagingFaultType AttrPagingFaultType `otel:"process.paging.fault_type"`
+}
+
+func (a PagingFaultsExtra) AttrProcessPagingFaultType() AttrPagingFaultType {
+	return a.ProcessPagingFaultType
 }
 
 /*
@@ -35,7 +44,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PagingFaultsOptional",
+        "AttrExtra": "PagingFaultsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

@@ -18,18 +18,28 @@ func NewClientCosmosdbOperationRequestCharge() ClientCosmosdbOperationRequestCha
 	}, labels)}
 }
 
-func (m ClientCosmosdbOperationRequestCharge) With(extra ClientCosmosdbOperationRequestChargeOptional) prometheus.Observer {
+func (m ClientCosmosdbOperationRequestCharge) With(extra interface {
+	AttrDbCollectionName() AttrCollectionName
+	AttrDbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
+	AttrDbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode
+	AttrDbNamespace() AttrNamespace
+	AttrDbOperationName() AttrOperationName
+	AttrDbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientCosmosdbOperationRequestChargeExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.DbCollectionName),
-		string(extra.DbCosmosdbConsistencyLevel),
-		string(extra.DbCosmosdbSubStatusCode),
-		string(extra.DbNamespace),
-		string(extra.DbOperationName),
-		string(extra.DbCosmosdbRegionsContacted),
+		string(extra.AttrDbCollectionName()),
+		string(extra.AttrDbCosmosdbConsistencyLevel()),
+		string(extra.AttrDbCosmosdbSubStatusCode()),
+		string(extra.AttrDbNamespace()),
+		string(extra.AttrDbOperationName()),
+		string(extra.AttrDbCosmosdbRegionsContacted()),
 	)
 }
 
-type ClientCosmosdbOperationRequestChargeOptional struct {
+type ClientCosmosdbOperationRequestChargeExtra struct {
 	// Cosmos DB container name.
 	DbCollectionName AttrCollectionName `otel:"db.collection.name"`
 	// Deprecated, use `cosmosdb.consistency.level` instead.
@@ -44,13 +54,32 @@ type ClientCosmosdbOperationRequestChargeOptional struct {
 	DbCosmosdbRegionsContacted AttrCosmosdbRegionsContacted `otel:"db.cosmosdb.regions_contacted"`
 }
 
+func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbCollectionName() AttrCollectionName {
+	return a.DbCollectionName
+}
+func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel {
+	return a.DbCosmosdbConsistencyLevel
+}
+func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode {
+	return a.DbCosmosdbSubStatusCode
+}
+func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbNamespace() AttrNamespace {
+	return a.DbNamespace
+}
+func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbOperationName() AttrOperationName {
+	return a.DbOperationName
+}
+func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted {
+	return a.DbCosmosdbRegionsContacted
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientCosmosdbOperationRequestChargeOptional",
+        "AttrExtra": "ClientCosmosdbOperationRequestChargeExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -211,6 +240,21 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "The name of the operation or command being executed.\n",
+                    "examples": [
+                        "findAndModify",
+                        "HMSET",
+                        "SELECT",
+                    ],
+                    "name": "db.operation.name",
+                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nThe operation name SHOULD NOT be extracted from `db.query.text`,\nwhen the database system supports query text with multiple operations\nin non-batch operations.\n\nIf spaces can occur in the operation name, multiple consecutive spaces\nSHOULD be normalized to a single space.\n\nFor batch operations, if the individual operations are known to have the same operation name\nthen that operation name SHOULD be used prepended by `BATCH `,\notherwise `db.operation.name` SHOULD be `BATCH` or some other database\nsystem specific term if more applicable.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If readily available and if there is a single operation name that describes the database call. The operation name MAY be parsed from the query text, in which case it SHOULD be the single operation name found in the query.\n",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "Cosmos DB container name.",
                     "examples": [
                         "public.users",
@@ -233,21 +277,6 @@ State {
                     "name": "db.namespace",
                     "requirement_level": {
                         "conditionally_required": "If available.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The name of the operation or command being executed.\n",
-                    "examples": [
-                        "findAndModify",
-                        "HMSET",
-                        "SELECT",
-                    ],
-                    "name": "db.operation.name",
-                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nThe operation name SHOULD NOT be extracted from `db.query.text`,\nwhen the database system supports query text with multiple operations\nin non-batch operations.\n\nIf spaces can occur in the operation name, multiple consecutive spaces\nSHOULD be normalized to a single space.\n\nFor batch operations, if the individual operations are known to have the same operation name\nthen that operation name SHOULD be used prepended by `BATCH `,\notherwise `db.operation.name` SHOULD be `BATCH` or some other database\nsystem specific term if more applicable.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If readily available and if there is a single operation name that describes the database call. The operation name MAY be parsed from the query text, in which case it SHOULD be the single operation name found in the query.\n",
                     },
                     "stability": "stable",
                     "type": "string",

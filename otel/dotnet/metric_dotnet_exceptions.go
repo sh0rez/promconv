@@ -22,13 +22,17 @@ func NewExceptions() Exceptions {
 	}, labels)}
 }
 
-func (m Exceptions) With(kind error.AttrType, extra ExceptionsOptional) prometheus.Counter {
+func (m Exceptions) With(kind error.AttrType, extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ExceptionsExtra{}
+	}
 	return m.WithLabelValues(
 		string(kind),
 	)
 }
 
-type ExceptionsOptional struct {
+type ExceptionsExtra struct {
 }
 
 /*
@@ -37,7 +41,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ExceptionsOptional",
+        "AttrExtra": "ExceptionsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

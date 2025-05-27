@@ -18,11 +18,15 @@ func NewJitCompiledIlSize() JitCompiledIlSize {
 	}, labels)}
 }
 
-func (m JitCompiledIlSize) With(extra JitCompiledIlSizeOptional) prometheus.Counter {
+func (m JitCompiledIlSize) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = JitCompiledIlSizeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type JitCompiledIlSizeOptional struct {
+type JitCompiledIlSizeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "JitCompiledIlSizeOptional",
+        "AttrExtra": "JitCompiledIlSizeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

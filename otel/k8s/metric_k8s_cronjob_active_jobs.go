@@ -18,11 +18,15 @@ func NewCronjobActiveJobs() CronjobActiveJobs {
 	}, labels)}
 }
 
-func (m CronjobActiveJobs) With(extra CronjobActiveJobsOptional) prometheus.Gauge {
+func (m CronjobActiveJobs) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = CronjobActiveJobsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type CronjobActiveJobsOptional struct {
+type CronjobActiveJobsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CronjobActiveJobsOptional",
+        "AttrExtra": "CronjobActiveJobsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

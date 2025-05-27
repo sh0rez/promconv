@@ -18,19 +18,28 @@ func NewMemoryLimit() MemoryLimit {
 	}, labels)}
 }
 
-func (m MemoryLimit) With(extra MemoryLimitOptional) prometheus.Gauge {
+func (m MemoryLimit) With(extra interface {
+	AttrJvmMemoryPoolName() AttrMemoryPoolName
+	AttrJvmMemoryType() AttrMemoryType
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryLimitExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.JvmMemoryPoolName),
-		string(extra.JvmMemoryType),
+		string(extra.AttrJvmMemoryPoolName()),
+		string(extra.AttrJvmMemoryType()),
 	)
 }
 
-type MemoryLimitOptional struct {
+type MemoryLimitExtra struct {
 	// Name of the memory pool.
 	JvmMemoryPoolName AttrMemoryPoolName `otel:"jvm.memory.pool.name"`
 	// The type of memory.
 	JvmMemoryType AttrMemoryType `otel:"jvm.memory.type"`
 }
+
+func (a MemoryLimitExtra) AttrJvmMemoryPoolName() AttrMemoryPoolName { return a.JvmMemoryPoolName }
+func (a MemoryLimitExtra) AttrJvmMemoryType() AttrMemoryType         { return a.JvmMemoryType }
 
 /*
 State {
@@ -38,7 +47,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryLimitOptional",
+        "AttrExtra": "MemoryLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

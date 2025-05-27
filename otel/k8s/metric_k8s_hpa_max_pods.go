@@ -18,11 +18,15 @@ func NewHpaMaxPods() HpaMaxPods {
 	}, labels)}
 }
 
-func (m HpaMaxPods) With(extra HpaMaxPodsOptional) prometheus.Gauge {
+func (m HpaMaxPods) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = HpaMaxPodsExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type HpaMaxPodsOptional struct {
+type HpaMaxPodsExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "HpaMaxPodsOptional",
+        "AttrExtra": "HpaMaxPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

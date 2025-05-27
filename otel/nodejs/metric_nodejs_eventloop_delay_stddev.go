@@ -18,11 +18,15 @@ func NewEventloopDelayStddev() EventloopDelayStddev {
 	}, labels)}
 }
 
-func (m EventloopDelayStddev) With(extra EventloopDelayStddevOptional) prometheus.Gauge {
+func (m EventloopDelayStddev) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = EventloopDelayStddevExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type EventloopDelayStddevOptional struct {
+type EventloopDelayStddevExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopDelayStddevOptional",
+        "AttrExtra": "EventloopDelayStddevExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

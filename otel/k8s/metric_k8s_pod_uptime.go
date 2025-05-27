@@ -18,11 +18,15 @@ func NewPodUptime() PodUptime {
 	}, labels)}
 }
 
-func (m PodUptime) With(extra PodUptimeOptional) prometheus.Gauge {
+func (m PodUptime) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = PodUptimeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type PodUptimeOptional struct {
+type PodUptimeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PodUptimeOptional",
+        "AttrExtra": "PodUptimeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

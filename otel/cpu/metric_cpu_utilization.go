@@ -18,19 +18,28 @@ func NewUtilization() Utilization {
 	}, labels)}
 }
 
-func (m Utilization) With(extra UtilizationOptional) prometheus.Gauge {
+func (m Utilization) With(extra interface {
+	AttrCpuLogicalNumber() AttrLogicalNumber
+	AttrCpuMode() AttrMode
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = UtilizationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.CpuLogicalNumber),
-		string(extra.CpuMode),
+		string(extra.AttrCpuLogicalNumber()),
+		string(extra.AttrCpuMode()),
 	)
 }
 
-type UtilizationOptional struct {
+type UtilizationExtra struct {
 	// The logical CPU number [0..n-1]
 	CpuLogicalNumber AttrLogicalNumber `otel:"cpu.logical_number"`
 	// The mode of the CPU
 	CpuMode AttrMode `otel:"cpu.mode"`
 }
+
+func (a UtilizationExtra) AttrCpuLogicalNumber() AttrLogicalNumber { return a.CpuLogicalNumber }
+func (a UtilizationExtra) AttrCpuMode() AttrMode                   { return a.CpuMode }
 
 /*
 State {
@@ -38,7 +47,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "UtilizationOptional",
+        "AttrExtra": "UtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

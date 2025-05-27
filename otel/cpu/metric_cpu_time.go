@@ -18,19 +18,28 @@ func NewTime() Time {
 	}, labels)}
 }
 
-func (m Time) With(extra TimeOptional) prometheus.Counter {
+func (m Time) With(extra interface {
+	AttrCpuLogicalNumber() AttrLogicalNumber
+	AttrCpuMode() AttrMode
+}) prometheus.Counter {
+	if extra == nil {
+		extra = TimeExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.CpuLogicalNumber),
-		string(extra.CpuMode),
+		string(extra.AttrCpuLogicalNumber()),
+		string(extra.AttrCpuMode()),
 	)
 }
 
-type TimeOptional struct {
+type TimeExtra struct {
 	// The logical CPU number [0..n-1]
 	CpuLogicalNumber AttrLogicalNumber `otel:"cpu.logical_number"`
 	// The mode of the CPU
 	CpuMode AttrMode `otel:"cpu.mode"`
 }
+
+func (a TimeExtra) AttrCpuLogicalNumber() AttrLogicalNumber { return a.CpuLogicalNumber }
+func (a TimeExtra) AttrCpuMode() AttrMode                   { return a.CpuMode }
 
 /*
 State {
@@ -38,7 +47,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "TimeOptional",
+        "AttrExtra": "TimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

@@ -18,11 +18,15 @@ func NewMemoryUsage() MemoryUsage {
 	}, labels)}
 }
 
-func (m MemoryUsage) With(extra MemoryUsageOptional) prometheus.Counter {
+func (m MemoryUsage) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = MemoryUsageExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type MemoryUsageOptional struct {
+type MemoryUsageExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryUsageOptional",
+        "AttrExtra": "MemoryUsageExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

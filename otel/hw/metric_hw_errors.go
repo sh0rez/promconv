@@ -22,17 +22,24 @@ func NewErrors() Errors {
 	}, labels)}
 }
 
-func (m Errors) With(id AttrId, kind AttrType, extra ErrorsOptional) prometheus.Counter {
+func (m Errors) With(id AttrId, kind AttrType, extra interface {
+	AttrErrorType() error.AttrType
+	AttrHwName() AttrName
+	AttrHwParent() AttrParent
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ErrorsExtra{}
+	}
 	return m.WithLabelValues(
 		string(id),
 		string(kind),
-		string(extra.ErrorType),
-		string(extra.HwName),
-		string(extra.HwParent),
+		string(extra.AttrErrorType()),
+		string(extra.AttrHwName()),
+		string(extra.AttrHwParent()),
 	)
 }
 
-type ErrorsOptional struct {
+type ErrorsExtra struct {
 	// The type of error encountered by the component
 	ErrorType error.AttrType `otel:"error.type"`
 	// An easily-recognizable name for the hardware component
@@ -41,13 +48,17 @@ type ErrorsOptional struct {
 	HwParent AttrParent `otel:"hw.parent"`
 }
 
+func (a ErrorsExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a ErrorsExtra) AttrHwName() AttrName          { return a.HwName }
+func (a ErrorsExtra) AttrHwParent() AttrParent      { return a.HwParent }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ErrorsOptional",
+        "AttrExtra": "ErrorsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

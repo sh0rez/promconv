@@ -18,11 +18,15 @@ func NewNodeUptime() NodeUptime {
 	}, labels)}
 }
 
-func (m NodeUptime) With(extra NodeUptimeOptional) prometheus.Gauge {
+func (m NodeUptime) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = NodeUptimeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type NodeUptimeOptional struct {
+type NodeUptimeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeUptimeOptional",
+        "AttrExtra": "NodeUptimeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

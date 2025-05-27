@@ -18,15 +18,24 @@ func NewBufferMemoryLimit() BufferMemoryLimit {
 	}, labels)}
 }
 
-func (m BufferMemoryLimit) With(extra BufferMemoryLimitOptional) prometheus.Gauge {
+func (m BufferMemoryLimit) With(extra interface {
+	AttrJvmBufferPoolName() AttrBufferPoolName
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = BufferMemoryLimitExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.JvmBufferPoolName),
+		string(extra.AttrJvmBufferPoolName()),
 	)
 }
 
-type BufferMemoryLimitOptional struct {
+type BufferMemoryLimitExtra struct {
 	// Name of the buffer pool.
 	JvmBufferPoolName AttrBufferPoolName `otel:"jvm.buffer.pool.name"`
+}
+
+func (a BufferMemoryLimitExtra) AttrJvmBufferPoolName() AttrBufferPoolName {
+	return a.JvmBufferPoolName
 }
 
 /*
@@ -35,7 +44,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "BufferMemoryLimitOptional",
+        "AttrExtra": "BufferMemoryLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

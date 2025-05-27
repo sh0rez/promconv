@@ -23,16 +23,24 @@ func NewUpgradedConnections() UpgradedConnections {
 	}, labels)}
 }
 
-func (m UpgradedConnections) With(extra UpgradedConnectionsOptional) prometheus.Gauge {
+func (m UpgradedConnections) With(extra interface {
+	AttrNetworkTransport() network.AttrTransport
+	AttrNetworkType() network.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = UpgradedConnectionsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkTransport),
-		string(extra.NetworkType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrNetworkTransport()),
+		string(extra.AttrNetworkType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type UpgradedConnectionsOptional struct {
+type UpgradedConnectionsExtra struct {
 	// [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
 	NetworkTransport network.AttrTransport `otel:"network.transport"`
 	// [OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.
@@ -43,13 +51,20 @@ type UpgradedConnectionsOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a UpgradedConnectionsExtra) AttrNetworkTransport() network.AttrTransport {
+	return a.NetworkTransport
+}
+func (a UpgradedConnectionsExtra) AttrNetworkType() network.AttrType     { return a.NetworkType }
+func (a UpgradedConnectionsExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a UpgradedConnectionsExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "UpgradedConnectionsOptional",
+        "AttrExtra": "UpgradedConnectionsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

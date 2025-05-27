@@ -23,18 +23,28 @@ func NewQueuedRequests() QueuedRequests {
 	}, labels)}
 }
 
-func (m QueuedRequests) With(extra QueuedRequestsOptional) prometheus.Gauge {
+func (m QueuedRequests) With(extra interface {
+	AttrNetworkProtocolName() network.AttrProtocolName
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	AttrNetworkTransport() network.AttrTransport
+	AttrNetworkType() network.AttrType
+	AttrServerAddress() server.AttrAddress
+	AttrServerPort() server.AttrPort
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = QueuedRequestsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkProtocolName),
-		string(extra.NetworkProtocolVersion),
-		string(extra.NetworkTransport),
-		string(extra.NetworkType),
-		string(extra.ServerAddress),
-		string(extra.ServerPort),
+		string(extra.AttrNetworkProtocolName()),
+		string(extra.AttrNetworkProtocolVersion()),
+		string(extra.AttrNetworkTransport()),
+		string(extra.AttrNetworkType()),
+		string(extra.AttrServerAddress()),
+		string(extra.AttrServerPort()),
 	)
 }
 
-type QueuedRequestsOptional struct {
+type QueuedRequestsExtra struct {
 	// [OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.
 	NetworkProtocolName network.AttrProtocolName `otel:"network.protocol.name"`
 	// The actual version of the protocol used for network communication.
@@ -49,13 +59,24 @@ type QueuedRequestsOptional struct {
 	ServerPort server.AttrPort `otel:"server.port"`
 }
 
+func (a QueuedRequestsExtra) AttrNetworkProtocolName() network.AttrProtocolName {
+	return a.NetworkProtocolName
+}
+func (a QueuedRequestsExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.NetworkProtocolVersion
+}
+func (a QueuedRequestsExtra) AttrNetworkTransport() network.AttrTransport { return a.NetworkTransport }
+func (a QueuedRequestsExtra) AttrNetworkType() network.AttrType           { return a.NetworkType }
+func (a QueuedRequestsExtra) AttrServerAddress() server.AttrAddress       { return a.ServerAddress }
+func (a QueuedRequestsExtra) AttrServerPort() server.AttrPort             { return a.ServerPort }
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "QueuedRequestsOptional",
+        "AttrExtra": "QueuedRequestsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

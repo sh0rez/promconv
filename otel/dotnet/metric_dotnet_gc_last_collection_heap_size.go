@@ -18,13 +18,17 @@ func NewGcLastCollectionHeapSize() GcLastCollectionHeapSize {
 	}, labels)}
 }
 
-func (m GcLastCollectionHeapSize) With(gcHeapGeneration AttrGcHeapGeneration, extra GcLastCollectionHeapSizeOptional) prometheus.Gauge {
+func (m GcLastCollectionHeapSize) With(gcHeapGeneration AttrGcHeapGeneration, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = GcLastCollectionHeapSizeExtra{}
+	}
 	return m.WithLabelValues(
 		string(gcHeapGeneration),
 	)
 }
 
-type GcLastCollectionHeapSizeOptional struct {
+type GcLastCollectionHeapSizeExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcLastCollectionHeapSizeOptional",
+        "AttrExtra": "GcLastCollectionHeapSizeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

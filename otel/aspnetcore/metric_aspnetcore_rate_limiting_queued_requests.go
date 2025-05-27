@@ -18,15 +18,24 @@ func NewRateLimitingQueuedRequests() RateLimitingQueuedRequests {
 	}, labels)}
 }
 
-func (m RateLimitingQueuedRequests) With(extra RateLimitingQueuedRequestsOptional) prometheus.Gauge {
+func (m RateLimitingQueuedRequests) With(extra interface {
+	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = RateLimitingQueuedRequestsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.AspnetcoreRateLimitingPolicy),
+		string(extra.AttrAspnetcoreRateLimitingPolicy()),
 	)
 }
 
-type RateLimitingQueuedRequestsOptional struct {
+type RateLimitingQueuedRequestsExtra struct {
 	// Rate limiting policy name.
 	AspnetcoreRateLimitingPolicy AttrRateLimitingPolicy `otel:"aspnetcore.rate_limiting.policy"`
+}
+
+func (a RateLimitingQueuedRequestsExtra) AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy {
+	return a.AspnetcoreRateLimitingPolicy
 }
 
 /*
@@ -35,7 +44,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RateLimitingQueuedRequestsOptional",
+        "AttrExtra": "RateLimitingQueuedRequestsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

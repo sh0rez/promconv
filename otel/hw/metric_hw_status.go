@@ -18,22 +18,31 @@ func NewStatus() Status {
 	}, labels)}
 }
 
-func (m Status) With(id AttrId, state AttrState, kind AttrType, extra StatusOptional) prometheus.Gauge {
+func (m Status) With(id AttrId, state AttrState, kind AttrType, extra interface {
+	AttrHwName() AttrName
+	AttrHwParent() AttrParent
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = StatusExtra{}
+	}
 	return m.WithLabelValues(
 		string(id),
 		string(state),
 		string(kind),
-		string(extra.HwName),
-		string(extra.HwParent),
+		string(extra.AttrHwName()),
+		string(extra.AttrHwParent()),
 	)
 }
 
-type StatusOptional struct {
+type StatusExtra struct {
 	// An easily-recognizable name for the hardware component
 	HwName AttrName `otel:"hw.name"`
 	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
 	HwParent AttrParent `otel:"hw.parent"`
 }
+
+func (a StatusExtra) AttrHwName() AttrName     { return a.HwName }
+func (a StatusExtra) AttrHwParent() AttrParent { return a.HwParent }
 
 /*
 State {
@@ -41,7 +50,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "StatusOptional",
+        "AttrExtra": "StatusExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

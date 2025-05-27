@@ -18,11 +18,15 @@ func NewGcLastCollectionMemoryCommittedSize() GcLastCollectionMemoryCommittedSiz
 	}, labels)}
 }
 
-func (m GcLastCollectionMemoryCommittedSize) With(extra GcLastCollectionMemoryCommittedSizeOptional) prometheus.Gauge {
+func (m GcLastCollectionMemoryCommittedSize) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = GcLastCollectionMemoryCommittedSizeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type GcLastCollectionMemoryCommittedSizeOptional struct {
+type GcLastCollectionMemoryCommittedSizeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcLastCollectionMemoryCommittedSizeOptional",
+        "AttrExtra": "GcLastCollectionMemoryCommittedSizeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

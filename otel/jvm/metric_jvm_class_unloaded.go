@@ -18,11 +18,15 @@ func NewClassUnloaded() ClassUnloaded {
 	}, labels)}
 }
 
-func (m ClassUnloaded) With(extra ClassUnloadedOptional) prometheus.Counter {
+func (m ClassUnloaded) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ClassUnloadedExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ClassUnloadedOptional struct {
+type ClassUnloadedExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClassUnloadedOptional",
+        "AttrExtra": "ClassUnloadedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

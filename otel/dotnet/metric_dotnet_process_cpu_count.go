@@ -18,11 +18,15 @@ func NewProcessCpuCount() ProcessCpuCount {
 	}, labels)}
 }
 
-func (m ProcessCpuCount) With(extra ProcessCpuCountOptional) prometheus.Gauge {
+func (m ProcessCpuCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ProcessCpuCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ProcessCpuCountOptional struct {
+type ProcessCpuCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessCpuCountOptional",
+        "AttrExtra": "ProcessCpuCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

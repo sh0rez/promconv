@@ -18,13 +18,17 @@ func NewWorkerCount() WorkerCount {
 	}, labels)}
 }
 
-func (m WorkerCount) With(workerState AttrWorkerState, extra WorkerCountOptional) prometheus.Gauge {
+func (m WorkerCount) With(workerState AttrWorkerState, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = WorkerCountExtra{}
+	}
 	return m.WithLabelValues(
 		string(workerState),
 	)
 }
 
-type WorkerCountOptional struct {
+type WorkerCountExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "WorkerCountOptional",
+        "AttrExtra": "WorkerCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

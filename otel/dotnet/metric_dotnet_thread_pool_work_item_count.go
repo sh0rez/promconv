@@ -18,11 +18,15 @@ func NewThreadPoolWorkItemCount() ThreadPoolWorkItemCount {
 	}, labels)}
 }
 
-func (m ThreadPoolWorkItemCount) With(extra ThreadPoolWorkItemCountOptional) prometheus.Counter {
+func (m ThreadPoolWorkItemCount) With(extra interface {
+}) prometheus.Counter {
+	if extra == nil {
+		extra = ThreadPoolWorkItemCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ThreadPoolWorkItemCountOptional struct {
+type ThreadPoolWorkItemCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ThreadPoolWorkItemCountOptional",
+        "AttrExtra": "ThreadPoolWorkItemCountExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

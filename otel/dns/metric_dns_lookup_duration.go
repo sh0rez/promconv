@@ -22,17 +22,24 @@ func NewLookupDuration() LookupDuration {
 	}, labels)}
 }
 
-func (m LookupDuration) With(questionName AttrQuestionName, extra LookupDurationOptional) prometheus.Observer {
+func (m LookupDuration) With(questionName AttrQuestionName, extra interface {
+	AttrErrorType() error.AttrType
+}) prometheus.Observer {
+	if extra == nil {
+		extra = LookupDurationExtra{}
+	}
 	return m.WithLabelValues(
 		string(questionName),
-		string(extra.ErrorType),
+		string(extra.AttrErrorType()),
 	)
 }
 
-type LookupDurationOptional struct {
+type LookupDurationExtra struct {
 	// Describes the error the DNS lookup failed with.
 	ErrorType error.AttrType `otel:"error.type"`
 }
+
+func (a LookupDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
 
 /*
 State {
@@ -40,7 +47,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "LookupDurationOptional",
+        "AttrExtra": "LookupDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

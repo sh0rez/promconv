@@ -22,18 +22,31 @@ func NewNodeNetworkErrors() NodeNetworkErrors {
 	}, labels)}
 }
 
-func (m NodeNetworkErrors) With(extra NodeNetworkErrorsOptional) prometheus.Counter {
+func (m NodeNetworkErrors) With(extra interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) prometheus.Counter {
+	if extra == nil {
+		extra = NodeNetworkErrorsExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.NetworkInterfaceName),
-		string(extra.NetworkIoDirection),
+		string(extra.AttrNetworkInterfaceName()),
+		string(extra.AttrNetworkIoDirection()),
 	)
 }
 
-type NodeNetworkErrorsOptional struct {
+type NodeNetworkErrorsExtra struct {
 	// The network interface name.
 	NetworkInterfaceName network.AttrInterfaceName `otel:"network.interface.name"`
 	// The network IO operation direction.
 	NetworkIoDirection network.AttrIoDirection `otel:"network.io.direction"`
+}
+
+func (a NodeNetworkErrorsExtra) AttrNetworkInterfaceName() network.AttrInterfaceName {
+	return a.NetworkInterfaceName
+}
+func (a NodeNetworkErrorsExtra) AttrNetworkIoDirection() network.AttrIoDirection {
+	return a.NetworkIoDirection
 }
 
 /*
@@ -42,7 +55,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeNetworkErrorsOptional",
+        "AttrExtra": "NodeNetworkErrorsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",

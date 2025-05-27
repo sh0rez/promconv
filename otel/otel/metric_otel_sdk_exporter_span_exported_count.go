@@ -18,11 +18,15 @@ func NewSdkExporterSpanExportedCount() SdkExporterSpanExportedCount {
 	}, labels)}
 }
 
-func (m SdkExporterSpanExportedCount) With(extra SdkExporterSpanExportedCountOptional) prometheus.Gauge {
+func (m SdkExporterSpanExportedCount) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = SdkExporterSpanExportedCountExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type SdkExporterSpanExportedCountOptional struct {
+type SdkExporterSpanExportedCountExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkExporterSpanExportedCountOptional",
+        "AttrExtra": "SdkExporterSpanExportedCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

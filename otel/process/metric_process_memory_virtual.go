@@ -18,11 +18,15 @@ func NewMemoryVirtual() MemoryVirtual {
 	}, labels)}
 }
 
-func (m MemoryVirtual) With(extra MemoryVirtualOptional) prometheus.Gauge {
+func (m MemoryVirtual) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryVirtualExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type MemoryVirtualOptional struct {
+type MemoryVirtualExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryVirtualOptional",
+        "AttrExtra": "MemoryVirtualExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

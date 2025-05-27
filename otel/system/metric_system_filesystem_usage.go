@@ -18,17 +18,26 @@ func NewFilesystemUsage() FilesystemUsage {
 	}, labels)}
 }
 
-func (m FilesystemUsage) With(extra FilesystemUsageOptional) prometheus.Gauge {
+func (m FilesystemUsage) With(extra interface {
+	AttrSystemDevice() AttrDevice
+	AttrSystemFilesystemMode() AttrFilesystemMode
+	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
+	AttrSystemFilesystemState() AttrFilesystemState
+	AttrSystemFilesystemType() AttrFilesystemType
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = FilesystemUsageExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemDevice),
-		string(extra.SystemFilesystemMode),
-		string(extra.SystemFilesystemMountpoint),
-		string(extra.SystemFilesystemState),
-		string(extra.SystemFilesystemType),
+		string(extra.AttrSystemDevice()),
+		string(extra.AttrSystemFilesystemMode()),
+		string(extra.AttrSystemFilesystemMountpoint()),
+		string(extra.AttrSystemFilesystemState()),
+		string(extra.AttrSystemFilesystemType()),
 	)
 }
 
-type FilesystemUsageOptional struct {
+type FilesystemUsageExtra struct {
 	// Identifier for the device where the filesystem resides.
 	SystemDevice AttrDevice `otel:"system.device"`
 	// The filesystem mode
@@ -41,13 +50,27 @@ type FilesystemUsageOptional struct {
 	SystemFilesystemType AttrFilesystemType `otel:"system.filesystem.type"`
 }
 
+func (a FilesystemUsageExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
+func (a FilesystemUsageExtra) AttrSystemFilesystemMode() AttrFilesystemMode {
+	return a.SystemFilesystemMode
+}
+func (a FilesystemUsageExtra) AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint {
+	return a.SystemFilesystemMountpoint
+}
+func (a FilesystemUsageExtra) AttrSystemFilesystemState() AttrFilesystemState {
+	return a.SystemFilesystemState
+}
+func (a FilesystemUsageExtra) AttrSystemFilesystemType() AttrFilesystemType {
+	return a.SystemFilesystemType
+}
+
 /*
 State {
     name: "metric.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "FilesystemUsageOptional",
+        "AttrExtra": "FilesystemUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

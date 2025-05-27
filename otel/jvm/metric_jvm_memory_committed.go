@@ -18,19 +18,28 @@ func NewMemoryCommitted() MemoryCommitted {
 	}, labels)}
 }
 
-func (m MemoryCommitted) With(extra MemoryCommittedOptional) prometheus.Gauge {
+func (m MemoryCommitted) With(extra interface {
+	AttrJvmMemoryPoolName() AttrMemoryPoolName
+	AttrJvmMemoryType() AttrMemoryType
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryCommittedExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.JvmMemoryPoolName),
-		string(extra.JvmMemoryType),
+		string(extra.AttrJvmMemoryPoolName()),
+		string(extra.AttrJvmMemoryType()),
 	)
 }
 
-type MemoryCommittedOptional struct {
+type MemoryCommittedExtra struct {
 	// Name of the memory pool.
 	JvmMemoryPoolName AttrMemoryPoolName `otel:"jvm.memory.pool.name"`
 	// The type of memory.
 	JvmMemoryType AttrMemoryType `otel:"jvm.memory.type"`
 }
+
+func (a MemoryCommittedExtra) AttrJvmMemoryPoolName() AttrMemoryPoolName { return a.JvmMemoryPoolName }
+func (a MemoryCommittedExtra) AttrJvmMemoryType() AttrMemoryType         { return a.JvmMemoryType }
 
 /*
 State {
@@ -38,7 +47,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryCommittedOptional",
+        "AttrExtra": "MemoryCommittedExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

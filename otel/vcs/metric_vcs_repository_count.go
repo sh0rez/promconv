@@ -18,19 +18,28 @@ func NewRepositoryCount() RepositoryCount {
 	}, labels)}
 }
 
-func (m RepositoryCount) With(extra RepositoryCountOptional) prometheus.Gauge {
+func (m RepositoryCount) With(extra interface {
+	AttrVcsOwnerName() AttrOwnerName
+	AttrVcsProviderName() AttrProviderName
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = RepositoryCountExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.VcsOwnerName),
-		string(extra.VcsProviderName),
+		string(extra.AttrVcsOwnerName()),
+		string(extra.AttrVcsProviderName()),
 	)
 }
 
-type RepositoryCountOptional struct {
+type RepositoryCountExtra struct {
 	// The group owner within the version control system.
 	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
 	// The name of the version control system provider.
 	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
 }
+
+func (a RepositoryCountExtra) AttrVcsOwnerName() AttrOwnerName       { return a.VcsOwnerName }
+func (a RepositoryCountExtra) AttrVcsProviderName() AttrProviderName { return a.VcsProviderName }
 
 /*
 State {
@@ -38,7 +47,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "RepositoryCountOptional",
+        "AttrExtra": "RepositoryCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

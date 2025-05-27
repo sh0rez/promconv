@@ -18,13 +18,17 @@ func NewClientConnectionsIdleMin() ClientConnectionsIdleMin {
 	}, labels)}
 }
 
-func (m ClientConnectionsIdleMin) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra ClientConnectionsIdleMinOptional) prometheus.Gauge {
+func (m ClientConnectionsIdleMin) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ClientConnectionsIdleMinExtra{}
+	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),
 	)
 }
 
-type ClientConnectionsIdleMinOptional struct {
+type ClientConnectionsIdleMinExtra struct {
 }
 
 /*
@@ -33,7 +37,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientConnectionsIdleMinOptional",
+        "AttrExtra": "ClientConnectionsIdleMinExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

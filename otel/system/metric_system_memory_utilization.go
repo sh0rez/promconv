@@ -17,16 +17,23 @@ func NewMemoryUtilization() MemoryUtilization {
 	}, labels)}
 }
 
-func (m MemoryUtilization) With(extra MemoryUtilizationOptional) prometheus.Gauge {
+func (m MemoryUtilization) With(extra interface {
+	AttrSystemMemoryState() AttrMemoryState
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = MemoryUtilizationExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.SystemMemoryState),
+		string(extra.AttrSystemMemoryState()),
 	)
 }
 
-type MemoryUtilizationOptional struct {
+type MemoryUtilizationExtra struct {
 	// The memory state
 	SystemMemoryState AttrMemoryState `otel:"system.memory.state"`
 }
+
+func (a MemoryUtilizationExtra) AttrSystemMemoryState() AttrMemoryState { return a.SystemMemoryState }
 
 /*
 State {
@@ -34,7 +41,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryUtilizationOptional",
+        "AttrExtra": "MemoryUtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

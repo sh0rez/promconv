@@ -18,16 +18,23 @@ func NewMemUsage() MemUsage {
 	}, labels)}
 }
 
-func (m MemUsage) With(extra MemUsageOptional) prometheus.Observer {
+func (m MemUsage) With(extra interface {
+	AttrFaasTrigger() AttrTrigger
+}) prometheus.Observer {
+	if extra == nil {
+		extra = MemUsageExtra{}
+	}
 	return m.WithLabelValues(
-		string(extra.FaasTrigger),
+		string(extra.AttrFaasTrigger()),
 	)
 }
 
-type MemUsageOptional struct {
+type MemUsageExtra struct {
 	// Type of the trigger which caused this function invocation.
 	FaasTrigger AttrTrigger `otel:"faas.trigger"`
 }
+
+func (a MemUsageExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
 
 /*
 State {
@@ -35,7 +42,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemUsageOptional",
+        "AttrExtra": "MemUsageExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

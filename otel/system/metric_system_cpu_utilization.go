@@ -18,11 +18,15 @@ func NewCpuUtilization() CpuUtilization {
 	}, labels)}
 }
 
-func (m CpuUtilization) With(extra CpuUtilizationOptional) prometheus.Gauge {
+func (m CpuUtilization) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = CpuUtilizationExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type CpuUtilizationOptional struct {
+type CpuUtilizationExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuUtilizationOptional",
+        "AttrExtra": "CpuUtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

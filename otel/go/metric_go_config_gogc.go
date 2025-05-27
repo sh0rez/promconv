@@ -18,11 +18,15 @@ func NewConfigGogc() ConfigGogc {
 	}, labels)}
 }
 
-func (m ConfigGogc) With(extra ConfigGogcOptional) prometheus.Gauge {
+func (m ConfigGogc) With(extra interface {
+}) prometheus.Gauge {
+	if extra == nil {
+		extra = ConfigGogcExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ConfigGogcOptional struct {
+type ConfigGogcExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ConfigGogcOptional",
+        "AttrExtra": "ConfigGogcExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",

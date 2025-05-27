@@ -18,11 +18,15 @@ func NewClientRequestSize() ClientRequestSize {
 	}, labels)}
 }
 
-func (m ClientRequestSize) With(extra ClientRequestSizeOptional) prometheus.Observer {
+func (m ClientRequestSize) With(extra interface {
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ClientRequestSizeExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ClientRequestSizeOptional struct {
+type ClientRequestSizeExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientRequestSizeOptional",
+        "AttrExtra": "ClientRequestSizeExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",

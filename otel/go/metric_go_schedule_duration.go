@@ -18,11 +18,15 @@ func NewScheduleDuration() ScheduleDuration {
 	}, labels)}
 }
 
-func (m ScheduleDuration) With(extra ScheduleDurationOptional) prometheus.Observer {
+func (m ScheduleDuration) With(extra interface {
+}) prometheus.Observer {
+	if extra == nil {
+		extra = ScheduleDurationExtra{}
+	}
 	return m.WithLabelValues()
 }
 
-type ScheduleDurationOptional struct {
+type ScheduleDurationExtra struct {
 }
 
 /*
@@ -31,7 +35,7 @@ State {
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ScheduleDurationOptional",
+        "AttrExtra": "ScheduleDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
