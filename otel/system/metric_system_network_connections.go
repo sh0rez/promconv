@@ -10,6 +10,7 @@ import (
 
 type NetworkConnections struct {
 	*prometheus.GaugeVec
+	extra NetworkConnectionsExtra
 }
 
 func NewNetworkConnections() NetworkConnections {
@@ -27,13 +28,30 @@ func (m NetworkConnections) With(extra interface {
 	AttrNetworkTransport() network.AttrTransport
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = NetworkConnectionsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkConnectionState()),
 		string(extra.AttrNetworkInterfaceName()),
 		string(extra.AttrNetworkTransport()),
 	)
+}
+
+func (a NetworkConnections) WithNetworkConnectionState(attr interface {
+	AttrNetworkConnectionState() network.AttrConnectionState
+}) NetworkConnections {
+	a.extra.NetworkConnectionState = attr.AttrNetworkConnectionState()
+	return a
+}
+func (a NetworkConnections) WithNetworkInterfaceName(attr interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+}) NetworkConnections {
+	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	return a
+}
+func (a NetworkConnections) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) NetworkConnections {
+	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+	return a
 }
 
 type NetworkConnectionsExtra struct {

@@ -7,6 +7,7 @@ import (
 // The time the request spent in a queue waiting to acquire a rate limiting lease.
 type RateLimitingRequestTimeInQueue struct {
 	*prometheus.HistogramVec
+	extra RateLimitingRequestTimeInQueueExtra
 }
 
 func NewRateLimitingRequestTimeInQueue() RateLimitingRequestTimeInQueue {
@@ -22,12 +23,17 @@ func (m RateLimitingRequestTimeInQueue) With(rateLimitingResult AttrRateLimiting
 	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
 }) prometheus.Observer {
 	if extra == nil {
-		extra = RateLimitingRequestTimeInQueueExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(rateLimitingResult),
 		string(extra.AttrAspnetcoreRateLimitingPolicy()),
 	)
+}
+
+func (a RateLimitingRequestTimeInQueue) WithAspnetcoreRateLimitingPolicy(attr interface{ AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) RateLimitingRequestTimeInQueue {
+	a.extra.AspnetcoreRateLimitingPolicy = attr.AttrAspnetcoreRateLimitingPolicy()
+	return a
 }
 
 type RateLimitingRequestTimeInQueueExtra struct {

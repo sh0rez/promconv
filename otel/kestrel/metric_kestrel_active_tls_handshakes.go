@@ -12,6 +12,7 @@ import (
 // Number of TLS handshakes that are currently in progress on the server.
 type ActiveTlsHandshakes struct {
 	*prometheus.GaugeVec
+	extra ActiveTlsHandshakesExtra
 }
 
 func NewActiveTlsHandshakes() ActiveTlsHandshakes {
@@ -30,7 +31,7 @@ func (m ActiveTlsHandshakes) With(extra interface {
 	AttrServerPort() server.AttrPort
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ActiveTlsHandshakesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkTransport()),
@@ -38,6 +39,23 @@ func (m ActiveTlsHandshakes) With(extra interface {
 		string(extra.AttrServerAddress()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a ActiveTlsHandshakes) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) ActiveTlsHandshakes {
+	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+	return a
+}
+func (a ActiveTlsHandshakes) WithNetworkType(attr interface{ AttrNetworkType() network.AttrType }) ActiveTlsHandshakes {
+	a.extra.NetworkType = attr.AttrNetworkType()
+	return a
+}
+func (a ActiveTlsHandshakes) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ActiveTlsHandshakes {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ActiveTlsHandshakes) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ActiveTlsHandshakes {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type ActiveTlsHandshakesExtra struct {
@@ -195,32 +213,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.",
                     "examples": [
                         "ipv4",
@@ -309,6 +301,32 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "Number of TLS handshakes that are currently in progress on the server.",

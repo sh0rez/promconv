@@ -7,6 +7,7 @@ import (
 // Recent CPU utilization for the process as reported by the JVM.
 type CpuRecentUtilization struct {
 	*prometheus.GaugeVec
+	extra CpuRecentUtilizationExtra
 }
 
 func NewCpuRecentUtilization() CpuRecentUtilization {
@@ -21,7 +22,7 @@ func NewCpuRecentUtilization() CpuRecentUtilization {
 func (m CpuRecentUtilization) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CpuRecentUtilizationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

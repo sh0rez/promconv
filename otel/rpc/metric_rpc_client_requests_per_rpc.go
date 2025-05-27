@@ -7,6 +7,7 @@ import (
 // Measures the number of messages received per RPC.
 type ClientRequestsPerRpc struct {
 	*prometheus.HistogramVec
+	extra ClientRequestsPerRpcExtra
 }
 
 func NewClientRequestsPerRpc() ClientRequestsPerRpc {
@@ -21,7 +22,7 @@ func NewClientRequestsPerRpc() ClientRequestsPerRpc {
 func (m ClientRequestsPerRpc) With(extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientRequestsPerRpcExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

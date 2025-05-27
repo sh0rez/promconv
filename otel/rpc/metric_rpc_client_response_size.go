@@ -7,6 +7,7 @@ import (
 // Measures the size of RPC response messages (uncompressed).
 type ClientResponseSize struct {
 	*prometheus.HistogramVec
+	extra ClientResponseSizeExtra
 }
 
 func NewClientResponseSize() ClientResponseSize {
@@ -21,7 +22,7 @@ func NewClientResponseSize() ClientResponseSize {
 func (m ClientResponseSize) With(extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientResponseSizeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

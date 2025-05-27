@@ -7,6 +7,7 @@ import (
 // The time it took to create a new connection
 type ClientConnectionCreateTime struct {
 	*prometheus.HistogramVec
+	extra ClientConnectionCreateTimeExtra
 }
 
 func NewClientConnectionCreateTime() ClientConnectionCreateTime {
@@ -21,7 +22,7 @@ func NewClientConnectionCreateTime() ClientConnectionCreateTime {
 func (m ClientConnectionCreateTime) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientConnectionCreateTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),

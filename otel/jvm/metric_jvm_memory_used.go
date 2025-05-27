@@ -7,6 +7,7 @@ import (
 // Measure of memory used.
 type MemoryUsed struct {
 	*prometheus.GaugeVec
+	extra MemoryUsedExtra
 }
 
 func NewMemoryUsed() MemoryUsed {
@@ -23,12 +24,21 @@ func (m MemoryUsed) With(extra interface {
 	AttrJvmMemoryType() AttrMemoryType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryUsedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmMemoryPoolName()),
 		string(extra.AttrJvmMemoryType()),
 	)
+}
+
+func (a MemoryUsed) WithJvmMemoryPoolName(attr interface{ AttrJvmMemoryPoolName() AttrMemoryPoolName }) MemoryUsed {
+	a.extra.JvmMemoryPoolName = attr.AttrJvmMemoryPoolName()
+	return a
+}
+func (a MemoryUsed) WithJvmMemoryType(attr interface{ AttrJvmMemoryType() AttrMemoryType }) MemoryUsed {
+	a.extra.JvmMemoryType = attr.AttrJvmMemoryType()
+	return a
 }
 
 type MemoryUsedExtra struct {

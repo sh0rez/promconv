@@ -7,6 +7,7 @@ import (
 // Number of connections that are currently active on the server.
 type ServerActiveConnections struct {
 	*prometheus.GaugeVec
+	extra ServerActiveConnectionsExtra
 }
 
 func NewServerActiveConnections() ServerActiveConnections {
@@ -23,12 +24,21 @@ func (m ServerActiveConnections) With(extra interface {
 	AttrSignalrTransport() AttrTransport
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ServerActiveConnectionsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSignalrConnectionStatus()),
 		string(extra.AttrSignalrTransport()),
 	)
+}
+
+func (a ServerActiveConnections) WithSignalrConnectionStatus(attr interface{ AttrSignalrConnectionStatus() AttrConnectionStatus }) ServerActiveConnections {
+	a.extra.SignalrConnectionStatus = attr.AttrSignalrConnectionStatus()
+	return a
+}
+func (a ServerActiveConnections) WithSignalrTransport(attr interface{ AttrSignalrTransport() AttrTransport }) ServerActiveConnections {
+	a.extra.SignalrTransport = attr.AttrSignalrTransport()
+	return a
 }
 
 type ServerActiveConnectionsExtra struct {

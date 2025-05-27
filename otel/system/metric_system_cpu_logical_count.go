@@ -7,6 +7,7 @@ import (
 // Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking
 type CpuLogicalCount struct {
 	*prometheus.GaugeVec
+	extra CpuLogicalCountExtra
 }
 
 func NewCpuLogicalCount() CpuLogicalCount {
@@ -21,7 +22,7 @@ func NewCpuLogicalCount() CpuLogicalCount {
 func (m CpuLogicalCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CpuLogicalCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

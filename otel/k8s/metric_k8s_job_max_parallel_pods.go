@@ -7,6 +7,7 @@ import (
 // The max desired number of pods the job should run at any given time
 type JobMaxParallelPods struct {
 	*prometheus.GaugeVec
+	extra JobMaxParallelPodsExtra
 }
 
 func NewJobMaxParallelPods() JobMaxParallelPods {
@@ -21,7 +22,7 @@ func NewJobMaxParallelPods() JobMaxParallelPods {
 func (m JobMaxParallelPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = JobMaxParallelPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

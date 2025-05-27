@@ -7,6 +7,7 @@ import (
 // The number of logs submitted to enabled SDK Loggers
 type SdkLogCreated struct {
 	*prometheus.CounterVec
+	extra SdkLogCreatedExtra
 }
 
 func NewSdkLogCreated() SdkLogCreated {
@@ -21,7 +22,7 @@ func NewSdkLogCreated() SdkLogCreated {
 func (m SdkLogCreated) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = SdkLogCreatedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

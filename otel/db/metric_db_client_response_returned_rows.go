@@ -13,6 +13,7 @@ import (
 // The actual number of records returned by the database operation.
 type ClientResponseReturnedRows struct {
 	*prometheus.HistogramVec
+	extra ClientResponseReturnedRowsExtra
 }
 
 func NewClientResponseReturnedRows() ClientResponseReturnedRows {
@@ -38,7 +39,7 @@ func (m ClientResponseReturnedRows) With(systemName AttrSystemName, extra interf
 	AttrDbQueryText() AttrQueryText
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientResponseReturnedRowsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(systemName),
@@ -54,6 +55,53 @@ func (m ClientResponseReturnedRows) With(systemName AttrSystemName, extra interf
 		string(extra.AttrServerAddress()),
 		string(extra.AttrDbQueryText()),
 	)
+}
+
+func (a ClientResponseReturnedRows) WithDbCollectionName(attr interface{ AttrDbCollectionName() AttrCollectionName }) ClientResponseReturnedRows {
+	a.extra.DbCollectionName = attr.AttrDbCollectionName()
+	return a
+}
+func (a ClientResponseReturnedRows) WithDbNamespace(attr interface{ AttrDbNamespace() AttrNamespace }) ClientResponseReturnedRows {
+	a.extra.DbNamespace = attr.AttrDbNamespace()
+	return a
+}
+func (a ClientResponseReturnedRows) WithDbOperationName(attr interface{ AttrDbOperationName() AttrOperationName }) ClientResponseReturnedRows {
+	a.extra.DbOperationName = attr.AttrDbOperationName()
+	return a
+}
+func (a ClientResponseReturnedRows) WithDbResponseStatusCode(attr interface{ AttrDbResponseStatusCode() AttrResponseStatusCode }) ClientResponseReturnedRows {
+	a.extra.DbResponseStatusCode = attr.AttrDbResponseStatusCode()
+	return a
+}
+func (a ClientResponseReturnedRows) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientResponseReturnedRows {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ClientResponseReturnedRows) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientResponseReturnedRows {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a ClientResponseReturnedRows) WithDbQuerySummary(attr interface{ AttrDbQuerySummary() AttrQuerySummary }) ClientResponseReturnedRows {
+	a.extra.DbQuerySummary = attr.AttrDbQuerySummary()
+	return a
+}
+func (a ClientResponseReturnedRows) WithNetworkPeerAddress(attr interface {
+	AttrNetworkPeerAddress() network.AttrPeerAddress
+}) ClientResponseReturnedRows {
+	a.extra.NetworkPeerAddress = attr.AttrNetworkPeerAddress()
+	return a
+}
+func (a ClientResponseReturnedRows) WithNetworkPeerPort(attr interface{ AttrNetworkPeerPort() network.AttrPeerPort }) ClientResponseReturnedRows {
+	a.extra.NetworkPeerPort = attr.AttrNetworkPeerPort()
+	return a
+}
+func (a ClientResponseReturnedRows) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientResponseReturnedRows {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ClientResponseReturnedRows) WithDbQueryText(attr interface{ AttrDbQueryText() AttrQueryText }) ClientResponseReturnedRows {
+	a.extra.DbQueryText = attr.AttrDbQueryText()
+	return a
 }
 
 type ClientResponseReturnedRowsExtra struct {
@@ -636,34 +684,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Name of the database host.\n",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If using a port other than the default port for this DBMS and if `server.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "Database response status code.",
                     "examples": [
                         "102",
@@ -708,18 +728,32 @@ State {
                     },
                 },
                 {
-                    "brief": "Peer address of the database node where the operation was performed.",
+                    "brief": "Name of the database host.\n",
                     "examples": [
+                        "example.com",
                         "10.1.2.80",
                         "/tmp/my.sock",
                     ],
-                    "name": "network.peer.address",
-                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
-                    "requirement_level": {
-                        "recommended": "If applicable for this database system.",
-                    },
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
                     "stability": "stable",
                     "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If using a port other than the default port for this DBMS and if `server.address` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
                 },
                 {
                     "brief": "Low cardinality summary of a database query.\n",
@@ -1130,6 +1164,20 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Peer address of the database node where the operation was performed.",
+                    "examples": [
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "network.peer.address",
+                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
+                    "requirement_level": {
+                        "recommended": "If applicable for this database system.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
                 },
                 {
                     "brief": "Peer port number of the network connection.",

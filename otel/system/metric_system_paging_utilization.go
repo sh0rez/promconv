@@ -6,6 +6,7 @@ import (
 
 type PagingUtilization struct {
 	*prometheus.GaugeVec
+	extra PagingUtilizationExtra
 }
 
 func NewPagingUtilization() PagingUtilization {
@@ -22,12 +23,21 @@ func (m PagingUtilization) With(extra interface {
 	AttrSystemPagingState() AttrPagingState
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = PagingUtilizationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemDevice()),
 		string(extra.AttrSystemPagingState()),
 	)
+}
+
+func (a PagingUtilization) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) PagingUtilization {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
+}
+func (a PagingUtilization) WithSystemPagingState(attr interface{ AttrSystemPagingState() AttrPagingState }) PagingUtilization {
+	a.extra.SystemPagingState = attr.AttrSystemPagingState()
+	return a
 }
 
 type PagingUtilizationExtra struct {

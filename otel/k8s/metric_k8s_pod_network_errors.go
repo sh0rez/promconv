@@ -11,6 +11,7 @@ import (
 // Pod network errors
 type PodNetworkErrors struct {
 	*prometheus.CounterVec
+	extra PodNetworkErrorsExtra
 }
 
 func NewPodNetworkErrors() PodNetworkErrors {
@@ -27,12 +28,25 @@ func (m PodNetworkErrors) With(extra interface {
 	AttrNetworkIoDirection() network.AttrIoDirection
 }) prometheus.Counter {
 	if extra == nil {
-		extra = PodNetworkErrorsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkInterfaceName()),
 		string(extra.AttrNetworkIoDirection()),
 	)
+}
+
+func (a PodNetworkErrors) WithNetworkInterfaceName(attr interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+}) PodNetworkErrors {
+	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	return a
+}
+func (a PodNetworkErrors) WithNetworkIoDirection(attr interface {
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) PodNetworkErrors {
+	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	return a
 }
 
 type PodNetworkErrorsExtra struct {

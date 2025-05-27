@@ -7,6 +7,7 @@ import (
 // Event loop maximum delay.
 type EventloopDelayMax struct {
 	*prometheus.GaugeVec
+	extra EventloopDelayMaxExtra
 }
 
 func NewEventloopDelayMax() EventloopDelayMax {
@@ -21,7 +22,7 @@ func NewEventloopDelayMax() EventloopDelayMax {
 func (m EventloopDelayMax) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = EventloopDelayMaxExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

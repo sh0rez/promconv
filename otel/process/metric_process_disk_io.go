@@ -11,6 +11,7 @@ import (
 // Disk bytes transferred.
 type DiskIo struct {
 	*prometheus.CounterVec
+	extra DiskIoExtra
 }
 
 func NewDiskIo() DiskIo {
@@ -26,11 +27,16 @@ func (m DiskIo) With(extra interface {
 	AttrDiskIoDirection() disk.AttrIoDirection
 }) prometheus.Counter {
 	if extra == nil {
-		extra = DiskIoExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrDiskIoDirection()),
 	)
+}
+
+func (a DiskIo) WithDiskIoDirection(attr interface{ AttrDiskIoDirection() disk.AttrIoDirection }) DiskIo {
+	a.extra.DiskIoDirection = attr.AttrDiskIoDirection()
+	return a
 }
 
 type DiskIoExtra struct {

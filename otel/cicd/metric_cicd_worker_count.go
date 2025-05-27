@@ -7,6 +7,7 @@ import (
 // The number of workers on the CICD system by state.
 type WorkerCount struct {
 	*prometheus.GaugeVec
+	extra WorkerCountExtra
 }
 
 func NewWorkerCount() WorkerCount {
@@ -21,7 +22,7 @@ func NewWorkerCount() WorkerCount {
 func (m WorkerCount) With(workerState AttrWorkerState, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = WorkerCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(workerState),

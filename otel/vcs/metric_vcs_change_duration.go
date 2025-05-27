@@ -7,6 +7,7 @@ import (
 // The time duration a change (pull request/merge request/changelist) has been in a given state.
 type ChangeDuration struct {
 	*prometheus.GaugeVec
+	extra ChangeDurationExtra
 }
 
 func NewChangeDuration() ChangeDuration {
@@ -24,7 +25,7 @@ func (m ChangeDuration) With(changeState AttrChangeState, refHeadName AttrRefHea
 	AttrVcsProviderName() AttrProviderName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ChangeDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(changeState),
@@ -34,6 +35,19 @@ func (m ChangeDuration) With(changeState AttrChangeState, refHeadName AttrRefHea
 		string(extra.AttrVcsRepositoryName()),
 		string(extra.AttrVcsProviderName()),
 	)
+}
+
+func (a ChangeDuration) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) ChangeDuration {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a ChangeDuration) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) ChangeDuration {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a ChangeDuration) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) ChangeDuration {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
 }
 
 type ChangeDurationExtra struct {

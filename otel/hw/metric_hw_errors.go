@@ -11,6 +11,7 @@ import (
 // Number of errors encountered by the component
 type Errors struct {
 	*prometheus.CounterVec
+	extra ErrorsExtra
 }
 
 func NewErrors() Errors {
@@ -28,7 +29,7 @@ func (m Errors) With(id AttrId, kind AttrType, extra interface {
 	AttrHwParent() AttrParent
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ErrorsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(id),
@@ -37,6 +38,19 @@ func (m Errors) With(id AttrId, kind AttrType, extra interface {
 		string(extra.AttrHwName()),
 		string(extra.AttrHwParent()),
 	)
+}
+
+func (a Errors) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) Errors {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a Errors) WithHwName(attr interface{ AttrHwName() AttrName }) Errors {
+	a.extra.HwName = attr.AttrHwName()
+	return a
+}
+func (a Errors) WithHwParent(attr interface{ AttrHwParent() AttrParent }) Errors {
+	a.extra.HwParent = attr.AttrHwParent()
+	return a
 }
 
 type ErrorsExtra struct {

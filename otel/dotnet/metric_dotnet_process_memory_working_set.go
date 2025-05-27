@@ -7,6 +7,7 @@ import (
 // The number of bytes of physical memory mapped to the process context.
 type ProcessMemoryWorkingSet struct {
 	*prometheus.GaugeVec
+	extra ProcessMemoryWorkingSetExtra
 }
 
 func NewProcessMemoryWorkingSet() ProcessMemoryWorkingSet {
@@ -21,7 +22,7 @@ func NewProcessMemoryWorkingSet() ProcessMemoryWorkingSet {
 func (m ProcessMemoryWorkingSet) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ProcessMemoryWorkingSetExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

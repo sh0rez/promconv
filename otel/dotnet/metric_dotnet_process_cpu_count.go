@@ -7,6 +7,7 @@ import (
 // The number of processors available to the process.
 type ProcessCpuCount struct {
 	*prometheus.GaugeVec
+	extra ProcessCpuCountExtra
 }
 
 func NewProcessCpuCount() ProcessCpuCount {
@@ -21,7 +22,7 @@ func NewProcessCpuCount() ProcessCpuCount {
 func (m ProcessCpuCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ProcessCpuCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

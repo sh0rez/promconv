@@ -7,6 +7,7 @@ import (
 // Cumulative duration of time the event loop has been in each state.
 type EventloopTime struct {
 	*prometheus.CounterVec
+	extra EventloopTimeExtra
 }
 
 func NewEventloopTime() EventloopTime {
@@ -21,7 +22,7 @@ func NewEventloopTime() EventloopTime {
 func (m EventloopTime) With(eventloopState AttrEventloopState, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = EventloopTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(eventloopState),

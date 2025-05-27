@@ -7,6 +7,7 @@ import (
 // Number of open file descriptors as reported by the JVM.
 type FileDescriptorCount struct {
 	*prometheus.GaugeVec
+	extra FileDescriptorCountExtra
 }
 
 func NewFileDescriptorCount() FileDescriptorCount {
@@ -21,7 +22,7 @@ func NewFileDescriptorCount() FileDescriptorCount {
 func (m FileDescriptorCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = FileDescriptorCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

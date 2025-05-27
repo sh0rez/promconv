@@ -13,6 +13,7 @@ import (
 // [Request units](https://learn.microsoft.com/azure/cosmos-db/request-units) consumed by the operation
 type CosmosdbClientOperationRequestCharge struct {
 	*prometheus.HistogramVec
+	extra CosmosdbClientOperationRequestChargeExtra
 }
 
 func NewCosmosdbClientOperationRequestCharge() CosmosdbClientOperationRequestCharge {
@@ -36,7 +37,7 @@ func (m CosmosdbClientOperationRequestCharge) With(operationName db.AttrOperatio
 	AttrServerAddress() server.AttrAddress
 }) prometheus.Observer {
 	if extra == nil {
-		extra = CosmosdbClientOperationRequestChargeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(operationName),
@@ -50,6 +51,51 @@ func (m CosmosdbClientOperationRequestCharge) With(operationName db.AttrOperatio
 		string(extra.AttrAzureCosmosdbOperationContactedRegions()),
 		string(extra.AttrServerAddress()),
 	)
+}
+
+func (a CosmosdbClientOperationRequestCharge) WithAzureCosmosdbConsistencyLevel(attr interface {
+	AttrAzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
+}) CosmosdbClientOperationRequestCharge {
+	a.extra.AzureCosmosdbConsistencyLevel = attr.AttrAzureCosmosdbConsistencyLevel()
+	return a
+}
+func (a CosmosdbClientOperationRequestCharge) WithAzureCosmosdbResponseSubStatusCode(attr interface {
+	AttrAzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode
+}) CosmosdbClientOperationRequestCharge {
+	a.extra.AzureCosmosdbResponseSubStatusCode = attr.AttrAzureCosmosdbResponseSubStatusCode()
+	return a
+}
+func (a CosmosdbClientOperationRequestCharge) WithDbCollectionName(attr interface{ AttrDbCollectionName() db.AttrCollectionName }) CosmosdbClientOperationRequestCharge {
+	a.extra.DbCollectionName = attr.AttrDbCollectionName()
+	return a
+}
+func (a CosmosdbClientOperationRequestCharge) WithDbNamespace(attr interface{ AttrDbNamespace() db.AttrNamespace }) CosmosdbClientOperationRequestCharge {
+	a.extra.DbNamespace = attr.AttrDbNamespace()
+	return a
+}
+func (a CosmosdbClientOperationRequestCharge) WithDbResponseStatusCode(attr interface {
+	AttrDbResponseStatusCode() db.AttrResponseStatusCode
+}) CosmosdbClientOperationRequestCharge {
+	a.extra.DbResponseStatusCode = attr.AttrDbResponseStatusCode()
+	return a
+}
+func (a CosmosdbClientOperationRequestCharge) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) CosmosdbClientOperationRequestCharge {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a CosmosdbClientOperationRequestCharge) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) CosmosdbClientOperationRequestCharge {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a CosmosdbClientOperationRequestCharge) WithAzureCosmosdbOperationContactedRegions(attr interface {
+	AttrAzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions
+}) CosmosdbClientOperationRequestCharge {
+	a.extra.AzureCosmosdbOperationContactedRegions = attr.AttrAzureCosmosdbOperationContactedRegions()
+	return a
+}
+func (a CosmosdbClientOperationRequestCharge) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) CosmosdbClientOperationRequestCharge {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
 }
 
 type CosmosdbClientOperationRequestChargeExtra struct {
@@ -322,91 +368,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Name of the database host.\n",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If using a port other than the default port for this DBMS and if `server.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
-                    "brief": "The name of the database, fully qualified within the server address and port.\n",
-                    "examples": [
-                        "customers",
-                        "test.users",
-                    ],
-                    "name": "db.namespace",
-                    "requirement_level": {
-                        "conditionally_required": "If available.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Database response status code.",
-                    "examples": [
-                        "102",
-                        "ORA-17002",
-                        "08P01",
-                        "404",
-                    ],
-                    "name": "db.response.status_code",
-                    "note": "The status code returned by the database. Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.\nSemantic conventions for individual database systems SHOULD document what `db.response.status_code` means in the context of that system.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If the operation failed and status code is available.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "timeout",
-                        "java.net.UnknownHostException",
-                        "server_certificate_invalid",
-                        "500",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD match the `db.response.status_code` returned by the database or the client library, or the canonical name of exception that occurred.\nWhen using canonical exception type name, instrumentation SHOULD do the best effort to report the most relevant type. For example, if the original exception is wrapped into a generic one, the original exception SHOULD be preferred.\nInstrumentations SHOULD document how `error.type` is populated.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If and only if the operation failed.",
-                    },
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
-                },
-                {
                     "brief": "Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).",
                     "examples": [
                         "Eventual",
@@ -467,6 +428,19 @@ State {
                     },
                 },
                 {
+                    "brief": "Cosmos DB sub status code.",
+                    "examples": [
+                        1000,
+                        1002,
+                    ],
+                    "name": "azure.cosmosdb.response.sub_status_code",
+                    "requirement_level": {
+                        "conditionally_required": "when response was received and contained sub-code.",
+                    },
+                    "stability": "development",
+                    "type": "int",
+                },
+                {
                     "brief": "List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.\n",
                     "examples": [
                         [
@@ -484,19 +458,6 @@ State {
                     "type": "string[]",
                 },
                 {
-                    "brief": "Cosmos DB sub status code.",
-                    "examples": [
-                        1000,
-                        1002,
-                    ],
-                    "name": "azure.cosmosdb.response.sub_status_code",
-                    "requirement_level": {
-                        "conditionally_required": "when response was received and contained sub-code.",
-                    },
-                    "stability": "development",
-                    "type": "int",
-                },
-                {
                     "brief": "Cosmos DB container name.\n",
                     "examples": [
                         "public.users",
@@ -504,6 +465,19 @@ State {
                     ],
                     "name": "db.collection.name",
                     "note": "It is RECOMMENDED to capture the value as provided by the application without attempting to do any case normalization.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If available.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The name of the database, fully qualified within the server address and port.\n",
+                    "examples": [
+                        "customers",
+                        "test.users",
+                    ],
+                    "name": "db.namespace",
                     "requirement_level": {
                         "conditionally_required": "If available.",
                     },
@@ -522,6 +496,78 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": "string",
+                },
+                {
+                    "brief": "Database response status code.",
+                    "examples": [
+                        "102",
+                        "ORA-17002",
+                        "08P01",
+                        "404",
+                    ],
+                    "name": "db.response.status_code",
+                    "note": "The status code returned by the database. Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.\nSemantic conventions for individual database systems SHOULD document what `db.response.status_code` means in the context of that system.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If the operation failed and status code is available.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "timeout",
+                        "java.net.UnknownHostException",
+                        "server_certificate_invalid",
+                        "500",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD match the `db.response.status_code` returned by the database or the client library, or the canonical name of exception that occurred.\nWhen using canonical exception type name, instrumentation SHOULD do the best effort to report the most relevant type. For example, if the original exception is wrapped into a generic one, the original exception SHOULD be preferred.\nInstrumentations SHOULD document how `error.type` is populated.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If and only if the operation failed.",
+                    },
+                    "stability": "stable",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
+                    "brief": "Name of the database host.\n",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If using a port other than the default port for this DBMS and if `server.address` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "[Request units](https://learn.microsoft.com/azure/cosmos-db/request-units) consumed by the operation",

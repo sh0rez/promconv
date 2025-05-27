@@ -11,6 +11,7 @@ import (
 // Duration of a pipeline run grouped by pipeline, state and result.
 type PipelineRunDuration struct {
 	*prometheus.HistogramVec
+	extra PipelineRunDurationExtra
 }
 
 func NewPipelineRunDuration() PipelineRunDuration {
@@ -27,7 +28,7 @@ func (m PipelineRunDuration) With(pipelineName AttrPipelineName, pipelineRunStat
 	AttrErrorType() error.AttrType
 }) prometheus.Observer {
 	if extra == nil {
-		extra = PipelineRunDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(pipelineName),
@@ -35,6 +36,15 @@ func (m PipelineRunDuration) With(pipelineName AttrPipelineName, pipelineRunStat
 		string(extra.AttrCicdPipelineResult()),
 		string(extra.AttrErrorType()),
 	)
+}
+
+func (a PipelineRunDuration) WithCicdPipelineResult(attr interface{ AttrCicdPipelineResult() AttrPipelineResult }) PipelineRunDuration {
+	a.extra.CicdPipelineResult = attr.AttrCicdPipelineResult()
+	return a
+}
+func (a PipelineRunDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) PipelineRunDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
 }
 
 type PipelineRunDurationExtra struct {

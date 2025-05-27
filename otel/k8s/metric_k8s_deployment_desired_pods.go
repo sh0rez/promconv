@@ -7,6 +7,7 @@ import (
 // Number of desired replica pods in this deployment
 type DeploymentDesiredPods struct {
 	*prometheus.GaugeVec
+	extra DeploymentDesiredPodsExtra
 }
 
 func NewDeploymentDesiredPods() DeploymentDesiredPods {
@@ -21,7 +22,7 @@ func NewDeploymentDesiredPods() DeploymentDesiredPods {
 func (m DeploymentDesiredPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = DeploymentDesiredPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

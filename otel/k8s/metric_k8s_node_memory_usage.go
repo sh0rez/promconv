@@ -7,6 +7,7 @@ import (
 // Memory usage of the Node
 type NodeMemoryUsage struct {
 	*prometheus.GaugeVec
+	extra NodeMemoryUsageExtra
 }
 
 func NewNodeMemoryUsage() NodeMemoryUsage {
@@ -21,7 +22,7 @@ func NewNodeMemoryUsage() NodeMemoryUsage {
 func (m NodeMemoryUsage) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = NodeMemoryUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

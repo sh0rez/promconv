@@ -30,6 +30,7 @@ import (
 // {{ctx.brief | trim}}
 type {{Type}} struct {
      *prometheus.{{Instr}}Vec
+     extra {{AttrExtra}}
 }
 
 func New{{Type}}() {{Type}} {
@@ -59,7 +60,7 @@ extra interface {
     Attr{{ attr.name | pascal_case}}() {{type}}Attr{{name|pascal_case}}
 {% endfor -%}
 }) prometheus.{{Instr | replace("Histogram", "Observer")}} {
-    if extra == nil { extra = {{AttrExtra}}{} }
+    if extra == nil { extra = m.extra }
      return m.WithLabelValues(
         {% for attr in attributes | required -%}
             {%- set id = attr.name | split_id -%}
@@ -71,6 +72,16 @@ extra interface {
         {% endfor %}
      )
 }
+
+{% for attr in attributes | not_required -%}
+    {%- set id = attr.name | split_id -%}
+    {%- set name = id[1:] | join(".") | pascal_case -%}
+    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
+    func (a {{Type}}) With{{attr.name|pascal_case}} (attr interface { Attr{{ attr.name | pascal_case}}() {{type}}Attr{{name|pascal_case}} } ) {{Type}} {
+        a.extra.{{attr.name|pascal_case}} = attr.Attr{{ attr.name | pascal_case}}()
+        return a
+    }
+{% endfor %}
 
 type {{AttrExtra}} struct {
 {% for attr in attributes | not_required -%}

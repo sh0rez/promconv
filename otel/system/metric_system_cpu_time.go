@@ -7,6 +7,7 @@ import (
 // Deprecated. Use `cpu.time` instead.
 type CpuTime struct {
 	*prometheus.CounterVec
+	extra CpuTimeExtra
 }
 
 func NewCpuTime() CpuTime {
@@ -21,7 +22,7 @@ func NewCpuTime() CpuTime {
 func (m CpuTime) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = CpuTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

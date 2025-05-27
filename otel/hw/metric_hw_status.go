@@ -7,6 +7,7 @@ import (
 // Operational status: `1` (true) or `0` (false) for each of the possible states
 type Status struct {
 	*prometheus.GaugeVec
+	extra StatusExtra
 }
 
 func NewStatus() Status {
@@ -23,7 +24,7 @@ func (m Status) With(id AttrId, state AttrState, kind AttrType, extra interface 
 	AttrHwParent() AttrParent
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = StatusExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(id),
@@ -32,6 +33,15 @@ func (m Status) With(id AttrId, state AttrState, kind AttrType, extra interface 
 		string(extra.AttrHwName()),
 		string(extra.AttrHwParent()),
 	)
+}
+
+func (a Status) WithHwName(attr interface{ AttrHwName() AttrName }) Status {
+	a.extra.HwName = attr.AttrHwName()
+	return a
+}
+func (a Status) WithHwParent(attr interface{ AttrHwParent() AttrParent }) Status {
+	a.extra.HwParent = attr.AttrHwParent()
+	return a
 }
 
 type StatusExtra struct {

@@ -7,6 +7,7 @@ import (
 // Measure of max obtainable memory.
 type MemoryLimit struct {
 	*prometheus.GaugeVec
+	extra MemoryLimitExtra
 }
 
 func NewMemoryLimit() MemoryLimit {
@@ -23,12 +24,21 @@ func (m MemoryLimit) With(extra interface {
 	AttrJvmMemoryType() AttrMemoryType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryLimitExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmMemoryPoolName()),
 		string(extra.AttrJvmMemoryType()),
 	)
+}
+
+func (a MemoryLimit) WithJvmMemoryPoolName(attr interface{ AttrJvmMemoryPoolName() AttrMemoryPoolName }) MemoryLimit {
+	a.extra.JvmMemoryPoolName = attr.AttrJvmMemoryPoolName()
+	return a
+}
+func (a MemoryLimit) WithJvmMemoryType(attr interface{ AttrJvmMemoryType() AttrMemoryType }) MemoryLimit {
+	a.extra.JvmMemoryType = attr.AttrJvmMemoryType()
+	return a
 }
 
 type MemoryLimitExtra struct {

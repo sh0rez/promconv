@@ -11,6 +11,7 @@ import (
 // Count of packets that are dropped or discarded even though there was no error
 type NetworkDropped struct {
 	*prometheus.CounterVec
+	extra NetworkDroppedExtra
 }
 
 func NewNetworkDropped() NetworkDropped {
@@ -27,12 +28,25 @@ func (m NetworkDropped) With(extra interface {
 	AttrNetworkIoDirection() network.AttrIoDirection
 }) prometheus.Counter {
 	if extra == nil {
-		extra = NetworkDroppedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkInterfaceName()),
 		string(extra.AttrNetworkIoDirection()),
 	)
+}
+
+func (a NetworkDropped) WithNetworkInterfaceName(attr interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+}) NetworkDropped {
+	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	return a
+}
+func (a NetworkDropped) WithNetworkIoDirection(attr interface {
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) NetworkDropped {
+	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	return a
 }
 
 type NetworkDroppedExtra struct {

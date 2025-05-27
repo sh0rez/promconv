@@ -7,6 +7,7 @@ import (
 // The number of times there was contention when trying to acquire a monitor lock since the process has started.
 type MonitorLockContentions struct {
 	*prometheus.CounterVec
+	extra MonitorLockContentionsExtra
 }
 
 func NewMonitorLockContentions() MonitorLockContentions {
@@ -21,7 +22,7 @@ func NewMonitorLockContentions() MonitorLockContentions {
 func (m MonitorLockContentions) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = MonitorLockContentionsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

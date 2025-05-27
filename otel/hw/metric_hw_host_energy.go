@@ -7,6 +7,7 @@ import (
 // Total energy consumed by the entire physical host, in joules
 type HostEnergy struct {
 	*prometheus.CounterVec
+	extra HostEnergyExtra
 }
 
 func NewHostEnergy() HostEnergy {
@@ -23,13 +24,22 @@ func (m HostEnergy) With(id AttrId, extra interface {
 	AttrHwParent() AttrParent
 }) prometheus.Counter {
 	if extra == nil {
-		extra = HostEnergyExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(id),
 		string(extra.AttrHwName()),
 		string(extra.AttrHwParent()),
 	)
+}
+
+func (a HostEnergy) WithHwName(attr interface{ AttrHwName() AttrName }) HostEnergy {
+	a.extra.HwName = attr.AttrHwName()
+	return a
+}
+func (a HostEnergy) WithHwParent(attr interface{ AttrHwParent() AttrParent }) HostEnergy {
+	a.extra.HwParent = attr.AttrHwParent()
+	return a
 }
 
 type HostEnergyExtra struct {

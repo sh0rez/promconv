@@ -7,6 +7,7 @@ import (
 // The number of replica pods created for this statefulset with a Ready Condition
 type StatefulsetReadyPods struct {
 	*prometheus.GaugeVec
+	extra StatefulsetReadyPodsExtra
 }
 
 func NewStatefulsetReadyPods() StatefulsetReadyPods {
@@ -21,7 +22,7 @@ func NewStatefulsetReadyPods() StatefulsetReadyPods {
 func (m StatefulsetReadyPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = StatefulsetReadyPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

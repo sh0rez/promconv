@@ -7,6 +7,7 @@ import (
 // Deprecated, use `k8s.replicationcontroller.available_pods` instead.
 type ReplicationControllerAvailablePods struct {
 	*prometheus.GaugeVec
+	extra ReplicationControllerAvailablePodsExtra
 }
 
 func NewReplicationControllerAvailablePods() ReplicationControllerAvailablePods {
@@ -21,7 +22,7 @@ func NewReplicationControllerAvailablePods() ReplicationControllerAvailablePods 
 func (m ReplicationControllerAvailablePods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ReplicationControllerAvailablePodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

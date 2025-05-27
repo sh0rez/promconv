@@ -7,6 +7,7 @@ import (
 // The total storage capacity of the disk
 type DiskLimit struct {
 	*prometheus.GaugeVec
+	extra DiskLimitExtra
 }
 
 func NewDiskLimit() DiskLimit {
@@ -22,11 +23,16 @@ func (m DiskLimit) With(extra interface {
 	AttrSystemDevice() AttrDevice
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = DiskLimitExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemDevice()),
 	)
+}
+
+func (a DiskLimit) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskLimit {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
 }
 
 type DiskLimitExtra struct {

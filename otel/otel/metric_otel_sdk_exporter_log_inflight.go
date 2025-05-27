@@ -11,6 +11,7 @@ import (
 // The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed)
 type SdkExporterLogInflight struct {
 	*prometheus.GaugeVec
+	extra SdkExporterLogInflightExtra
 }
 
 func NewSdkExporterLogInflight() SdkExporterLogInflight {
@@ -29,7 +30,7 @@ func (m SdkExporterLogInflight) With(extra interface {
 	AttrServerPort() server.AttrPort
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SdkExporterLogInflightExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrOtelComponentName()),
@@ -37,6 +38,23 @@ func (m SdkExporterLogInflight) With(extra interface {
 		string(extra.AttrServerAddress()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a SdkExporterLogInflight) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkExporterLogInflight {
+	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+	return a
+}
+func (a SdkExporterLogInflight) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkExporterLogInflight {
+	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+	return a
+}
+func (a SdkExporterLogInflight) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) SdkExporterLogInflight {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a SdkExporterLogInflight) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) SdkExporterLogInflight {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type SdkExporterLogInflightExtra struct {
@@ -250,36 +268,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
                     "examples": [
                         "batching_span_processor",
@@ -418,6 +406,36 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": "string",
+                },
+                {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed)",

@@ -7,6 +7,7 @@ import (
 // The number of lines added/removed in a ref (branch) relative to the ref from the `vcs.ref.base.name` attribute.
 type RefLinesDelta struct {
 	*prometheus.GaugeVec
+	extra RefLinesDeltaExtra
 }
 
 func NewRefLinesDelta() RefLinesDelta {
@@ -25,7 +26,7 @@ func (m RefLinesDelta) With(lineChangeType AttrLineChangeType, refBaseName AttrR
 	AttrVcsProviderName() AttrProviderName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = RefLinesDeltaExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(lineChangeType),
@@ -39,6 +40,23 @@ func (m RefLinesDelta) With(lineChangeType AttrLineChangeType, refBaseName AttrR
 		string(extra.AttrVcsRepositoryName()),
 		string(extra.AttrVcsProviderName()),
 	)
+}
+
+func (a RefLinesDelta) WithVcsChangeId(attr interface{ AttrVcsChangeId() AttrChangeId }) RefLinesDelta {
+	a.extra.VcsChangeId = attr.AttrVcsChangeId()
+	return a
+}
+func (a RefLinesDelta) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) RefLinesDelta {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a RefLinesDelta) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) RefLinesDelta {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a RefLinesDelta) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) RefLinesDelta {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
 }
 
 type RefLinesDeltaExtra struct {

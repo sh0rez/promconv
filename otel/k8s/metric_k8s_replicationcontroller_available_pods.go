@@ -7,6 +7,7 @@ import (
 // Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller
 type ReplicationcontrollerAvailablePods struct {
 	*prometheus.GaugeVec
+	extra ReplicationcontrollerAvailablePodsExtra
 }
 
 func NewReplicationcontrollerAvailablePods() ReplicationcontrollerAvailablePods {
@@ -21,7 +22,7 @@ func NewReplicationcontrollerAvailablePods() ReplicationcontrollerAvailablePods 
 func (m ReplicationcontrollerAvailablePods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ReplicationcontrollerAvailablePodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

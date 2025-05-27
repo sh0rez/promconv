@@ -7,6 +7,7 @@ import (
 // The number of garbage collections that have occurred since the process has started.
 type GcCollections struct {
 	*prometheus.CounterVec
+	extra GcCollectionsExtra
 }
 
 func NewGcCollections() GcCollections {
@@ -21,7 +22,7 @@ func NewGcCollections() GcCollections {
 func (m GcCollections) With(gcHeapGeneration AttrGcHeapGeneration, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = GcCollectionsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(gcHeapGeneration),

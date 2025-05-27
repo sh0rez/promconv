@@ -7,6 +7,7 @@ import (
 // Distribution of max memory usage per invocation
 type MemUsage struct {
 	*prometheus.HistogramVec
+	extra MemUsageExtra
 }
 
 func NewMemUsage() MemUsage {
@@ -22,11 +23,16 @@ func (m MemUsage) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Observer {
 	if extra == nil {
-		extra = MemUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a MemUsage) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) MemUsage {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type MemUsageExtra struct {

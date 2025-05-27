@@ -11,6 +11,7 @@ import (
 // CPU time used by the process.
 type ProcessCpuTime struct {
 	*prometheus.CounterVec
+	extra ProcessCpuTimeExtra
 }
 
 func NewProcessCpuTime() ProcessCpuTime {
@@ -25,7 +26,7 @@ func NewProcessCpuTime() ProcessCpuTime {
 func (m ProcessCpuTime) With(mode cpu.AttrMode, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ProcessCpuTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(mode),

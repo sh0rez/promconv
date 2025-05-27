@@ -7,6 +7,7 @@ import (
 // Number of invocation timeouts
 type Timeouts struct {
 	*prometheus.CounterVec
+	extra TimeoutsExtra
 }
 
 func NewTimeouts() Timeouts {
@@ -22,11 +23,16 @@ func (m Timeouts) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Counter {
 	if extra == nil {
-		extra = TimeoutsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a Timeouts) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) Timeouts {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type TimeoutsExtra struct {

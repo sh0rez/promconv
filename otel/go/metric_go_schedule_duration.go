@@ -7,6 +7,7 @@ import (
 // The time goroutines have spent in the scheduler in a runnable state before actually running.
 type ScheduleDuration struct {
 	*prometheus.HistogramVec
+	extra ScheduleDurationExtra
 }
 
 func NewScheduleDuration() ScheduleDuration {
@@ -21,7 +22,7 @@ func NewScheduleDuration() ScheduleDuration {
 func (m ScheduleDuration) With(extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ScheduleDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

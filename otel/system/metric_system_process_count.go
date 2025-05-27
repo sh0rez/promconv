@@ -7,6 +7,7 @@ import (
 // Total number of processes in each state
 type ProcessCount struct {
 	*prometheus.GaugeVec
+	extra ProcessCountExtra
 }
 
 func NewProcessCount() ProcessCount {
@@ -22,11 +23,16 @@ func (m ProcessCount) With(extra interface {
 	AttrSystemProcessStatus() AttrProcessStatus
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ProcessCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemProcessStatus()),
 	)
+}
+
+func (a ProcessCount) WithSystemProcessStatus(attr interface{ AttrSystemProcessStatus() AttrProcessStatus }) ProcessCount {
+	a.extra.SystemProcessStatus = attr.AttrSystemProcessStatus()
+	return a
 }
 
 type ProcessCountExtra struct {

@@ -13,6 +13,7 @@ import (
 // Duration of database client operations.
 type ClientOperationDuration struct {
 	*prometheus.HistogramVec
+	extra ClientOperationDurationExtra
 }
 
 func NewClientOperationDuration() ClientOperationDuration {
@@ -39,7 +40,7 @@ func (m ClientOperationDuration) With(systemName AttrSystemName, extra interface
 	AttrDbQueryText() AttrQueryText
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientOperationDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(systemName),
@@ -56,6 +57,59 @@ func (m ClientOperationDuration) With(systemName AttrSystemName, extra interface
 		string(extra.AttrServerAddress()),
 		string(extra.AttrDbQueryText()),
 	)
+}
+
+func (a ClientOperationDuration) WithDbCollectionName(attr interface{ AttrDbCollectionName() AttrCollectionName }) ClientOperationDuration {
+	a.extra.DbCollectionName = attr.AttrDbCollectionName()
+	return a
+}
+func (a ClientOperationDuration) WithDbNamespace(attr interface{ AttrDbNamespace() AttrNamespace }) ClientOperationDuration {
+	a.extra.DbNamespace = attr.AttrDbNamespace()
+	return a
+}
+func (a ClientOperationDuration) WithDbOperationName(attr interface{ AttrDbOperationName() AttrOperationName }) ClientOperationDuration {
+	a.extra.DbOperationName = attr.AttrDbOperationName()
+	return a
+}
+func (a ClientOperationDuration) WithDbResponseStatusCode(attr interface{ AttrDbResponseStatusCode() AttrResponseStatusCode }) ClientOperationDuration {
+	a.extra.DbResponseStatusCode = attr.AttrDbResponseStatusCode()
+	return a
+}
+func (a ClientOperationDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientOperationDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ClientOperationDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientOperationDuration {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a ClientOperationDuration) WithDbQuerySummary(attr interface{ AttrDbQuerySummary() AttrQuerySummary }) ClientOperationDuration {
+	a.extra.DbQuerySummary = attr.AttrDbQuerySummary()
+	return a
+}
+func (a ClientOperationDuration) WithDbStoredProcedureName(attr interface {
+	AttrDbStoredProcedureName() AttrStoredProcedureName
+}) ClientOperationDuration {
+	a.extra.DbStoredProcedureName = attr.AttrDbStoredProcedureName()
+	return a
+}
+func (a ClientOperationDuration) WithNetworkPeerAddress(attr interface {
+	AttrNetworkPeerAddress() network.AttrPeerAddress
+}) ClientOperationDuration {
+	a.extra.NetworkPeerAddress = attr.AttrNetworkPeerAddress()
+	return a
+}
+func (a ClientOperationDuration) WithNetworkPeerPort(attr interface{ AttrNetworkPeerPort() network.AttrPeerPort }) ClientOperationDuration {
+	a.extra.NetworkPeerPort = attr.AttrNetworkPeerPort()
+	return a
+}
+func (a ClientOperationDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientOperationDuration {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ClientOperationDuration) WithDbQueryText(attr interface{ AttrDbQueryText() AttrQueryText }) ClientOperationDuration {
+	a.extra.DbQueryText = attr.AttrDbQueryText()
+	return a
 }
 
 type ClientOperationDurationExtra struct {
@@ -652,34 +706,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Name of the database host.\n",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If using a port other than the default port for this DBMS and if `server.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "Database response status code.",
                     "examples": [
                         "102",
@@ -724,31 +750,32 @@ State {
                     },
                 },
                 {
-                    "brief": "The name of a stored procedure within the database.",
+                    "brief": "Name of the database host.\n",
                     "examples": [
-                        "GetCustomer",
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
                     ],
-                    "name": "db.stored_procedure.name",
-                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nFor batch operations, if the individual operations are known to have the same\nstored procedure name then that stored procedure name SHOULD be used.\n",
-                    "requirement_level": {
-                        "recommended": "If operation applies to a specific stored procedure.",
-                    },
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
                     "stability": "stable",
                     "type": "string",
                 },
                 {
-                    "brief": "Peer address of the database node where the operation was performed.",
+                    "brief": "Server port number.",
                     "examples": [
-                        "10.1.2.80",
-                        "/tmp/my.sock",
+                        80,
+                        8080,
+                        443,
                     ],
-                    "name": "network.peer.address",
-                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
                     "requirement_level": {
-                        "recommended": "If applicable for this database system.",
+                        "conditionally_required": "If using a port other than the default port for this DBMS and if `server.address` is set.",
                     },
                     "stability": "stable",
-                    "type": "string",
+                    "type": "int",
                 },
                 {
                     "brief": "Low cardinality summary of a database query.\n",
@@ -817,6 +844,19 @@ State {
                     "name": "db.query.text",
                     "note": "For sanitization see [Sanitization of `db.query.text`](/docs/database/database-spans.md#sanitization-of-dbquerytext).\nFor batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator `; ` or some other database system specific separator if more applicable.\nParameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.\n",
                     "requirement_level": "opt_in",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The name of a stored procedure within the database.",
+                    "examples": [
+                        "GetCustomer",
+                    ],
+                    "name": "db.stored_procedure.name",
+                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nFor batch operations, if the individual operations are known to have the same\nstored procedure name then that stored procedure name SHOULD be used.\n",
+                    "requirement_level": {
+                        "recommended": "If operation applies to a specific stored procedure.",
+                    },
                     "stability": "stable",
                     "type": "string",
                 },
@@ -1159,6 +1199,20 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Peer address of the database node where the operation was performed.",
+                    "examples": [
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "network.peer.address",
+                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
+                    "requirement_level": {
+                        "recommended": "If applicable for this database system.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
                 },
                 {
                     "brief": "Peer port number of the network connection.",

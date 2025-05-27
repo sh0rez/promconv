@@ -7,6 +7,7 @@ import (
 // An estimate of how much memory is available for starting new applications, without causing swapping
 type LinuxMemoryAvailable struct {
 	*prometheus.GaugeVec
+	extra LinuxMemoryAvailableExtra
 }
 
 func NewLinuxMemoryAvailable() LinuxMemoryAvailable {
@@ -21,7 +22,7 @@ func NewLinuxMemoryAvailable() LinuxMemoryAvailable {
 func (m LinuxMemoryAvailable) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = LinuxMemoryAvailableExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

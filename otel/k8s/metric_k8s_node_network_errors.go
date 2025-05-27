@@ -11,6 +11,7 @@ import (
 // Node network errors
 type NodeNetworkErrors struct {
 	*prometheus.CounterVec
+	extra NodeNetworkErrorsExtra
 }
 
 func NewNodeNetworkErrors() NodeNetworkErrors {
@@ -27,12 +28,25 @@ func (m NodeNetworkErrors) With(extra interface {
 	AttrNetworkIoDirection() network.AttrIoDirection
 }) prometheus.Counter {
 	if extra == nil {
-		extra = NodeNetworkErrorsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkInterfaceName()),
 		string(extra.AttrNetworkIoDirection()),
 	)
+}
+
+func (a NodeNetworkErrors) WithNetworkInterfaceName(attr interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+}) NodeNetworkErrors {
+	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	return a
+}
+func (a NodeNetworkErrors) WithNetworkIoDirection(attr interface {
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) NodeNetworkErrors {
+	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	return a
 }
 
 type NodeNetworkErrorsExtra struct {

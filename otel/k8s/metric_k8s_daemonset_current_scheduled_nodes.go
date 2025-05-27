@@ -7,6 +7,7 @@ import (
 // Number of nodes that are running at least 1 daemon pod and are supposed to run the daemon pod
 type DaemonsetCurrentScheduledNodes struct {
 	*prometheus.GaugeVec
+	extra DaemonsetCurrentScheduledNodesExtra
 }
 
 func NewDaemonsetCurrentScheduledNodes() DaemonsetCurrentScheduledNodes {
@@ -21,7 +22,7 @@ func NewDaemonsetCurrentScheduledNodes() DaemonsetCurrentScheduledNodes {
 func (m DaemonsetCurrentScheduledNodes) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = DaemonsetCurrentScheduledNodesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

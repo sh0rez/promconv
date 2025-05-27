@@ -7,6 +7,7 @@ import (
 // The time the Pod has been running
 type PodUptime struct {
 	*prometheus.GaugeVec
+	extra PodUptimeExtra
 }
 
 func NewPodUptime() PodUptime {
@@ -21,7 +22,7 @@ func NewPodUptime() PodUptime {
 func (m PodUptime) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = PodUptimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

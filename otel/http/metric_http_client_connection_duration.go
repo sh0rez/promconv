@@ -13,6 +13,7 @@ import (
 // The duration of the successfully established outbound HTTP connections.
 type ClientConnectionDuration struct {
 	*prometheus.HistogramVec
+	extra ClientConnectionDurationExtra
 }
 
 func NewClientConnectionDuration() ClientConnectionDuration {
@@ -30,7 +31,7 @@ func (m ClientConnectionDuration) With(address server.AttrAddress, port server.A
 	AttrUrlScheme() url.AttrScheme
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientConnectionDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(address),
@@ -39,6 +40,23 @@ func (m ClientConnectionDuration) With(address server.AttrAddress, port server.A
 		string(extra.AttrNetworkProtocolVersion()),
 		string(extra.AttrUrlScheme()),
 	)
+}
+
+func (a ClientConnectionDuration) WithNetworkPeerAddress(attr interface {
+	AttrNetworkPeerAddress() network.AttrPeerAddress
+}) ClientConnectionDuration {
+	a.extra.NetworkPeerAddress = attr.AttrNetworkPeerAddress()
+	return a
+}
+func (a ClientConnectionDuration) WithNetworkProtocolVersion(attr interface {
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+}) ClientConnectionDuration {
+	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	return a
+}
+func (a ClientConnectionDuration) WithUrlScheme(attr interface{ AttrUrlScheme() url.AttrScheme }) ClientConnectionDuration {
+	a.extra.UrlScheme = attr.AttrUrlScheme()
+	return a
 }
 
 type ClientConnectionDurationExtra struct {

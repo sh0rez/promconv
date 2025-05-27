@@ -7,6 +7,7 @@ import (
 // Number of classes unloaded since JVM start.
 type ClassUnloaded struct {
 	*prometheus.CounterVec
+	extra ClassUnloadedExtra
 }
 
 func NewClassUnloaded() ClassUnloaded {
@@ -21,7 +22,7 @@ func NewClassUnloaded() ClassUnloaded {
 func (m ClassUnloaded) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ClassUnloadedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

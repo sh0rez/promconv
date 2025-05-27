@@ -7,6 +7,7 @@ import (
 // Number of requests that are currently queued, waiting to acquire a rate limiting lease.
 type RateLimitingQueuedRequests struct {
 	*prometheus.GaugeVec
+	extra RateLimitingQueuedRequestsExtra
 }
 
 func NewRateLimitingQueuedRequests() RateLimitingQueuedRequests {
@@ -22,11 +23,16 @@ func (m RateLimitingQueuedRequests) With(extra interface {
 	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = RateLimitingQueuedRequestsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrAspnetcoreRateLimitingPolicy()),
 	)
+}
+
+func (a RateLimitingQueuedRequests) WithAspnetcoreRateLimitingPolicy(attr interface{ AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) RateLimitingQueuedRequests {
+	a.extra.AspnetcoreRateLimitingPolicy = attr.AttrAspnetcoreRateLimitingPolicy()
+	return a
 }
 
 type RateLimitingQueuedRequestsExtra struct {

@@ -11,6 +11,7 @@ import (
 // Difference in process.cpu.time since the last measurement, divided by the elapsed time and number of CPUs available to the process.
 type CpuUtilization struct {
 	*prometheus.GaugeVec
+	extra CpuUtilizationExtra
 }
 
 func NewCpuUtilization() CpuUtilization {
@@ -26,11 +27,16 @@ func (m CpuUtilization) With(extra interface {
 	AttrCpuMode() cpu.AttrMode
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CpuUtilizationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrCpuMode()),
 	)
+}
+
+func (a CpuUtilization) WithCpuMode(attr interface{ AttrCpuMode() cpu.AttrMode }) CpuUtilization {
+	a.extra.CpuMode = attr.AttrCpuMode()
+	return a
 }
 
 type CpuUtilizationExtra struct {

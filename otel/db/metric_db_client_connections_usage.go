@@ -7,6 +7,7 @@ import (
 // Deprecated, use `db.client.connection.count` instead.
 type ClientConnectionsUsage struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionsUsageExtra
 }
 
 func NewClientConnectionsUsage() ClientConnectionsUsage {
@@ -21,7 +22,7 @@ func NewClientConnectionsUsage() ClientConnectionsUsage {
 func (m ClientConnectionsUsage) With(clientConnectionsPoolName AttrClientConnectionsPoolName, clientConnectionsState AttrClientConnectionsState, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionsUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),

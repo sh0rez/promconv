@@ -7,6 +7,7 @@ import (
 // The number of connections that are currently in state described by the `state` attribute
 type ClientConnectionCount struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionCountExtra
 }
 
 func NewClientConnectionCount() ClientConnectionCount {
@@ -21,7 +22,7 @@ func NewClientConnectionCount() ClientConnectionCount {
 func (m ClientConnectionCount) With(clientConnectionPoolName AttrClientConnectionPoolName, clientConnectionState AttrClientConnectionState, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),

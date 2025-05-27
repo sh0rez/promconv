@@ -7,6 +7,7 @@ import (
 // Deprecated, use `otel.sdk.span.ended` instead.
 type SdkSpanEndedCount struct {
 	*prometheus.CounterVec
+	extra SdkSpanEndedCountExtra
 }
 
 func NewSdkSpanEndedCount() SdkSpanEndedCount {
@@ -21,7 +22,7 @@ func NewSdkSpanEndedCount() SdkSpanEndedCount {
 func (m SdkSpanEndedCount) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = SdkSpanEndedCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

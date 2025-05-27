@@ -7,6 +7,7 @@ import (
 // Measures the duration of the function's logic execution
 type InvokeDuration struct {
 	*prometheus.HistogramVec
+	extra InvokeDurationExtra
 }
 
 func NewInvokeDuration() InvokeDuration {
@@ -22,11 +23,16 @@ func (m InvokeDuration) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Observer {
 	if extra == nil {
-		extra = InvokeDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a InvokeDuration) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) InvokeDuration {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type InvokeDurationExtra struct {

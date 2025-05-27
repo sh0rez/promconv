@@ -7,6 +7,7 @@ import (
 // Count of bytes of intermediate language that have been compiled since the process has started.
 type JitCompiledIlSize struct {
 	*prometheus.CounterVec
+	extra JitCompiledIlSizeExtra
 }
 
 func NewJitCompiledIlSize() JitCompiledIlSize {
@@ -21,7 +22,7 @@ func NewJitCompiledIlSize() JitCompiledIlSize {
 func (m JitCompiledIlSize) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = JitCompiledIlSizeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

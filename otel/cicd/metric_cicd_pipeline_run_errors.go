@@ -11,6 +11,7 @@ import (
 // The number of errors encountered in pipeline runs (eg. compile, test failures).
 type PipelineRunErrors struct {
 	*prometheus.CounterVec
+	extra PipelineRunErrorsExtra
 }
 
 func NewPipelineRunErrors() PipelineRunErrors {
@@ -25,7 +26,7 @@ func NewPipelineRunErrors() PipelineRunErrors {
 func (m PipelineRunErrors) With(pipelineName AttrPipelineName, kind error.AttrType, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = PipelineRunErrorsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(pipelineName),

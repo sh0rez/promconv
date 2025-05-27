@@ -7,6 +7,7 @@ import (
 // The upper limit for the number of replica pods to which the autoscaler can scale up
 type HpaMaxPods struct {
 	*prometheus.GaugeVec
+	extra HpaMaxPodsExtra
 }
 
 func NewHpaMaxPods() HpaMaxPods {
@@ -21,7 +22,7 @@ func NewHpaMaxPods() HpaMaxPods {
 func (m HpaMaxPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = HpaMaxPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

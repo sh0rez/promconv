@@ -7,6 +7,7 @@ import (
 // Deprecated. Use `cpu.frequency` instead.
 type CpuFrequency struct {
 	*prometheus.GaugeVec
+	extra CpuFrequencyExtra
 }
 
 func NewCpuFrequency() CpuFrequency {
@@ -21,7 +22,7 @@ func NewCpuFrequency() CpuFrequency {
 func (m CpuFrequency) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CpuFrequencyExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

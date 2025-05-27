@@ -7,6 +7,7 @@ import (
 // The number of created spans for which the end operation was called
 type SdkSpanEnded struct {
 	*prometheus.CounterVec
+	extra SdkSpanEndedExtra
 }
 
 func NewSdkSpanEnded() SdkSpanEnded {
@@ -22,11 +23,16 @@ func (m SdkSpanEnded) With(extra interface {
 	AttrOtelSpanSamplingResult() AttrSpanSamplingResult
 }) prometheus.Counter {
 	if extra == nil {
-		extra = SdkSpanEndedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrOtelSpanSamplingResult()),
 	)
+}
+
+func (a SdkSpanEnded) WithOtelSpanSamplingResult(attr interface{ AttrOtelSpanSamplingResult() AttrSpanSamplingResult }) SdkSpanEnded {
+	a.extra.OtelSpanSamplingResult = attr.AttrOtelSpanSamplingResult()
+	return a
 }
 
 type SdkSpanEndedExtra struct {

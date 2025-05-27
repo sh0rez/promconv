@@ -7,6 +7,7 @@ import (
 // The amount of committed virtual memory.
 type MemoryVirtual struct {
 	*prometheus.GaugeVec
+	extra MemoryVirtualExtra
 }
 
 func NewMemoryVirtual() MemoryVirtual {
@@ -21,7 +22,7 @@ func NewMemoryVirtual() MemoryVirtual {
 func (m MemoryVirtual) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryVirtualExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

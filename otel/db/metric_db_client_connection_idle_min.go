@@ -7,6 +7,7 @@ import (
 // The minimum number of idle open connections allowed
 type ClientConnectionIdleMin struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionIdleMinExtra
 }
 
 func NewClientConnectionIdleMin() ClientConnectionIdleMin {
@@ -21,7 +22,7 @@ func NewClientConnectionIdleMin() ClientConnectionIdleMin {
 func (m ClientConnectionIdleMin) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionIdleMinExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),

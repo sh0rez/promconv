@@ -7,6 +7,7 @@ import (
 // Heap size target for the end of the GC cycle.
 type MemoryGcGoal struct {
 	*prometheus.GaugeVec
+	extra MemoryGcGoalExtra
 }
 
 func NewMemoryGcGoal() MemoryGcGoal {
@@ -21,7 +22,7 @@ func NewMemoryGcGoal() MemoryGcGoal {
 func (m MemoryGcGoal) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryGcGoalExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

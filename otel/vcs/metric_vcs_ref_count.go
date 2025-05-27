@@ -7,6 +7,7 @@ import (
 // The number of refs of type branch or tag in a repository.
 type RefCount struct {
 	*prometheus.GaugeVec
+	extra RefCountExtra
 }
 
 func NewRefCount() RefCount {
@@ -24,7 +25,7 @@ func (m RefCount) With(refType AttrRefType, repositoryUrlFull AttrRepositoryUrlF
 	AttrVcsProviderName() AttrProviderName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = RefCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(refType),
@@ -33,6 +34,19 @@ func (m RefCount) With(refType AttrRefType, repositoryUrlFull AttrRepositoryUrlF
 		string(extra.AttrVcsRepositoryName()),
 		string(extra.AttrVcsProviderName()),
 	)
+}
+
+func (a RefCount) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) RefCount {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a RefCount) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) RefCount {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a RefCount) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) RefCount {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
 }
 
 type RefCountExtra struct {

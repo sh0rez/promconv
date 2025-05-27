@@ -7,6 +7,7 @@ import (
 // The number of changes (pull requests/merge requests/changelists) in a repository, categorized by their state (e.g. open or merged)
 type ChangeCount struct {
 	*prometheus.GaugeVec
+	extra ChangeCountExtra
 }
 
 func NewChangeCount() ChangeCount {
@@ -24,7 +25,7 @@ func (m ChangeCount) With(changeState AttrChangeState, repositoryUrlFull AttrRep
 	AttrVcsProviderName() AttrProviderName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ChangeCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(changeState),
@@ -33,6 +34,19 @@ func (m ChangeCount) With(changeState AttrChangeState, repositoryUrlFull AttrRep
 		string(extra.AttrVcsRepositoryName()),
 		string(extra.AttrVcsProviderName()),
 	)
+}
+
+func (a ChangeCount) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) ChangeCount {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a ChangeCount) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) ChangeCount {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a ChangeCount) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) ChangeCount {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
 }
 
 type ChangeCountExtra struct {

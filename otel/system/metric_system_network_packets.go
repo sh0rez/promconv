@@ -10,6 +10,7 @@ import (
 
 type NetworkPackets struct {
 	*prometheus.CounterVec
+	extra NetworkPacketsExtra
 }
 
 func NewNetworkPackets() NetworkPackets {
@@ -26,12 +27,23 @@ func (m NetworkPackets) With(extra interface {
 	AttrSystemDevice() AttrDevice
 }) prometheus.Counter {
 	if extra == nil {
-		extra = NetworkPacketsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkIoDirection()),
 		string(extra.AttrSystemDevice()),
 	)
+}
+
+func (a NetworkPackets) WithNetworkIoDirection(attr interface {
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) NetworkPackets {
+	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	return a
+}
+func (a NetworkPackets) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) NetworkPackets {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
 }
 
 type NetworkPacketsExtra struct {
@@ -107,16 +119,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The device identifier",
-                    "examples": [
-                        "(identifier)",
-                    ],
-                    "name": "system.device",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "The network IO operation direction.",
                     "examples": [
                         "transmit",
@@ -145,6 +147,16 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "The device identifier",
+                    "examples": [
+                        "(identifier)",
+                    ],
+                    "name": "system.device",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
             ],
             "entity_associations": [

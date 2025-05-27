@@ -11,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+//example:http-server
 func ExampleInstrument() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/hello/{name}", func(w http.ResponseWriter, r *http.Request) {

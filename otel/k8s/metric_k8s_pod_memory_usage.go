@@ -7,6 +7,7 @@ import (
 // Memory usage of the Pod
 type PodMemoryUsage struct {
 	*prometheus.GaugeVec
+	extra PodMemoryUsageExtra
 }
 
 func NewPodMemoryUsage() PodMemoryUsage {
@@ -21,7 +22,7 @@ func NewPodMemoryUsage() PodMemoryUsage {
 func (m PodMemoryUsage) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = PodMemoryUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

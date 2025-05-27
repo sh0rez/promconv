@@ -7,6 +7,7 @@ import (
 // Deprecated, use `otel.sdk.exporter.span.inflight` instead.
 type SdkExporterSpanInflightCount struct {
 	*prometheus.GaugeVec
+	extra SdkExporterSpanInflightCountExtra
 }
 
 func NewSdkExporterSpanInflightCount() SdkExporterSpanInflightCount {
@@ -21,7 +22,7 @@ func NewSdkExporterSpanInflightCount() SdkExporterSpanInflightCount {
 func (m SdkExporterSpanInflightCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SdkExporterSpanInflightCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

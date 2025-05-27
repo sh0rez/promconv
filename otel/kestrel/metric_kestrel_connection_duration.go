@@ -14,6 +14,7 @@ import (
 // The duration of connections on the server.
 type ConnectionDuration struct {
 	*prometheus.HistogramVec
+	extra ConnectionDurationExtra
 }
 
 func NewConnectionDuration() ConnectionDuration {
@@ -36,7 +37,7 @@ func (m ConnectionDuration) With(extra interface {
 	AttrTlsProtocolVersion() tls.AttrProtocolVersion
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ConnectionDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrErrorType()),
@@ -48,6 +49,45 @@ func (m ConnectionDuration) With(extra interface {
 		string(extra.AttrServerPort()),
 		string(extra.AttrTlsProtocolVersion()),
 	)
+}
+
+func (a ConnectionDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ConnectionDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ConnectionDuration) WithNetworkProtocolName(attr interface {
+	AttrNetworkProtocolName() network.AttrProtocolName
+}) ConnectionDuration {
+	a.extra.NetworkProtocolName = attr.AttrNetworkProtocolName()
+	return a
+}
+func (a ConnectionDuration) WithNetworkProtocolVersion(attr interface {
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+}) ConnectionDuration {
+	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	return a
+}
+func (a ConnectionDuration) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) ConnectionDuration {
+	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+	return a
+}
+func (a ConnectionDuration) WithNetworkType(attr interface{ AttrNetworkType() network.AttrType }) ConnectionDuration {
+	a.extra.NetworkType = attr.AttrNetworkType()
+	return a
+}
+func (a ConnectionDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ConnectionDuration {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ConnectionDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ConnectionDuration {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a ConnectionDuration) WithTlsProtocolVersion(attr interface {
+	AttrTlsProtocolVersion() tls.AttrProtocolVersion
+}) ConnectionDuration {
+	a.extra.TlsProtocolVersion = attr.AttrTlsProtocolVersion()
+	return a
 }
 
 type ConnectionDurationExtra struct {
@@ -284,30 +324,15 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "brief": "Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)\n",
                     "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
+                        "1.2",
+                        "3",
                     ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "name": "tls.protocol.version",
                     "requirement_level": "recommended",
-                    "stability": "stable",
+                    "stability": "development",
                     "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
                 },
                 {
                     "brief": "The actual version of the protocol used for network communication.",
@@ -450,15 +475,30 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)\n",
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
                     "examples": [
-                        "1.2",
-                        "3",
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
                     ],
-                    "name": "tls.protocol.version",
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
                     "requirement_level": "recommended",
-                    "stability": "development",
+                    "stability": "stable",
                     "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "The duration of connections on the server.",

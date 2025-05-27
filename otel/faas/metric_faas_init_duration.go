@@ -7,6 +7,7 @@ import (
 // Measures the duration of the function's initialization, such as a cold start
 type InitDuration struct {
 	*prometheus.HistogramVec
+	extra InitDurationExtra
 }
 
 func NewInitDuration() InitDuration {
@@ -22,11 +23,16 @@ func (m InitDuration) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Observer {
 	if extra == nil {
-		extra = InitDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a InitDuration) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) InitDuration {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type InitDurationExtra struct {

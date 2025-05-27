@@ -7,6 +7,7 @@ import (
 // Deprecated, use `azure.cosmosdb.client.operation.request_charge` instead.
 type ClientCosmosdbOperationRequestCharge struct {
 	*prometheus.HistogramVec
+	extra ClientCosmosdbOperationRequestChargeExtra
 }
 
 func NewClientCosmosdbOperationRequestCharge() ClientCosmosdbOperationRequestCharge {
@@ -27,7 +28,7 @@ func (m ClientCosmosdbOperationRequestCharge) With(extra interface {
 	AttrDbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientCosmosdbOperationRequestChargeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrDbCollectionName()),
@@ -37,6 +38,37 @@ func (m ClientCosmosdbOperationRequestCharge) With(extra interface {
 		string(extra.AttrDbOperationName()),
 		string(extra.AttrDbCosmosdbRegionsContacted()),
 	)
+}
+
+func (a ClientCosmosdbOperationRequestCharge) WithDbCollectionName(attr interface{ AttrDbCollectionName() AttrCollectionName }) ClientCosmosdbOperationRequestCharge {
+	a.extra.DbCollectionName = attr.AttrDbCollectionName()
+	return a
+}
+func (a ClientCosmosdbOperationRequestCharge) WithDbCosmosdbConsistencyLevel(attr interface {
+	AttrDbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
+}) ClientCosmosdbOperationRequestCharge {
+	a.extra.DbCosmosdbConsistencyLevel = attr.AttrDbCosmosdbConsistencyLevel()
+	return a
+}
+func (a ClientCosmosdbOperationRequestCharge) WithDbCosmosdbSubStatusCode(attr interface {
+	AttrDbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode
+}) ClientCosmosdbOperationRequestCharge {
+	a.extra.DbCosmosdbSubStatusCode = attr.AttrDbCosmosdbSubStatusCode()
+	return a
+}
+func (a ClientCosmosdbOperationRequestCharge) WithDbNamespace(attr interface{ AttrDbNamespace() AttrNamespace }) ClientCosmosdbOperationRequestCharge {
+	a.extra.DbNamespace = attr.AttrDbNamespace()
+	return a
+}
+func (a ClientCosmosdbOperationRequestCharge) WithDbOperationName(attr interface{ AttrDbOperationName() AttrOperationName }) ClientCosmosdbOperationRequestCharge {
+	a.extra.DbOperationName = attr.AttrDbOperationName()
+	return a
+}
+func (a ClientCosmosdbOperationRequestCharge) WithDbCosmosdbRegionsContacted(attr interface {
+	AttrDbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted
+}) ClientCosmosdbOperationRequestCharge {
+	a.extra.DbCosmosdbRegionsContacted = attr.AttrDbCosmosdbRegionsContacted()
+	return a
 }
 
 type ClientCosmosdbOperationRequestChargeExtra struct {
@@ -240,16 +272,14 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The name of the operation or command being executed.\n",
+                    "brief": "The name of the database, fully qualified within the server address and port.\n",
                     "examples": [
-                        "findAndModify",
-                        "HMSET",
-                        "SELECT",
+                        "customers",
+                        "test.users",
                     ],
-                    "name": "db.operation.name",
-                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nThe operation name SHOULD NOT be extracted from `db.query.text`,\nwhen the database system supports query text with multiple operations\nin non-batch operations.\n\nIf spaces can occur in the operation name, multiple consecutive spaces\nSHOULD be normalized to a single space.\n\nFor batch operations, if the individual operations are known to have the same operation name\nthen that operation name SHOULD be used prepended by `BATCH `,\notherwise `db.operation.name` SHOULD be `BATCH` or some other database\nsystem specific term if more applicable.\n",
+                    "name": "db.namespace",
                     "requirement_level": {
-                        "conditionally_required": "If readily available and if there is a single operation name that describes the database call. The operation name MAY be parsed from the query text, in which case it SHOULD be the single operation name found in the query.\n",
+                        "conditionally_required": "If available.",
                     },
                     "stability": "stable",
                     "type": "string",
@@ -269,14 +299,16 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "The name of the database, fully qualified within the server address and port.\n",
+                    "brief": "The name of the operation or command being executed.\n",
                     "examples": [
-                        "customers",
-                        "test.users",
+                        "findAndModify",
+                        "HMSET",
+                        "SELECT",
                     ],
-                    "name": "db.namespace",
+                    "name": "db.operation.name",
+                    "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nThe operation name SHOULD NOT be extracted from `db.query.text`,\nwhen the database system supports query text with multiple operations\nin non-batch operations.\n\nIf spaces can occur in the operation name, multiple consecutive spaces\nSHOULD be normalized to a single space.\n\nFor batch operations, if the individual operations are known to have the same operation name\nthen that operation name SHOULD be used prepended by `BATCH `,\notherwise `db.operation.name` SHOULD be `BATCH` or some other database\nsystem specific term if more applicable.\n",
                     "requirement_level": {
-                        "conditionally_required": "If available.",
+                        "conditionally_required": "If readily available and if there is a single operation name that describes the database call. The operation name MAY be parsed from the query text, in which case it SHOULD be the single operation name found in the query.\n",
                     },
                     "stability": "stable",
                     "type": "string",

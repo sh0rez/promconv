@@ -7,6 +7,7 @@ import (
 // Event loop mean delay.
 type EventloopDelayMean struct {
 	*prometheus.GaugeVec
+	extra EventloopDelayMeanExtra
 }
 
 func NewEventloopDelayMean() EventloopDelayMean {
@@ -21,7 +22,7 @@ func NewEventloopDelayMean() EventloopDelayMean {
 func (m EventloopDelayMean) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = EventloopDelayMeanExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

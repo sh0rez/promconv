@@ -7,6 +7,7 @@ import (
 // The number of work items that are currently queued to be processed by the thread pool.
 type ThreadPoolQueueLength struct {
 	*prometheus.GaugeVec
+	extra ThreadPoolQueueLengthExtra
 }
 
 func NewThreadPoolQueueLength() ThreadPoolQueueLength {
@@ -21,7 +22,7 @@ func NewThreadPoolQueueLength() ThreadPoolQueueLength {
 func (m ThreadPoolQueueLength) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ThreadPoolQueueLengthExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

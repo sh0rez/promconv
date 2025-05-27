@@ -7,6 +7,7 @@ import (
 // The number of pipeline runs currently active in the system by state.
 type PipelineRunActive struct {
 	*prometheus.GaugeVec
+	extra PipelineRunActiveExtra
 }
 
 func NewPipelineRunActive() PipelineRunActive {
@@ -21,7 +22,7 @@ func NewPipelineRunActive() PipelineRunActive {
 func (m PipelineRunActive) With(pipelineName AttrPipelineName, pipelineRunState AttrPipelineRunState, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = PipelineRunActiveExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(pipelineName),

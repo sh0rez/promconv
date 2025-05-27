@@ -7,6 +7,7 @@ import (
 // The number of connection timeouts that have occurred trying to obtain a connection from the pool
 type ClientConnectionTimeouts struct {
 	*prometheus.CounterVec
+	extra ClientConnectionTimeoutsExtra
 }
 
 func NewClientConnectionTimeouts() ClientConnectionTimeouts {
@@ -21,7 +22,7 @@ func NewClientConnectionTimeouts() ClientConnectionTimeouts {
 func (m ClientConnectionTimeouts) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ClientConnectionTimeoutsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),

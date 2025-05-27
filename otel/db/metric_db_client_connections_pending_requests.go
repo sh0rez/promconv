@@ -7,6 +7,7 @@ import (
 // Deprecated, use `db.client.connection.pending_requests` instead.
 type ClientConnectionsPendingRequests struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionsPendingRequestsExtra
 }
 
 func NewClientConnectionsPendingRequests() ClientConnectionsPendingRequests {
@@ -21,7 +22,7 @@ func NewClientConnectionsPendingRequests() ClientConnectionsPendingRequests {
 func (m ClientConnectionsPendingRequests) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionsPendingRequestsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),

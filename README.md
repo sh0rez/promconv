@@ -5,7 +5,7 @@
 _[Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/) for Prometheus_
 
 **PromConv** has two goals:
-- Bring semantic convetions to Prometheus
+- Bring semantic conventions to Prometheus
 - Make the experience easier and safer than writing metrics by hand
 
 To achieve those, **PromConv**:

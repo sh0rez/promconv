@@ -7,6 +7,7 @@ import (
 // The maximum number of spans the queue of a given instance of an SDK span processor can hold
 type SdkProcessorSpanQueueCapacity struct {
 	*prometheus.GaugeVec
+	extra SdkProcessorSpanQueueCapacityExtra
 }
 
 func NewSdkProcessorSpanQueueCapacity() SdkProcessorSpanQueueCapacity {
@@ -23,12 +24,21 @@ func (m SdkProcessorSpanQueueCapacity) With(extra interface {
 	AttrOtelComponentType() AttrComponentType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SdkProcessorSpanQueueCapacityExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrOtelComponentName()),
 		string(extra.AttrOtelComponentType()),
 	)
+}
+
+func (a SdkProcessorSpanQueueCapacity) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkProcessorSpanQueueCapacity {
+	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+	return a
+}
+func (a SdkProcessorSpanQueueCapacity) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkProcessorSpanQueueCapacity {
+	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+	return a
 }
 
 type SdkProcessorSpanQueueCapacityExtra struct {

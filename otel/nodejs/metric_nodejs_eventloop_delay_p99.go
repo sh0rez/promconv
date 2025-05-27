@@ -7,6 +7,7 @@ import (
 // Event loop 99 percentile delay.
 type EventloopDelayP99 struct {
 	*prometheus.GaugeVec
+	extra EventloopDelayP99Extra
 }
 
 func NewEventloopDelayP99() EventloopDelayP99 {
@@ -21,7 +22,7 @@ func NewEventloopDelayP99() EventloopDelayP99 {
 func (m EventloopDelayP99) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = EventloopDelayP99Extra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

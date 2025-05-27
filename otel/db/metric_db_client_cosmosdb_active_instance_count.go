@@ -11,6 +11,7 @@ import (
 // Deprecated, use `azure.cosmosdb.client.active_instance.count` instead.
 type ClientCosmosdbActiveInstanceCount struct {
 	*prometheus.GaugeVec
+	extra ClientCosmosdbActiveInstanceCountExtra
 }
 
 func NewClientCosmosdbActiveInstanceCount() ClientCosmosdbActiveInstanceCount {
@@ -27,12 +28,21 @@ func (m ClientCosmosdbActiveInstanceCount) With(extra interface {
 	AttrServerAddress() server.AttrAddress
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientCosmosdbActiveInstanceCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrServerPort()),
 		string(extra.AttrServerAddress()),
 	)
+}
+
+func (a ClientCosmosdbActiveInstanceCount) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientCosmosdbActiveInstanceCount {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a ClientCosmosdbActiveInstanceCount) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientCosmosdbActiveInstanceCount {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
 }
 
 type ClientCosmosdbActiveInstanceCountExtra struct {

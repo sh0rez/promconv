@@ -7,6 +7,7 @@ import (
 // The amount of time since its creation it took a change (pull request/merge request/changelist) to get the first approval.
 type ChangeTimeToApproval struct {
 	*prometheus.GaugeVec
+	extra ChangeTimeToApprovalExtra
 }
 
 func NewChangeTimeToApproval() ChangeTimeToApproval {
@@ -27,7 +28,7 @@ func (m ChangeTimeToApproval) With(refHeadName AttrRefHeadName, repositoryUrlFul
 	AttrVcsRefHeadRevision() AttrRefHeadRevision
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ChangeTimeToApprovalExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(refHeadName),
@@ -39,6 +40,31 @@ func (m ChangeTimeToApproval) With(refHeadName AttrRefHeadName, repositoryUrlFul
 		string(extra.AttrVcsRefBaseRevision()),
 		string(extra.AttrVcsRefHeadRevision()),
 	)
+}
+
+func (a ChangeTimeToApproval) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) ChangeTimeToApproval {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a ChangeTimeToApproval) WithVcsRefBaseName(attr interface{ AttrVcsRefBaseName() AttrRefBaseName }) ChangeTimeToApproval {
+	a.extra.VcsRefBaseName = attr.AttrVcsRefBaseName()
+	return a
+}
+func (a ChangeTimeToApproval) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) ChangeTimeToApproval {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a ChangeTimeToApproval) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) ChangeTimeToApproval {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
+}
+func (a ChangeTimeToApproval) WithVcsRefBaseRevision(attr interface{ AttrVcsRefBaseRevision() AttrRefBaseRevision }) ChangeTimeToApproval {
+	a.extra.VcsRefBaseRevision = attr.AttrVcsRefBaseRevision()
+	return a
+}
+func (a ChangeTimeToApproval) WithVcsRefHeadRevision(attr interface{ AttrVcsRefHeadRevision() AttrRefHeadRevision }) ChangeTimeToApproval {
+	a.extra.VcsRefHeadRevision = attr.AttrVcsRefHeadRevision()
+	return a
 }
 
 type ChangeTimeToApprovalExtra struct {

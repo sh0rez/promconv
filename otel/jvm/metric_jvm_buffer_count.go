@@ -7,6 +7,7 @@ import (
 // Number of buffers in the pool.
 type BufferCount struct {
 	*prometheus.GaugeVec
+	extra BufferCountExtra
 }
 
 func NewBufferCount() BufferCount {
@@ -22,11 +23,16 @@ func (m BufferCount) With(extra interface {
 	AttrJvmBufferPoolName() AttrBufferPoolName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = BufferCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmBufferPoolName()),
 	)
+}
+
+func (a BufferCount) WithJvmBufferPoolName(attr interface{ AttrJvmBufferPoolName() AttrBufferPoolName }) BufferCount {
+	a.extra.JvmBufferPoolName = attr.AttrJvmBufferPoolName()
+	return a
 }
 
 type BufferCountExtra struct {

@@ -7,6 +7,7 @@ import (
 // The number of .NET assemblies that are currently loaded.
 type AssemblyCount struct {
 	*prometheus.GaugeVec
+	extra AssemblyCountExtra
 }
 
 func NewAssemblyCount() AssemblyCount {
@@ -21,7 +22,7 @@ func NewAssemblyCount() AssemblyCount {
 func (m AssemblyCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = AssemblyCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

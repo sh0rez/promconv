@@ -12,6 +12,7 @@ import (
 // Number of HTTP requests on multiplexed connections (HTTP/2 and HTTP/3) that are currently queued and are waiting to start.
 type QueuedRequests struct {
 	*prometheus.GaugeVec
+	extra QueuedRequestsExtra
 }
 
 func NewQueuedRequests() QueuedRequests {
@@ -32,7 +33,7 @@ func (m QueuedRequests) With(extra interface {
 	AttrServerPort() server.AttrPort
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = QueuedRequestsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkProtocolName()),
@@ -42,6 +43,35 @@ func (m QueuedRequests) With(extra interface {
 		string(extra.AttrServerAddress()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a QueuedRequests) WithNetworkProtocolName(attr interface {
+	AttrNetworkProtocolName() network.AttrProtocolName
+}) QueuedRequests {
+	a.extra.NetworkProtocolName = attr.AttrNetworkProtocolName()
+	return a
+}
+func (a QueuedRequests) WithNetworkProtocolVersion(attr interface {
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+}) QueuedRequests {
+	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	return a
+}
+func (a QueuedRequests) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) QueuedRequests {
+	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+	return a
+}
+func (a QueuedRequests) WithNetworkType(attr interface{ AttrNetworkType() network.AttrType }) QueuedRequests {
+	a.extra.NetworkType = attr.AttrNetworkType()
+	return a
+}
+func (a QueuedRequests) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) QueuedRequests {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a QueuedRequests) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) QueuedRequests {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type QueuedRequestsExtra struct {
@@ -231,32 +261,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "The actual version of the protocol used for network communication.",
                     "examples": [
                         "1.1",
@@ -369,6 +373,32 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": "string",
+                },
+                {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "Number of HTTP requests on multiplexed connections (HTTP/2 and HTTP/3) that are currently queued and are waiting to start.",

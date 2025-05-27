@@ -7,6 +7,7 @@ import (
 // Memory used by the Go runtime.
 type MemoryUsed struct {
 	*prometheus.GaugeVec
+	extra MemoryUsedExtra
 }
 
 func NewMemoryUsed() MemoryUsed {
@@ -22,11 +23,16 @@ func (m MemoryUsed) With(extra interface {
 	AttrGoMemoryType() AttrMemoryType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryUsedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrGoMemoryType()),
 	)
+}
+
+func (a MemoryUsed) WithGoMemoryType(attr interface{ AttrGoMemoryType() AttrMemoryType }) MemoryUsed {
+	a.extra.GoMemoryType = attr.AttrGoMemoryType()
+	return a
 }
 
 type MemoryUsedExtra struct {

@@ -7,6 +7,7 @@ import (
 // Measures the size of RPC request messages (uncompressed).
 type ServerRequestSize struct {
 	*prometheus.HistogramVec
+	extra ServerRequestSizeExtra
 }
 
 func NewServerRequestSize() ServerRequestSize {
@@ -21,7 +22,7 @@ func NewServerRequestSize() ServerRequestSize {
 func (m ServerRequestSize) With(extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ServerRequestSizeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

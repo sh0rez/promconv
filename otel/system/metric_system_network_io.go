@@ -10,6 +10,7 @@ import (
 
 type NetworkIo struct {
 	*prometheus.CounterVec
+	extra NetworkIoExtra
 }
 
 func NewNetworkIo() NetworkIo {
@@ -26,12 +27,25 @@ func (m NetworkIo) With(extra interface {
 	AttrNetworkIoDirection() network.AttrIoDirection
 }) prometheus.Counter {
 	if extra == nil {
-		extra = NetworkIoExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkInterfaceName()),
 		string(extra.AttrNetworkIoDirection()),
 	)
+}
+
+func (a NetworkIo) WithNetworkInterfaceName(attr interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+}) NetworkIo {
+	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	return a
+}
+func (a NetworkIo) WithNetworkIoDirection(attr interface {
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) NetworkIo {
+	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	return a
 }
 
 type NetworkIoExtra struct {

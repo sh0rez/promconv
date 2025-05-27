@@ -10,6 +10,7 @@ import (
 
 type DiskMerged struct {
 	*prometheus.CounterVec
+	extra DiskMergedExtra
 }
 
 func NewDiskMerged() DiskMerged {
@@ -26,12 +27,21 @@ func (m DiskMerged) With(extra interface {
 	AttrSystemDevice() AttrDevice
 }) prometheus.Counter {
 	if extra == nil {
-		extra = DiskMergedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrDiskIoDirection()),
 		string(extra.AttrSystemDevice()),
 	)
+}
+
+func (a DiskMerged) WithDiskIoDirection(attr interface{ AttrDiskIoDirection() disk.AttrIoDirection }) DiskMerged {
+	a.extra.DiskIoDirection = attr.AttrDiskIoDirection()
+	return a
+}
+func (a DiskMerged) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskMerged {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
 }
 
 type DiskMergedExtra struct {
@@ -105,16 +115,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The device identifier",
-                    "examples": [
-                        "(identifier)",
-                    ],
-                    "name": "system.device",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "The disk IO operation direction.",
                     "examples": [
                         "read",
@@ -143,6 +143,16 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "The device identifier",
+                    "examples": [
+                        "(identifier)",
+                    ],
+                    "name": "system.device",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
             ],
             "entity_associations": [

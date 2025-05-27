@@ -7,6 +7,7 @@ import (
 // Event loop minimum delay.
 type EventloopDelayMin struct {
 	*prometheus.GaugeVec
+	extra EventloopDelayMinExtra
 }
 
 func NewEventloopDelayMin() EventloopDelayMin {
@@ -21,7 +22,7 @@ func NewEventloopDelayMin() EventloopDelayMin {
 func (m EventloopDelayMin) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = EventloopDelayMinExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

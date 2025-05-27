@@ -11,6 +11,7 @@ import (
 // The number of spans for which the processing has finished, either successful or failed
 type SdkProcessorSpanProcessed struct {
 	*prometheus.CounterVec
+	extra SdkProcessorSpanProcessedExtra
 }
 
 func NewSdkProcessorSpanProcessed() SdkProcessorSpanProcessed {
@@ -28,13 +29,26 @@ func (m SdkProcessorSpanProcessed) With(extra interface {
 	AttrOtelComponentType() AttrComponentType
 }) prometheus.Counter {
 	if extra == nil {
-		extra = SdkProcessorSpanProcessedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrErrorType()),
 		string(extra.AttrOtelComponentName()),
 		string(extra.AttrOtelComponentType()),
 	)
+}
+
+func (a SdkProcessorSpanProcessed) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) SdkProcessorSpanProcessed {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a SdkProcessorSpanProcessed) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkProcessorSpanProcessed {
+	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+	return a
+}
+func (a SdkProcessorSpanProcessed) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkProcessorSpanProcessed {
+	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+	return a
 }
 
 type SdkProcessorSpanProcessedExtra struct {
@@ -238,6 +252,29 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "A low-cardinality description of the failure reason. SDK Batching Span Processors MUST use `queue_full` for spans dropped due to a full queue.\n",
+                    "examples": [
+                        "queue_full",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
                     "examples": [
                         "batching_span_processor",
@@ -376,29 +413,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": "string",
-                },
-                {
-                    "brief": "A low-cardinality description of the failure reason. SDK Batching Span Processors MUST use `queue_full` for spans dropped due to a full queue.\n",
-                    "examples": [
-                        "queue_full",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
                 },
             ],
             "brief": "The number of spans for which the processing has finished, either successful or failed",

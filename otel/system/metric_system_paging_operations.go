@@ -6,6 +6,7 @@ import (
 
 type PagingOperations struct {
 	*prometheus.CounterVec
+	extra PagingOperationsExtra
 }
 
 func NewPagingOperations() PagingOperations {
@@ -22,12 +23,21 @@ func (m PagingOperations) With(extra interface {
 	AttrSystemPagingType() AttrPagingType
 }) prometheus.Counter {
 	if extra == nil {
-		extra = PagingOperationsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemPagingDirection()),
 		string(extra.AttrSystemPagingType()),
 	)
+}
+
+func (a PagingOperations) WithSystemPagingDirection(attr interface{ AttrSystemPagingDirection() AttrPagingDirection }) PagingOperations {
+	a.extra.SystemPagingDirection = attr.AttrSystemPagingDirection()
+	return a
+}
+func (a PagingOperations) WithSystemPagingType(attr interface{ AttrSystemPagingType() AttrPagingType }) PagingOperations {
+	a.extra.SystemPagingType = attr.AttrSystemPagingType()
+	return a
 }
 
 type PagingOperationsExtra struct {

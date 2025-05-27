@@ -7,6 +7,7 @@ import (
 // For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.
 type Utilization struct {
 	*prometheus.GaugeVec
+	extra UtilizationExtra
 }
 
 func NewUtilization() Utilization {
@@ -23,12 +24,21 @@ func (m Utilization) With(extra interface {
 	AttrCpuMode() AttrMode
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = UtilizationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrCpuLogicalNumber()),
 		string(extra.AttrCpuMode()),
 	)
+}
+
+func (a Utilization) WithCpuLogicalNumber(attr interface{ AttrCpuLogicalNumber() AttrLogicalNumber }) Utilization {
+	a.extra.CpuLogicalNumber = attr.AttrCpuLogicalNumber()
+	return a
+}
+func (a Utilization) WithCpuMode(attr interface{ AttrCpuMode() AttrMode }) Utilization {
+	a.extra.CpuMode = attr.AttrCpuMode()
+	return a
 }
 
 type UtilizationExtra struct {

@@ -7,6 +7,7 @@ import (
 // Number of invocation cold starts
 type Coldstarts struct {
 	*prometheus.CounterVec
+	extra ColdstartsExtra
 }
 
 func NewColdstarts() Coldstarts {
@@ -22,11 +23,16 @@ func (m Coldstarts) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ColdstartsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a Coldstarts) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) Coldstarts {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type ColdstartsExtra struct {

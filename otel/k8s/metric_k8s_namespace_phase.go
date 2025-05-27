@@ -7,6 +7,7 @@ import (
 // Describes number of K8s namespaces that are currently in a given phase.
 type NamespacePhase struct {
 	*prometheus.GaugeVec
+	extra NamespacePhaseExtra
 }
 
 func NewNamespacePhase() NamespacePhase {
@@ -21,7 +22,7 @@ func NewNamespacePhase() NamespacePhase {
 func (m NamespacePhase) With(namespacePhase AttrNamespacePhase, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = NamespacePhaseExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(namespacePhase),

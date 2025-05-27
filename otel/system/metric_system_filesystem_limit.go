@@ -7,6 +7,7 @@ import (
 // The total storage capacity of the filesystem
 type FilesystemLimit struct {
 	*prometheus.GaugeVec
+	extra FilesystemLimitExtra
 }
 
 func NewFilesystemLimit() FilesystemLimit {
@@ -25,7 +26,7 @@ func (m FilesystemLimit) With(extra interface {
 	AttrSystemFilesystemType() AttrFilesystemType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = FilesystemLimitExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemDevice()),
@@ -33,6 +34,25 @@ func (m FilesystemLimit) With(extra interface {
 		string(extra.AttrSystemFilesystemMountpoint()),
 		string(extra.AttrSystemFilesystemType()),
 	)
+}
+
+func (a FilesystemLimit) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) FilesystemLimit {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
+}
+func (a FilesystemLimit) WithSystemFilesystemMode(attr interface{ AttrSystemFilesystemMode() AttrFilesystemMode }) FilesystemLimit {
+	a.extra.SystemFilesystemMode = attr.AttrSystemFilesystemMode()
+	return a
+}
+func (a FilesystemLimit) WithSystemFilesystemMountpoint(attr interface {
+	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
+}) FilesystemLimit {
+	a.extra.SystemFilesystemMountpoint = attr.AttrSystemFilesystemMountpoint()
+	return a
+}
+func (a FilesystemLimit) WithSystemFilesystemType(attr interface{ AttrSystemFilesystemType() AttrFilesystemType }) FilesystemLimit {
+	a.extra.SystemFilesystemType = attr.AttrSystemFilesystemType()
+	return a
 }
 
 type FilesystemLimitExtra struct {

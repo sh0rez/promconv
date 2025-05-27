@@ -7,6 +7,7 @@ import (
 // The time the process has been running.
 type Uptime struct {
 	*prometheus.GaugeVec
+	extra UptimeExtra
 }
 
 func NewUptime() Uptime {
@@ -21,7 +22,7 @@ func NewUptime() Uptime {
 func (m Uptime) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = UptimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

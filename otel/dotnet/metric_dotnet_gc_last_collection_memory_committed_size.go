@@ -7,6 +7,7 @@ import (
 // The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.
 type GcLastCollectionMemoryCommittedSize struct {
 	*prometheus.GaugeVec
+	extra GcLastCollectionMemoryCommittedSizeExtra
 }
 
 func NewGcLastCollectionMemoryCommittedSize() GcLastCollectionMemoryCommittedSize {
@@ -21,7 +22,7 @@ func NewGcLastCollectionMemoryCommittedSize() GcLastCollectionMemoryCommittedSiz
 func (m GcLastCollectionMemoryCommittedSize) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = GcLastCollectionMemoryCommittedSizeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

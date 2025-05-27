@@ -12,6 +12,7 @@ import (
 // Number of messages that were delivered to the application.
 type ClientConsumedMessages struct {
 	*prometheus.CounterVec
+	extra ClientConsumedMessagesExtra
 }
 
 func NewClientConsumedMessages() ClientConsumedMessages {
@@ -34,7 +35,7 @@ func (m ClientConsumedMessages) With(operationName AttrOperationName, system Att
 	AttrServerPort() server.AttrPort
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ClientConsumedMessagesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(operationName),
@@ -48,6 +49,45 @@ func (m ClientConsumedMessages) With(operationName AttrOperationName, system Att
 		string(extra.AttrMessagingDestinationPartitionId()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a ClientConsumedMessages) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientConsumedMessages {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ClientConsumedMessages) WithMessagingConsumerGroupName(attr interface{ AttrMessagingConsumerGroupName() AttrConsumerGroupName }) ClientConsumedMessages {
+	a.extra.MessagingConsumerGroupName = attr.AttrMessagingConsumerGroupName()
+	return a
+}
+func (a ClientConsumedMessages) WithMessagingDestinationName(attr interface{ AttrMessagingDestinationName() AttrDestinationName }) ClientConsumedMessages {
+	a.extra.MessagingDestinationName = attr.AttrMessagingDestinationName()
+	return a
+}
+func (a ClientConsumedMessages) WithMessagingDestinationSubscriptionName(attr interface {
+	AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
+}) ClientConsumedMessages {
+	a.extra.MessagingDestinationSubscriptionName = attr.AttrMessagingDestinationSubscriptionName()
+	return a
+}
+func (a ClientConsumedMessages) WithMessagingDestinationTemplate(attr interface {
+	AttrMessagingDestinationTemplate() AttrDestinationTemplate
+}) ClientConsumedMessages {
+	a.extra.MessagingDestinationTemplate = attr.AttrMessagingDestinationTemplate()
+	return a
+}
+func (a ClientConsumedMessages) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientConsumedMessages {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ClientConsumedMessages) WithMessagingDestinationPartitionId(attr interface {
+	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
+}) ClientConsumedMessages {
+	a.extra.MessagingDestinationPartitionId = attr.AttrMessagingDestinationPartitionId()
+	return a
+}
+func (a ClientConsumedMessages) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientConsumedMessages {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type ClientConsumedMessagesExtra struct {
@@ -339,19 +379,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.\n",
                     "examples": "1",
                     "name": "messaging.destination.partition.id",
@@ -514,21 +541,6 @@ State {
                     },
                 },
                 {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "Server domain name of the broker if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If available.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
                     "brief": "The name of the consumer group with which a consumer is associated.\n",
                     "examples": [
                         "my-group",
@@ -566,6 +578,34 @@ State {
                     "name": "messaging.operation.name",
                     "requirement_level": "required",
                     "stability": "development",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "Server domain name of the broker if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If available.",
+                    },
+                    "stability": "stable",
                     "type": "string",
                 },
             ],

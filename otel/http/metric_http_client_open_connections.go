@@ -13,6 +13,7 @@ import (
 // Number of outbound HTTP connections that are currently active or idle on the client.
 type ClientOpenConnections struct {
 	*prometheus.GaugeVec
+	extra ClientOpenConnectionsExtra
 }
 
 func NewClientOpenConnections() ClientOpenConnections {
@@ -30,7 +31,7 @@ func (m ClientOpenConnections) With(connectionState AttrConnectionState, address
 	AttrUrlScheme() url.AttrScheme
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientOpenConnectionsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(connectionState),
@@ -40,6 +41,23 @@ func (m ClientOpenConnections) With(connectionState AttrConnectionState, address
 		string(extra.AttrNetworkProtocolVersion()),
 		string(extra.AttrUrlScheme()),
 	)
+}
+
+func (a ClientOpenConnections) WithNetworkPeerAddress(attr interface {
+	AttrNetworkPeerAddress() network.AttrPeerAddress
+}) ClientOpenConnections {
+	a.extra.NetworkPeerAddress = attr.AttrNetworkPeerAddress()
+	return a
+}
+func (a ClientOpenConnections) WithNetworkProtocolVersion(attr interface {
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+}) ClientOpenConnections {
+	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	return a
+}
+func (a ClientOpenConnections) WithUrlScheme(attr interface{ AttrUrlScheme() url.AttrScheme }) ClientOpenConnections {
+	a.extra.UrlScheme = attr.AttrUrlScheme()
+	return a
 }
 
 type ClientOpenConnectionsExtra struct {
@@ -171,6 +189,37 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "State of the HTTP connection in the HTTP connection pool.",
+                    "examples": [
+                        "active",
+                        "idle",
+                    ],
+                    "name": "http.connection.state",
+                    "requirement_level": "required",
+                    "stability": "development",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "active state.",
+                                "deprecated": none,
+                                "id": "active",
+                                "note": none,
+                                "stability": "development",
+                                "value": "active",
+                            },
+                            {
+                                "brief": "idle state.",
+                                "deprecated": none,
+                                "id": "idle",
+                                "note": none,
+                                "stability": "development",
+                                "value": "idle",
+                            },
+                        ],
+                    },
+                },
+                {
                     "brief": "Peer address of the network connection - IP address or Unix domain socket name.",
                     "examples": [
                         "10.1.2.80",
@@ -216,37 +265,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "State of the HTTP connection in the HTTP connection pool.",
-                    "examples": [
-                        "active",
-                        "idle",
-                    ],
-                    "name": "http.connection.state",
-                    "requirement_level": "required",
-                    "stability": "development",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "active state.",
-                                "deprecated": none,
-                                "id": "active",
-                                "note": none,
-                                "stability": "development",
-                                "value": "active",
-                            },
-                            {
-                                "brief": "idle state.",
-                                "deprecated": none,
-                                "id": "idle",
-                                "note": none,
-                                "stability": "development",
-                                "value": "idle",
-                            },
-                        ],
-                    },
                 },
                 {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",

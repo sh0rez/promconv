@@ -7,6 +7,7 @@ import (
 // Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready
 type DaemonsetReadyNodes struct {
 	*prometheus.GaugeVec
+	extra DaemonsetReadyNodesExtra
 }
 
 func NewDaemonsetReadyNodes() DaemonsetReadyNodes {
@@ -21,7 +22,7 @@ func NewDaemonsetReadyNodes() DaemonsetReadyNodes {
 func (m DaemonsetReadyNodes) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = DaemonsetReadyNodesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

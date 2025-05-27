@@ -7,6 +7,7 @@ import (
 // The time between borrowing a connection and returning it to the pool
 type ClientConnectionUseTime struct {
 	*prometheus.HistogramVec
+	extra ClientConnectionUseTimeExtra
 }
 
 func NewClientConnectionUseTime() ClientConnectionUseTime {
@@ -21,7 +22,7 @@ func NewClientConnectionUseTime() ClientConnectionUseTime {
 func (m ClientConnectionUseTime) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientConnectionUseTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),

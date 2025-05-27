@@ -7,6 +7,7 @@ import (
 // Measure of total memory capacity of buffers.
 type BufferMemoryLimit struct {
 	*prometheus.GaugeVec
+	extra BufferMemoryLimitExtra
 }
 
 func NewBufferMemoryLimit() BufferMemoryLimit {
@@ -22,11 +23,16 @@ func (m BufferMemoryLimit) With(extra interface {
 	AttrJvmBufferPoolName() AttrBufferPoolName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = BufferMemoryLimitExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmBufferPoolName()),
 	)
+}
+
+func (a BufferMemoryLimit) WithJvmBufferPoolName(attr interface{ AttrJvmBufferPoolName() AttrBufferPoolName }) BufferMemoryLimit {
+	a.extra.JvmBufferPoolName = attr.AttrJvmBufferPoolName()
+	return a
 }
 
 type BufferMemoryLimitExtra struct {

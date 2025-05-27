@@ -7,6 +7,7 @@ import (
 // Number of executing platform threads.
 type ThreadCount struct {
 	*prometheus.GaugeVec
+	extra ThreadCountExtra
 }
 
 func NewThreadCount() ThreadCount {
@@ -23,12 +24,21 @@ func (m ThreadCount) With(extra interface {
 	AttrJvmThreadState() AttrThreadState
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ThreadCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmThreadDaemon()),
 		string(extra.AttrJvmThreadState()),
 	)
+}
+
+func (a ThreadCount) WithJvmThreadDaemon(attr interface{ AttrJvmThreadDaemon() AttrThreadDaemon }) ThreadCount {
+	a.extra.JvmThreadDaemon = attr.AttrJvmThreadDaemon()
+	return a
+}
+func (a ThreadCount) WithJvmThreadState(attr interface{ AttrJvmThreadState() AttrThreadState }) ThreadCount {
+	a.extra.JvmThreadState = attr.AttrJvmThreadState()
+	return a
 }
 
 type ThreadCountExtra struct {

@@ -7,6 +7,7 @@ import (
 // Heap space available size.
 type HeapSpaceAvailableSize struct {
 	*prometheus.GaugeVec
+	extra HeapSpaceAvailableSizeExtra
 }
 
 func NewHeapSpaceAvailableSize() HeapSpaceAvailableSize {
@@ -21,7 +22,7 @@ func NewHeapSpaceAvailableSize() HeapSpaceAvailableSize {
 func (m HeapSpaceAvailableSize) With(heapSpaceName AttrHeapSpaceName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = HeapSpaceAvailableSizeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(heapSpaceName),

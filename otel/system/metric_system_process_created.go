@@ -7,6 +7,7 @@ import (
 // Total number of processes created over uptime of the host
 type ProcessCreated struct {
 	*prometheus.CounterVec
+	extra ProcessCreatedExtra
 }
 
 func NewProcessCreated() ProcessCreated {
@@ -21,7 +22,7 @@ func NewProcessCreated() ProcessCreated {
 func (m ProcessCreated) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ProcessCreatedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

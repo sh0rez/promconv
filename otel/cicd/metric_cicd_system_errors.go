@@ -11,6 +11,7 @@ import (
 // The number of errors in a component of the CICD system (eg. controller, scheduler, agent).
 type SystemErrors struct {
 	*prometheus.CounterVec
+	extra SystemErrorsExtra
 }
 
 func NewSystemErrors() SystemErrors {
@@ -25,7 +26,7 @@ func NewSystemErrors() SystemErrors {
 func (m SystemErrors) With(systemComponent AttrSystemComponent, kind error.AttrType, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = SystemErrorsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(systemComponent),

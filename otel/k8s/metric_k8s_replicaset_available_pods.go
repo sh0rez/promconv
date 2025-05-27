@@ -7,6 +7,7 @@ import (
 // Total number of available replica pods (ready for at least minReadySeconds) targeted by this replicaset
 type ReplicasetAvailablePods struct {
 	*prometheus.GaugeVec
+	extra ReplicasetAvailablePodsExtra
 }
 
 func NewReplicasetAvailablePods() ReplicasetAvailablePods {
@@ -21,7 +22,7 @@ func NewReplicasetAvailablePods() ReplicasetAvailablePods {
 func (m ReplicasetAvailablePods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ReplicasetAvailablePodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

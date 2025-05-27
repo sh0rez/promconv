@@ -7,6 +7,7 @@ import (
 // Garbage collection duration.
 type GcDuration struct {
 	*prometheus.HistogramVec
+	extra GcDurationExtra
 }
 
 func NewGcDuration() GcDuration {
@@ -21,7 +22,7 @@ func NewGcDuration() GcDuration {
 func (m GcDuration) With(gcType AttrGcType, extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = GcDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(gcType),

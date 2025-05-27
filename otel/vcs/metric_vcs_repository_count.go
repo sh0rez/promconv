@@ -7,6 +7,7 @@ import (
 // The number of repositories in an organization.
 type RepositoryCount struct {
 	*prometheus.GaugeVec
+	extra RepositoryCountExtra
 }
 
 func NewRepositoryCount() RepositoryCount {
@@ -23,12 +24,21 @@ func (m RepositoryCount) With(extra interface {
 	AttrVcsProviderName() AttrProviderName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = RepositoryCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrVcsOwnerName()),
 		string(extra.AttrVcsProviderName()),
 	)
+}
+
+func (a RepositoryCount) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) RepositoryCount {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a RepositoryCount) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) RepositoryCount {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
 }
 
 type RepositoryCountExtra struct {

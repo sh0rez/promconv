@@ -7,6 +7,7 @@ import (
 // The number of created spans for which the end operation has not been called yet
 type SdkSpanLive struct {
 	*prometheus.GaugeVec
+	extra SdkSpanLiveExtra
 }
 
 func NewSdkSpanLive() SdkSpanLive {
@@ -22,11 +23,16 @@ func (m SdkSpanLive) With(extra interface {
 	AttrOtelSpanSamplingResult() AttrSpanSamplingResult
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SdkSpanLiveExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrOtelSpanSamplingResult()),
 	)
+}
+
+func (a SdkSpanLive) WithOtelSpanSamplingResult(attr interface{ AttrOtelSpanSamplingResult() AttrSpanSamplingResult }) SdkSpanLive {
+	a.extra.OtelSpanSamplingResult = attr.AttrOtelSpanSamplingResult()
+	return a
 }
 
 type SdkSpanLiveExtra struct {

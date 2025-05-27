@@ -12,6 +12,7 @@ import (
 // GenAI operation duration
 type ClientOperationDuration struct {
 	*prometheus.HistogramVec
+	extra ClientOperationDurationExtra
 }
 
 func NewClientOperationDuration() ClientOperationDuration {
@@ -31,7 +32,7 @@ func (m ClientOperationDuration) With(operationName AttrOperationName, system At
 	AttrServerAddress() server.AttrAddress
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientOperationDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(operationName),
@@ -42,6 +43,27 @@ func (m ClientOperationDuration) With(operationName AttrOperationName, system At
 		string(extra.AttrGenAiResponseModel()),
 		string(extra.AttrServerAddress()),
 	)
+}
+
+func (a ClientOperationDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientOperationDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ClientOperationDuration) WithGenAiRequestModel(attr interface{ AttrGenAiRequestModel() AttrRequestModel }) ClientOperationDuration {
+	a.extra.GenAiRequestModel = attr.AttrGenAiRequestModel()
+	return a
+}
+func (a ClientOperationDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientOperationDuration {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a ClientOperationDuration) WithGenAiResponseModel(attr interface{ AttrGenAiResponseModel() AttrResponseModel }) ClientOperationDuration {
+	a.extra.GenAiResponseModel = attr.AttrGenAiResponseModel()
+	return a
+}
+func (a ClientOperationDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientOperationDuration {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
 }
 
 type ClientOperationDurationExtra struct {
@@ -381,6 +403,34 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "timeout",
+                        "java.net.UnknownHostException",
+                        "server_certificate_invalid",
+                        "500",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,\nthe canonical name of exception that occurred, or another low-cardinality error identifier.\nInstrumentations SHOULD document the list of errors they report.\n",
+                    "requirement_level": {
+                        "conditionally_required": "if the operation ended in an error",
+                    },
+                    "stability": "stable",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
                     "brief": "The name of the model that generated the response.",
                     "examples": [
                         "gpt-4-0613",
@@ -389,74 +439,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": "string",
-                },
-                {
-                    "brief": "The name of the operation being performed.",
-                    "name": "gen_ai.operation.name",
-                    "note": "If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.\n",
-                    "requirement_level": "required",
-                    "stability": "development",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)",
-                                "deprecated": none,
-                                "id": "chat",
-                                "note": none,
-                                "stability": "development",
-                                "value": "chat",
-                            },
-                            {
-                                "brief": "Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)",
-                                "deprecated": none,
-                                "id": "generate_content",
-                                "note": none,
-                                "stability": "development",
-                                "value": "generate_content",
-                            },
-                            {
-                                "brief": "Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)",
-                                "deprecated": none,
-                                "id": "text_completion",
-                                "note": none,
-                                "stability": "development",
-                                "value": "text_completion",
-                            },
-                            {
-                                "brief": "Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)",
-                                "deprecated": none,
-                                "id": "embeddings",
-                                "note": none,
-                                "stability": "development",
-                                "value": "embeddings",
-                            },
-                            {
-                                "brief": "Create GenAI agent",
-                                "deprecated": none,
-                                "id": "create_agent",
-                                "note": none,
-                                "stability": "development",
-                                "value": "create_agent",
-                            },
-                            {
-                                "brief": "Invoke GenAI agent",
-                                "deprecated": none,
-                                "id": "invoke_agent",
-                                "note": none,
-                                "stability": "development",
-                                "value": "invoke_agent",
-                            },
-                            {
-                                "brief": "Execute a tool",
-                                "deprecated": none,
-                                "id": "execute_tool",
-                                "note": none,
-                                "stability": "development",
-                                "value": "execute_tool",
-                            },
-                        ],
-                    },
                 },
                 {
                     "brief": "GenAI server address.",
@@ -487,32 +469,14 @@ State {
                     "type": "int",
                 },
                 {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "timeout",
-                        "java.net.UnknownHostException",
-                        "server_certificate_invalid",
-                        "500",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,\nthe canonical name of exception that occurred, or another low-cardinality error identifier.\nInstrumentations SHOULD document the list of errors they report.\n",
+                    "brief": "The name of the GenAI model a request is being made to.",
+                    "examples": "gpt-4",
+                    "name": "gen_ai.request.model",
                     "requirement_level": {
-                        "conditionally_required": "if the operation ended in an error",
+                        "conditionally_required": "If available.",
                     },
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
+                    "stability": "development",
+                    "type": "string",
                 },
                 {
                     "brief": "The Generative AI product as identified by the client or server instrumentation.",
@@ -664,14 +628,72 @@ State {
                     },
                 },
                 {
-                    "brief": "The name of the GenAI model a request is being made to.",
-                    "examples": "gpt-4",
-                    "name": "gen_ai.request.model",
-                    "requirement_level": {
-                        "conditionally_required": "If available.",
-                    },
+                    "brief": "The name of the operation being performed.",
+                    "name": "gen_ai.operation.name",
+                    "note": "If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.\n",
+                    "requirement_level": "required",
                     "stability": "development",
-                    "type": "string",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)",
+                                "deprecated": none,
+                                "id": "chat",
+                                "note": none,
+                                "stability": "development",
+                                "value": "chat",
+                            },
+                            {
+                                "brief": "Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)",
+                                "deprecated": none,
+                                "id": "generate_content",
+                                "note": none,
+                                "stability": "development",
+                                "value": "generate_content",
+                            },
+                            {
+                                "brief": "Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)",
+                                "deprecated": none,
+                                "id": "text_completion",
+                                "note": none,
+                                "stability": "development",
+                                "value": "text_completion",
+                            },
+                            {
+                                "brief": "Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)",
+                                "deprecated": none,
+                                "id": "embeddings",
+                                "note": none,
+                                "stability": "development",
+                                "value": "embeddings",
+                            },
+                            {
+                                "brief": "Create GenAI agent",
+                                "deprecated": none,
+                                "id": "create_agent",
+                                "note": none,
+                                "stability": "development",
+                                "value": "create_agent",
+                            },
+                            {
+                                "brief": "Invoke GenAI agent",
+                                "deprecated": none,
+                                "id": "invoke_agent",
+                                "note": none,
+                                "stability": "development",
+                                "value": "invoke_agent",
+                            },
+                            {
+                                "brief": "Execute a tool",
+                                "deprecated": none,
+                                "id": "execute_tool",
+                                "note": none,
+                                "stability": "development",
+                                "value": "execute_tool",
+                            },
+                        ],
+                    },
                 },
             ],
             "brief": "GenAI operation duration",

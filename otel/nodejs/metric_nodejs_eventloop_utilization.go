@@ -7,6 +7,7 @@ import (
 // Event loop utilization.
 type EventloopUtilization struct {
 	*prometheus.GaugeVec
+	extra EventloopUtilizationExtra
 }
 
 func NewEventloopUtilization() EventloopUtilization {
@@ -21,7 +22,7 @@ func NewEventloopUtilization() EventloopUtilization {
 func (m EventloopUtilization) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = EventloopUtilizationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

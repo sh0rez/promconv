@@ -7,6 +7,7 @@ import (
 // Number of desired replica pods in this statefulset
 type StatefulsetDesiredPods struct {
 	*prometheus.GaugeVec
+	extra StatefulsetDesiredPodsExtra
 }
 
 func NewStatefulsetDesiredPods() StatefulsetDesiredPods {
@@ -21,7 +22,7 @@ func NewStatefulsetDesiredPods() StatefulsetDesiredPods {
 func (m StatefulsetDesiredPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = StatefulsetDesiredPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

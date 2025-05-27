@@ -7,6 +7,7 @@ import (
 // Number of page faults the process has made.
 type PagingFaults struct {
 	*prometheus.CounterVec
+	extra PagingFaultsExtra
 }
 
 func NewPagingFaults() PagingFaults {
@@ -22,11 +23,16 @@ func (m PagingFaults) With(extra interface {
 	AttrProcessPagingFaultType() AttrPagingFaultType
 }) prometheus.Counter {
 	if extra == nil {
-		extra = PagingFaultsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrProcessPagingFaultType()),
 	)
+}
+
+func (a PagingFaults) WithProcessPagingFaultType(attr interface{ AttrProcessPagingFaultType() AttrPagingFaultType }) PagingFaults {
+	a.extra.ProcessPagingFaultType = attr.AttrProcessPagingFaultType()
+	return a
 }
 
 type PagingFaultsExtra struct {

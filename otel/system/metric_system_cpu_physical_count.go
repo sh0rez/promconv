@@ -7,6 +7,7 @@ import (
 // Reports the number of actual physical processor cores on the hardware
 type CpuPhysicalCount struct {
 	*prometheus.GaugeVec
+	extra CpuPhysicalCountExtra
 }
 
 func NewCpuPhysicalCount() CpuPhysicalCount {
@@ -21,7 +22,7 @@ func NewCpuPhysicalCount() CpuPhysicalCount {
 func (m CpuPhysicalCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CpuPhysicalCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

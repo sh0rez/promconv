@@ -11,6 +11,7 @@ import (
 // Measures the time taken to perform a DNS lookup.
 type LookupDuration struct {
 	*prometheus.HistogramVec
+	extra LookupDurationExtra
 }
 
 func NewLookupDuration() LookupDuration {
@@ -26,12 +27,17 @@ func (m LookupDuration) With(questionName AttrQuestionName, extra interface {
 	AttrErrorType() error.AttrType
 }) prometheus.Observer {
 	if extra == nil {
-		extra = LookupDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(questionName),
 		string(extra.AttrErrorType()),
 	)
+}
+
+func (a LookupDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) LookupDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
 }
 
 type LookupDurationExtra struct {

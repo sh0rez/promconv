@@ -7,6 +7,7 @@ import (
 // The number of timer instances that are currently active.
 type TimerCount struct {
 	*prometheus.GaugeVec
+	extra TimerCountExtra
 }
 
 func NewTimerCount() TimerCount {
@@ -21,7 +22,7 @@ func NewTimerCount() TimerCount {
 func (m TimerCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = TimerCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

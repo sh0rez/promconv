@@ -7,6 +7,7 @@ import (
 // Total memory available in the system.
 type MemoryLimit struct {
 	*prometheus.GaugeVec
+	extra MemoryLimitExtra
 }
 
 func NewMemoryLimit() MemoryLimit {
@@ -21,7 +22,7 @@ func NewMemoryLimit() MemoryLimit {
 func (m MemoryLimit) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryLimitExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

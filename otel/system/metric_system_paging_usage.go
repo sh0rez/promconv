@@ -7,6 +7,7 @@ import (
 // Unix swap or windows pagefile usage
 type PagingUsage struct {
 	*prometheus.GaugeVec
+	extra PagingUsageExtra
 }
 
 func NewPagingUsage() PagingUsage {
@@ -23,12 +24,21 @@ func (m PagingUsage) With(extra interface {
 	AttrSystemPagingState() AttrPagingState
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = PagingUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemDevice()),
 		string(extra.AttrSystemPagingState()),
 	)
+}
+
+func (a PagingUsage) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) PagingUsage {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
+}
+func (a PagingUsage) WithSystemPagingState(attr interface{ AttrSystemPagingState() AttrPagingState }) PagingUsage {
+	a.extra.SystemPagingState = attr.AttrSystemPagingState()
+	return a
 }
 
 type PagingUsageExtra struct {

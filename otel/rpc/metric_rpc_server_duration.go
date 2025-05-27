@@ -7,6 +7,7 @@ import (
 // Measures the duration of inbound RPC.
 type ServerDuration struct {
 	*prometheus.HistogramVec
+	extra ServerDurationExtra
 }
 
 func NewServerDuration() ServerDuration {
@@ -21,7 +22,7 @@ func NewServerDuration() ServerDuration {
 func (m ServerDuration) With(extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ServerDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

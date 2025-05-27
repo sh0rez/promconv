@@ -14,6 +14,7 @@ import (
 // The duration of exporting a batch of telemetry records.
 type SdkExporterOperationDuration struct {
 	*prometheus.HistogramVec
+	extra SdkExporterOperationDurationExtra
 }
 
 func NewSdkExporterOperationDuration() SdkExporterOperationDuration {
@@ -35,7 +36,7 @@ func (m SdkExporterOperationDuration) With(extra interface {
 	AttrServerPort() server.AttrPort
 }) prometheus.Observer {
 	if extra == nil {
-		extra = SdkExporterOperationDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrErrorType()),
@@ -46,6 +47,37 @@ func (m SdkExporterOperationDuration) With(extra interface {
 		string(extra.AttrServerAddress()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a SdkExporterOperationDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) SdkExporterOperationDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a SdkExporterOperationDuration) WithHttpResponseStatusCode(attr interface {
+	AttrHttpResponseStatusCode() http.AttrResponseStatusCode
+}) SdkExporterOperationDuration {
+	a.extra.HttpResponseStatusCode = attr.AttrHttpResponseStatusCode()
+	return a
+}
+func (a SdkExporterOperationDuration) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkExporterOperationDuration {
+	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+	return a
+}
+func (a SdkExporterOperationDuration) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkExporterOperationDuration {
+	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+	return a
+}
+func (a SdkExporterOperationDuration) WithRpcGrpcStatusCode(attr interface{ AttrRpcGrpcStatusCode() rpc.AttrGrpcStatusCode }) SdkExporterOperationDuration {
+	a.extra.RpcGrpcStatusCode = attr.AttrRpcGrpcStatusCode()
+	return a
+}
+func (a SdkExporterOperationDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) SdkExporterOperationDuration {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a SdkExporterOperationDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) SdkExporterOperationDuration {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type SdkExporterOperationDurationExtra struct {
@@ -463,6 +495,58 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "rejected",
+                        "timeout",
+                        "500",
+                        "java.net.UnknownHostException",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If operation has ended with an error",
+                    },
+                    "stability": "stable",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
+                    "brief": "The HTTP status code of the last HTTP request performed in scope of this export call.",
+                    "examples": [
+                        200,
+                    ],
+                    "name": "http.response.status_code",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
+                    "brief": "A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.\n",
+                    "examples": [
+                        "otlp_grpc_span_exporter/0",
+                        "custom-name",
+                    ],
+                    "name": "otel.component.name",
+                    "note": "Implementations SHOULD ensure a low cardinality for this attribute, even across application or SDK restarts.\nE.g. implementations MUST NOT use UUIDs as values for this attribute.\n\nImplementations MAY achieve these goals by following a `<otel.component.type>/<instance-counter>` pattern, e.g. `batching_span_processor/0`.\nHereby `otel.component.type` refers to the corresponding attribute value of the component.\n\nThe value of `instance-counter` MAY be automatically assigned by the component and uniqueness within the enclosing SDK instance MUST be guaranteed.\nFor example, `<instance-counter>` MAY be implemented by using a monotonically increasing counter (starting with `0`), which is incremented every time an\ninstance of the given component type is started.\n\nWith this implementation, for example the first Batching Span Processor would have `batching_span_processor/0`\nas `otel.component.name`, the second one `batching_span_processor/1` and so on.\nThese values will therefore be reused in the case of an application restart.\n",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
+                },
+                {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
                     "examples": [
                         "example.com",
@@ -491,18 +575,6 @@ State {
                     },
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.\n",
-                    "examples": [
-                        "otlp_grpc_span_exporter/0",
-                        "custom-name",
-                    ],
-                    "name": "otel.component.name",
-                    "note": "Implementations SHOULD ensure a low cardinality for this attribute, even across application or SDK restarts.\nE.g. implementations MUST NOT use UUIDs as values for this attribute.\n\nImplementations MAY achieve these goals by following a `<otel.component.type>/<instance-counter>` pattern, e.g. `batching_span_processor/0`.\nHereby `otel.component.type` refers to the corresponding attribute value of the component.\n\nThe value of `instance-counter` MAY be automatically assigned by the component and uniqueness within the enclosing SDK instance MUST be guaranteed.\nFor example, `<instance-counter>` MAY be implemented by using a monotonically increasing counter (starting with `0`), which is incremented every time an\ninstance of the given component type is started.\n\nWith this implementation, for example the first Batching Span Processor would have `batching_span_processor/0`\nas `otel.component.name`, the second one `batching_span_processor/1` and so on.\nThese values will therefore be reused in the case of an application restart.\n",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
                 },
                 {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
@@ -631,46 +703,6 @@ State {
                             },
                         ],
                     },
-                },
-                {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "rejected",
-                        "timeout",
-                        "500",
-                        "java.net.UnknownHostException",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If operation has ended with an error",
-                    },
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
-                },
-                {
-                    "brief": "The HTTP status code of the last HTTP request performed in scope of this export call.",
-                    "examples": [
-                        200,
-                    ],
-                    "name": "http.response.status_code",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "int",
                 },
                 {
                     "brief": "The gRPC status code of the last gRPC requests performed in scope of this export call.",

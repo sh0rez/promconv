@@ -7,6 +7,7 @@ import (
 // Time a ref (branch) created from the default branch (trunk) has existed. The `ref.type` attribute will always be `branch`
 type RefTime struct {
 	*prometheus.GaugeVec
+	extra RefTimeExtra
 }
 
 func NewRefTime() RefTime {
@@ -24,7 +25,7 @@ func (m RefTime) With(refHeadName AttrRefHeadName, refHeadType AttrRefHeadType, 
 	AttrVcsProviderName() AttrProviderName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = RefTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(refHeadName),
@@ -34,6 +35,19 @@ func (m RefTime) With(refHeadName AttrRefHeadName, refHeadType AttrRefHeadType, 
 		string(extra.AttrVcsRepositoryName()),
 		string(extra.AttrVcsProviderName()),
 	)
+}
+
+func (a RefTime) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) RefTime {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a RefTime) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) RefTime {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a RefTime) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) RefTime {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
 }
 
 type RefTimeExtra struct {

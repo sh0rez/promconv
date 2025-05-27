@@ -7,6 +7,7 @@ import (
 // Deprecated, use `db.client.connection.use_time` instead. Note: the unit also changed from `ms` to `s`.
 type ClientConnectionsUseTime struct {
 	*prometheus.HistogramVec
+	extra ClientConnectionsUseTimeExtra
 }
 
 func NewClientConnectionsUseTime() ClientConnectionsUseTime {
@@ -21,7 +22,7 @@ func NewClientConnectionsUseTime() ClientConnectionsUseTime {
 func (m ClientConnectionsUseTime) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientConnectionsUseTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),

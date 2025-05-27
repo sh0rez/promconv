@@ -7,6 +7,7 @@ import (
 // Measure of initial memory requested.
 type MemoryInit struct {
 	*prometheus.GaugeVec
+	extra MemoryInitExtra
 }
 
 func NewMemoryInit() MemoryInit {
@@ -23,12 +24,21 @@ func (m MemoryInit) With(extra interface {
 	AttrJvmMemoryType() AttrMemoryType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryInitExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmMemoryPoolName()),
 		string(extra.AttrJvmMemoryType()),
 	)
+}
+
+func (a MemoryInit) WithJvmMemoryPoolName(attr interface{ AttrJvmMemoryPoolName() AttrMemoryPoolName }) MemoryInit {
+	a.extra.JvmMemoryPoolName = attr.AttrJvmMemoryPoolName()
+	return a
+}
+func (a MemoryInit) WithJvmMemoryType(attr interface{ AttrJvmMemoryType() AttrMemoryType }) MemoryInit {
+	a.extra.JvmMemoryType = attr.AttrJvmMemoryType()
+	return a
 }
 
 type MemoryInitExtra struct {

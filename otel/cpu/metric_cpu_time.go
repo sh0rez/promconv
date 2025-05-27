@@ -7,6 +7,7 @@ import (
 // Seconds each logical CPU spent on each mode
 type Time struct {
 	*prometheus.CounterVec
+	extra TimeExtra
 }
 
 func NewTime() Time {
@@ -23,12 +24,21 @@ func (m Time) With(extra interface {
 	AttrCpuMode() AttrMode
 }) prometheus.Counter {
 	if extra == nil {
-		extra = TimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrCpuLogicalNumber()),
 		string(extra.AttrCpuMode()),
 	)
+}
+
+func (a Time) WithCpuLogicalNumber(attr interface{ AttrCpuLogicalNumber() AttrLogicalNumber }) Time {
+	a.extra.CpuLogicalNumber = attr.AttrCpuLogicalNumber()
+	return a
+}
+func (a Time) WithCpuMode(attr interface{ AttrCpuMode() AttrMode }) Time {
+	a.extra.CpuMode = attr.AttrCpuMode()
+	return a
 }
 
 type TimeExtra struct {

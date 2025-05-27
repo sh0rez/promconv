@@ -7,6 +7,7 @@ import (
 // The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.
 type GcHeapTotalAllocated struct {
 	*prometheus.CounterVec
+	extra GcHeapTotalAllocatedExtra
 }
 
 func NewGcHeapTotalAllocated() GcHeapTotalAllocated {
@@ -21,7 +22,7 @@ func NewGcHeapTotalAllocated() GcHeapTotalAllocated {
 func (m GcHeapTotalAllocated) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = GcHeapTotalAllocatedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

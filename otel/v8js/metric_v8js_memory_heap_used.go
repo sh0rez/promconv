@@ -7,6 +7,7 @@ import (
 // Heap Memory size allocated.
 type MemoryHeapUsed struct {
 	*prometheus.GaugeVec
+	extra MemoryHeapUsedExtra
 }
 
 func NewMemoryHeapUsed() MemoryHeapUsed {
@@ -21,7 +22,7 @@ func NewMemoryHeapUsed() MemoryHeapUsed {
 func (m MemoryHeapUsed) With(heapSpaceName AttrHeapSpaceName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryHeapUsedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(heapSpaceName),

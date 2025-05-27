@@ -7,6 +7,7 @@ import (
 // By how many degrees Celsius the temperature of the physical host can be increased, before reaching a warning threshold on one of the internal sensors
 type HostHeatingMargin struct {
 	*prometheus.GaugeVec
+	extra HostHeatingMarginExtra
 }
 
 func NewHostHeatingMargin() HostHeatingMargin {
@@ -23,13 +24,22 @@ func (m HostHeatingMargin) With(id AttrId, extra interface {
 	AttrHwParent() AttrParent
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = HostHeatingMarginExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(id),
 		string(extra.AttrHwName()),
 		string(extra.AttrHwParent()),
 	)
+}
+
+func (a HostHeatingMargin) WithHwName(attr interface{ AttrHwName() AttrName }) HostHeatingMargin {
+	a.extra.HwName = attr.AttrHwName()
+	return a
+}
+func (a HostHeatingMargin) WithHwParent(attr interface{ AttrHwParent() AttrParent }) HostHeatingMargin {
+	a.extra.HwParent = attr.AttrHwParent()
+	return a
 }
 
 type HostHeatingMarginExtra struct {

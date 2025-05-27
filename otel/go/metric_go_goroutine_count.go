@@ -7,6 +7,7 @@ import (
 // Count of live goroutines.
 type GoroutineCount struct {
 	*prometheus.GaugeVec
+	extra GoroutineCountExtra
 }
 
 func NewGoroutineCount() GoroutineCount {
@@ -21,7 +22,7 @@ func NewGoroutineCount() GoroutineCount {
 func (m GoroutineCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = GoroutineCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

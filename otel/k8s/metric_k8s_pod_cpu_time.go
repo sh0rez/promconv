@@ -7,6 +7,7 @@ import (
 // Total CPU time consumed
 type PodCpuTime struct {
 	*prometheus.CounterVec
+	extra PodCpuTimeExtra
 }
 
 func NewPodCpuTime() PodCpuTime {
@@ -21,7 +22,7 @@ func NewPodCpuTime() PodCpuTime {
 func (m PodCpuTime) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = PodCpuTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

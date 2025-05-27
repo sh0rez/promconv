@@ -7,6 +7,7 @@ import (
 // Deprecated. Use `cpu.utilization` instead.
 type CpuUtilization struct {
 	*prometheus.GaugeVec
+	extra CpuUtilizationExtra
 }
 
 func NewCpuUtilization() CpuUtilization {
@@ -21,7 +22,7 @@ func NewCpuUtilization() CpuUtilization {
 func (m CpuUtilization) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CpuUtilizationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

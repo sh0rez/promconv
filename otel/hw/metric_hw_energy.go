@@ -7,6 +7,7 @@ import (
 // Energy consumed by the component
 type Energy struct {
 	*prometheus.CounterVec
+	extra EnergyExtra
 }
 
 func NewEnergy() Energy {
@@ -23,7 +24,7 @@ func (m Energy) With(id AttrId, kind AttrType, extra interface {
 	AttrHwParent() AttrParent
 }) prometheus.Counter {
 	if extra == nil {
-		extra = EnergyExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(id),
@@ -31,6 +32,15 @@ func (m Energy) With(id AttrId, kind AttrType, extra interface {
 		string(extra.AttrHwName()),
 		string(extra.AttrHwParent()),
 	)
+}
+
+func (a Energy) WithHwName(attr interface{ AttrHwName() AttrName }) Energy {
+	a.extra.HwName = attr.AttrHwName()
+	return a
+}
+func (a Energy) WithHwParent(attr interface{ AttrHwParent() AttrParent }) Energy {
+	a.extra.HwParent = attr.AttrHwParent()
+	return a
 }
 
 type EnergyExtra struct {

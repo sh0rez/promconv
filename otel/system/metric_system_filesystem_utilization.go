@@ -6,6 +6,7 @@ import (
 
 type FilesystemUtilization struct {
 	*prometheus.GaugeVec
+	extra FilesystemUtilizationExtra
 }
 
 func NewFilesystemUtilization() FilesystemUtilization {
@@ -25,7 +26,7 @@ func (m FilesystemUtilization) With(extra interface {
 	AttrSystemFilesystemType() AttrFilesystemType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = FilesystemUtilizationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemDevice()),
@@ -34,6 +35,29 @@ func (m FilesystemUtilization) With(extra interface {
 		string(extra.AttrSystemFilesystemState()),
 		string(extra.AttrSystemFilesystemType()),
 	)
+}
+
+func (a FilesystemUtilization) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) FilesystemUtilization {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
+}
+func (a FilesystemUtilization) WithSystemFilesystemMode(attr interface{ AttrSystemFilesystemMode() AttrFilesystemMode }) FilesystemUtilization {
+	a.extra.SystemFilesystemMode = attr.AttrSystemFilesystemMode()
+	return a
+}
+func (a FilesystemUtilization) WithSystemFilesystemMountpoint(attr interface {
+	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
+}) FilesystemUtilization {
+	a.extra.SystemFilesystemMountpoint = attr.AttrSystemFilesystemMountpoint()
+	return a
+}
+func (a FilesystemUtilization) WithSystemFilesystemState(attr interface{ AttrSystemFilesystemState() AttrFilesystemState }) FilesystemUtilization {
+	a.extra.SystemFilesystemState = attr.AttrSystemFilesystemState()
+	return a
+}
+func (a FilesystemUtilization) WithSystemFilesystemType(attr interface{ AttrSystemFilesystemType() AttrFilesystemType }) FilesystemUtilization {
+	a.extra.SystemFilesystemType = attr.AttrSystemFilesystemType()
+	return a
 }
 
 type FilesystemUtilizationExtra struct {

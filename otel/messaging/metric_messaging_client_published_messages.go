@@ -12,6 +12,7 @@ import (
 // Deprecated. Use `messaging.client.sent.messages` instead.
 type ClientPublishedMessages struct {
 	*prometheus.CounterVec
+	extra ClientPublishedMessagesExtra
 }
 
 func NewClientPublishedMessages() ClientPublishedMessages {
@@ -32,7 +33,7 @@ func (m ClientPublishedMessages) With(operationName AttrOperationName, system At
 	AttrServerPort() server.AttrPort
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ClientPublishedMessagesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(operationName),
@@ -44,6 +45,35 @@ func (m ClientPublishedMessages) With(operationName AttrOperationName, system At
 		string(extra.AttrMessagingDestinationPartitionId()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a ClientPublishedMessages) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientPublishedMessages {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ClientPublishedMessages) WithMessagingDestinationName(attr interface{ AttrMessagingDestinationName() AttrDestinationName }) ClientPublishedMessages {
+	a.extra.MessagingDestinationName = attr.AttrMessagingDestinationName()
+	return a
+}
+func (a ClientPublishedMessages) WithMessagingDestinationTemplate(attr interface {
+	AttrMessagingDestinationTemplate() AttrDestinationTemplate
+}) ClientPublishedMessages {
+	a.extra.MessagingDestinationTemplate = attr.AttrMessagingDestinationTemplate()
+	return a
+}
+func (a ClientPublishedMessages) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientPublishedMessages {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ClientPublishedMessages) WithMessagingDestinationPartitionId(attr interface {
+	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
+}) ClientPublishedMessages {
+	a.extra.MessagingDestinationPartitionId = attr.AttrMessagingDestinationPartitionId()
+	return a
+}
+func (a ClientPublishedMessages) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientPublishedMessages {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type ClientPublishedMessagesExtra struct {
@@ -297,23 +327,22 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.\n",
                     "examples": "1",
                     "name": "messaging.destination.partition.id",
                     "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
+                },
+                {
+                    "brief": "The system-specific name of the messaging operation.\n",
+                    "examples": [
+                        "ack",
+                        "nack",
+                        "send",
+                    ],
+                    "name": "messaging.operation.name",
+                    "requirement_level": "required",
                     "stability": "development",
                     "type": "string",
                 },
@@ -368,18 +397,6 @@ State {
                     "requirement_level": {
                         "conditionally_required": "if available.",
                     },
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
-                    "brief": "The system-specific name of the messaging operation.\n",
-                    "examples": [
-                        "ack",
-                        "nack",
-                        "send",
-                    ],
-                    "name": "messaging.operation.name",
-                    "requirement_level": "required",
                     "stability": "development",
                     "type": "string",
                 },
@@ -482,6 +499,19 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
                 },
                 {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",

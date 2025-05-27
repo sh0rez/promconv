@@ -7,6 +7,7 @@ import (
 // Number of processors available to the Java virtual machine.
 type CpuCount struct {
 	*prometheus.GaugeVec
+	extra CpuCountExtra
 }
 
 func NewCpuCount() CpuCount {
@@ -21,7 +22,7 @@ func NewCpuCount() CpuCount {
 func (m CpuCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CpuCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

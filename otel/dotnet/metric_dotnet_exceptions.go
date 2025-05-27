@@ -11,6 +11,7 @@ import (
 // The number of exceptions that have been thrown in managed code.
 type Exceptions struct {
 	*prometheus.CounterVec
+	extra ExceptionsExtra
 }
 
 func NewExceptions() Exceptions {
@@ -25,7 +26,7 @@ func NewExceptions() Exceptions {
 func (m Exceptions) With(kind error.AttrType, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ExceptionsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(kind),

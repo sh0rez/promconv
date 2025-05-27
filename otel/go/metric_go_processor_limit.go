@@ -7,6 +7,7 @@ import (
 // The number of OS threads that can execute user-level Go code simultaneously.
 type ProcessorLimit struct {
 	*prometheus.GaugeVec
+	extra ProcessorLimitExtra
 }
 
 func NewProcessorLimit() ProcessorLimit {
@@ -21,7 +22,7 @@ func NewProcessorLimit() ProcessorLimit {
 func (m ProcessorLimit) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ProcessorLimitExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

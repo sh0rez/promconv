@@ -7,6 +7,7 @@ import (
 // Deprecated, use `db.client.connection.create_time` instead. Note: the unit also changed from `ms` to `s`.
 type ClientConnectionsCreateTime struct {
 	*prometheus.HistogramVec
+	extra ClientConnectionsCreateTimeExtra
 }
 
 func NewClientConnectionsCreateTime() ClientConnectionsCreateTime {
@@ -21,7 +22,7 @@ func NewClientConnectionsCreateTime() ClientConnectionsCreateTime {
 func (m ClientConnectionsCreateTime) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientConnectionsCreateTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),

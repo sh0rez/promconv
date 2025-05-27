@@ -7,6 +7,7 @@ import (
 // Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs
 type NodeCpuUsage struct {
 	*prometheus.GaugeVec
+	extra NodeCpuUsageExtra
 }
 
 func NewNodeCpuUsage() NodeCpuUsage {
@@ -21,7 +22,7 @@ func NewNodeCpuUsage() NodeCpuUsage {
 func (m NodeCpuUsage) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = NodeCpuUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

@@ -7,6 +7,7 @@ import (
 // Deprecated, use `db.client.connection.max` instead.
 type ClientConnectionsMax struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionsMaxExtra
 }
 
 func NewClientConnectionsMax() ClientConnectionsMax {
@@ -21,7 +22,7 @@ func NewClientConnectionsMax() ClientConnectionsMax {
 func (m ClientConnectionsMax) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionsMaxExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),

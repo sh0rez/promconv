@@ -12,6 +12,7 @@ import (
 // Number of connections rejected by the server.
 type RejectedConnections struct {
 	*prometheus.CounterVec
+	extra RejectedConnectionsExtra
 }
 
 func NewRejectedConnections() RejectedConnections {
@@ -30,7 +31,7 @@ func (m RejectedConnections) With(extra interface {
 	AttrServerPort() server.AttrPort
 }) prometheus.Counter {
 	if extra == nil {
-		extra = RejectedConnectionsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkTransport()),
@@ -38,6 +39,23 @@ func (m RejectedConnections) With(extra interface {
 		string(extra.AttrServerAddress()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a RejectedConnections) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) RejectedConnections {
+	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+	return a
+}
+func (a RejectedConnections) WithNetworkType(attr interface{ AttrNetworkType() network.AttrType }) RejectedConnections {
+	a.extra.NetworkType = attr.AttrNetworkType()
+	return a
+}
+func (a RejectedConnections) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) RejectedConnections {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a RejectedConnections) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) RejectedConnections {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type RejectedConnectionsExtra struct {
@@ -195,32 +213,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.",
                     "examples": [
                         "ipv4",
@@ -309,6 +301,32 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "Number of connections rejected by the server.",

@@ -7,6 +7,7 @@ import (
 // Memory allocated to the heap by the application.
 type MemoryAllocated struct {
 	*prometheus.CounterVec
+	extra MemoryAllocatedExtra
 }
 
 func NewMemoryAllocated() MemoryAllocated {
@@ -21,7 +22,7 @@ func NewMemoryAllocated() MemoryAllocated {
 func (m MemoryAllocated) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = MemoryAllocatedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

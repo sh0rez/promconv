@@ -7,6 +7,7 @@ import (
 // Measure of memory committed.
 type MemoryCommitted struct {
 	*prometheus.GaugeVec
+	extra MemoryCommittedExtra
 }
 
 func NewMemoryCommitted() MemoryCommitted {
@@ -23,12 +24,21 @@ func (m MemoryCommitted) With(extra interface {
 	AttrJvmMemoryType() AttrMemoryType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryCommittedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmMemoryPoolName()),
 		string(extra.AttrJvmMemoryType()),
 	)
+}
+
+func (a MemoryCommitted) WithJvmMemoryPoolName(attr interface{ AttrJvmMemoryPoolName() AttrMemoryPoolName }) MemoryCommitted {
+	a.extra.JvmMemoryPoolName = attr.AttrJvmMemoryPoolName()
+	return a
+}
+func (a MemoryCommitted) WithJvmMemoryType(attr interface{ AttrJvmMemoryType() AttrMemoryType }) MemoryCommitted {
+	a.extra.JvmMemoryType = attr.AttrJvmMemoryType()
+	return a
 }
 
 type MemoryCommittedExtra struct {

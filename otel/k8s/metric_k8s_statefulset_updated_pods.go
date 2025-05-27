@@ -7,6 +7,7 @@ import (
 // Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision
 type StatefulsetUpdatedPods struct {
 	*prometheus.GaugeVec
+	extra StatefulsetUpdatedPodsExtra
 }
 
 func NewStatefulsetUpdatedPods() StatefulsetUpdatedPods {
@@ -21,7 +22,7 @@ func NewStatefulsetUpdatedPods() StatefulsetUpdatedPods {
 func (m StatefulsetUpdatedPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = StatefulsetUpdatedPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

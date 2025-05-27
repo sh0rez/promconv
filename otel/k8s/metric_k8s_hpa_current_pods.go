@@ -7,6 +7,7 @@ import (
 // Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler
 type HpaCurrentPods struct {
 	*prometheus.GaugeVec
+	extra HpaCurrentPodsExtra
 }
 
 func NewHpaCurrentPods() HpaCurrentPods {
@@ -21,7 +22,7 @@ func NewHpaCurrentPods() HpaCurrentPods {
 func (m HpaCurrentPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = HpaCurrentPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

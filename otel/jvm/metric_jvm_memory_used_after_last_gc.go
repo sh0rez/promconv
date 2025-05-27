@@ -7,6 +7,7 @@ import (
 // Measure of memory used, as measured after the most recent garbage collection event on this pool.
 type MemoryUsedAfterLastGc struct {
 	*prometheus.GaugeVec
+	extra MemoryUsedAfterLastGcExtra
 }
 
 func NewMemoryUsedAfterLastGc() MemoryUsedAfterLastGc {
@@ -23,12 +24,21 @@ func (m MemoryUsedAfterLastGc) With(extra interface {
 	AttrJvmMemoryType() AttrMemoryType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryUsedAfterLastGcExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmMemoryPoolName()),
 		string(extra.AttrJvmMemoryType()),
 	)
+}
+
+func (a MemoryUsedAfterLastGc) WithJvmMemoryPoolName(attr interface{ AttrJvmMemoryPoolName() AttrMemoryPoolName }) MemoryUsedAfterLastGc {
+	a.extra.JvmMemoryPoolName = attr.AttrJvmMemoryPoolName()
+	return a
+}
+func (a MemoryUsedAfterLastGc) WithJvmMemoryType(attr interface{ AttrJvmMemoryType() AttrMemoryType }) MemoryUsedAfterLastGc {
+	a.extra.JvmMemoryType = attr.AttrJvmMemoryType()
+	return a
 }
 
 type MemoryUsedAfterLastGcExtra struct {

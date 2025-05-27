@@ -7,6 +7,7 @@ import (
 // The heap fragmentation, as observed during the latest garbage collection.
 type GcLastCollectionHeapFragmentationSize struct {
 	*prometheus.GaugeVec
+	extra GcLastCollectionHeapFragmentationSizeExtra
 }
 
 func NewGcLastCollectionHeapFragmentationSize() GcLastCollectionHeapFragmentationSize {
@@ -21,7 +22,7 @@ func NewGcLastCollectionHeapFragmentationSize() GcLastCollectionHeapFragmentatio
 func (m GcLastCollectionHeapFragmentationSize) With(gcHeapGeneration AttrGcHeapGeneration, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = GcLastCollectionHeapFragmentationSizeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(gcHeapGeneration),

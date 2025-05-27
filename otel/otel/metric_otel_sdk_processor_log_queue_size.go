@@ -7,6 +7,7 @@ import (
 // The number of log records in the queue of a given instance of an SDK log processor
 type SdkProcessorLogQueueSize struct {
 	*prometheus.GaugeVec
+	extra SdkProcessorLogQueueSizeExtra
 }
 
 func NewSdkProcessorLogQueueSize() SdkProcessorLogQueueSize {
@@ -23,12 +24,21 @@ func (m SdkProcessorLogQueueSize) With(extra interface {
 	AttrOtelComponentType() AttrComponentType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SdkProcessorLogQueueSizeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrOtelComponentName()),
 		string(extra.AttrOtelComponentType()),
 	)
+}
+
+func (a SdkProcessorLogQueueSize) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkProcessorLogQueueSize {
+	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+	return a
+}
+func (a SdkProcessorLogQueueSize) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkProcessorLogQueueSize {
+	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+	return a
 }
 
 type SdkProcessorLogQueueSizeExtra struct {

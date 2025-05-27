@@ -7,6 +7,7 @@ import (
 // Committed size of a heap space.
 type HeapSpacePhysicalSize struct {
 	*prometheus.GaugeVec
+	extra HeapSpacePhysicalSizeExtra
 }
 
 func NewHeapSpacePhysicalSize() HeapSpacePhysicalSize {
@@ -21,7 +22,7 @@ func NewHeapSpacePhysicalSize() HeapSpacePhysicalSize {
 func (m HeapSpacePhysicalSize) With(heapSpaceName AttrHeapSpaceName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = HeapSpacePhysicalSizeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(heapSpaceName),

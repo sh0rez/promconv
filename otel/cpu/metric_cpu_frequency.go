@@ -7,6 +7,7 @@ import (
 // Operating frequency of the logical CPU in Hertz.
 type Frequency struct {
 	*prometheus.GaugeVec
+	extra FrequencyExtra
 }
 
 func NewFrequency() Frequency {
@@ -22,11 +23,16 @@ func (m Frequency) With(extra interface {
 	AttrCpuLogicalNumber() AttrLogicalNumber
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = FrequencyExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrCpuLogicalNumber()),
 	)
+}
+
+func (a Frequency) WithCpuLogicalNumber(attr interface{ AttrCpuLogicalNumber() AttrLogicalNumber }) Frequency {
+	a.extra.CpuLogicalNumber = attr.AttrCpuLogicalNumber()
+	return a
 }
 
 type FrequencyExtra struct {

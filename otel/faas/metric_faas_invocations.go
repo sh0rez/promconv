@@ -7,6 +7,7 @@ import (
 // Number of successful invocations
 type Invocations struct {
 	*prometheus.CounterVec
+	extra InvocationsExtra
 }
 
 func NewInvocations() Invocations {
@@ -22,11 +23,16 @@ func (m Invocations) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Counter {
 	if extra == nil {
-		extra = InvocationsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a Invocations) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) Invocations {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type InvocationsExtra struct {

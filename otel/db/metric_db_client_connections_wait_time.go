@@ -7,6 +7,7 @@ import (
 // Deprecated, use `db.client.connection.wait_time` instead. Note: the unit also changed from `ms` to `s`.
 type ClientConnectionsWaitTime struct {
 	*prometheus.HistogramVec
+	extra ClientConnectionsWaitTimeExtra
 }
 
 func NewClientConnectionsWaitTime() ClientConnectionsWaitTime {
@@ -21,7 +22,7 @@ func NewClientConnectionsWaitTime() ClientConnectionsWaitTime {
 func (m ClientConnectionsWaitTime) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientConnectionsWaitTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),

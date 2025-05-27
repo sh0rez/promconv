@@ -7,6 +7,7 @@ import (
 // Instantaneous power consumed by the entire physical host in Watts (`hw.host.energy` is preferred)
 type HostPower struct {
 	*prometheus.GaugeVec
+	extra HostPowerExtra
 }
 
 func NewHostPower() HostPower {
@@ -23,13 +24,22 @@ func (m HostPower) With(id AttrId, extra interface {
 	AttrHwParent() AttrParent
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = HostPowerExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(id),
 		string(extra.AttrHwName()),
 		string(extra.AttrHwParent()),
 	)
+}
+
+func (a HostPower) WithHwName(attr interface{ AttrHwName() AttrName }) HostPower {
+	a.extra.HwName = attr.AttrHwName()
+	return a
+}
+func (a HostPower) WithHwParent(attr interface{ AttrHwParent() AttrParent }) HostPower {
+	a.extra.HwParent = attr.AttrHwParent()
+	return a
 }
 
 type HostPowerExtra struct {

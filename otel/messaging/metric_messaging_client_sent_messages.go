@@ -12,6 +12,7 @@ import (
 // Number of messages producer attempted to send to the broker.
 type ClientSentMessages struct {
 	*prometheus.CounterVec
+	extra ClientSentMessagesExtra
 }
 
 func NewClientSentMessages() ClientSentMessages {
@@ -32,7 +33,7 @@ func (m ClientSentMessages) With(operationName AttrOperationName, system AttrSys
 	AttrServerPort() server.AttrPort
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ClientSentMessagesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(operationName),
@@ -44,6 +45,35 @@ func (m ClientSentMessages) With(operationName AttrOperationName, system AttrSys
 		string(extra.AttrMessagingDestinationPartitionId()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a ClientSentMessages) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientSentMessages {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ClientSentMessages) WithMessagingDestinationName(attr interface{ AttrMessagingDestinationName() AttrDestinationName }) ClientSentMessages {
+	a.extra.MessagingDestinationName = attr.AttrMessagingDestinationName()
+	return a
+}
+func (a ClientSentMessages) WithMessagingDestinationTemplate(attr interface {
+	AttrMessagingDestinationTemplate() AttrDestinationTemplate
+}) ClientSentMessages {
+	a.extra.MessagingDestinationTemplate = attr.AttrMessagingDestinationTemplate()
+	return a
+}
+func (a ClientSentMessages) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientSentMessages {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ClientSentMessages) WithMessagingDestinationPartitionId(attr interface {
+	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
+}) ClientSentMessages {
+	a.extra.MessagingDestinationPartitionId = attr.AttrMessagingDestinationPartitionId()
+	return a
+}
+func (a ClientSentMessages) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientSentMessages {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type ClientSentMessagesExtra struct {
@@ -297,19 +327,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.\n",
                     "examples": "1",
                     "name": "messaging.destination.partition.id",
@@ -472,6 +489,31 @@ State {
                     },
                 },
                 {
+                    "brief": "The system-specific name of the messaging operation.\n",
+                    "examples": [
+                        "send",
+                        "schedule",
+                        "enqueue",
+                    ],
+                    "name": "messaging.operation.name",
+                    "requirement_level": "required",
+                    "stability": "development",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
                     "examples": [
                         "example.com",
@@ -484,18 +526,6 @@ State {
                         "conditionally_required": "If available.",
                     },
                     "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The system-specific name of the messaging operation.\n",
-                    "examples": [
-                        "send",
-                        "schedule",
-                        "enqueue",
-                    ],
-                    "name": "messaging.operation.name",
-                    "requirement_level": "required",
-                    "stability": "development",
                     "type": "string",
                 },
             ],

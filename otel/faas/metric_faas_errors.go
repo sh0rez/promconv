@@ -7,6 +7,7 @@ import (
 // Number of invocation errors
 type Errors struct {
 	*prometheus.CounterVec
+	extra ErrorsExtra
 }
 
 func NewErrors() Errors {
@@ -22,11 +23,16 @@ func (m Errors) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ErrorsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a Errors) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) Errors {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type ErrorsExtra struct {

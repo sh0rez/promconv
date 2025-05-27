@@ -11,6 +11,7 @@ import (
 // Number of active client instances
 type CosmosdbClientActiveInstanceCount struct {
 	*prometheus.GaugeVec
+	extra CosmosdbClientActiveInstanceCountExtra
 }
 
 func NewCosmosdbClientActiveInstanceCount() CosmosdbClientActiveInstanceCount {
@@ -27,12 +28,21 @@ func (m CosmosdbClientActiveInstanceCount) With(extra interface {
 	AttrServerAddress() server.AttrAddress
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CosmosdbClientActiveInstanceCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrServerPort()),
 		string(extra.AttrServerAddress()),
 	)
+}
+
+func (a CosmosdbClientActiveInstanceCount) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) CosmosdbClientActiveInstanceCount {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a CosmosdbClientActiveInstanceCount) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) CosmosdbClientActiveInstanceCount {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
 }
 
 type CosmosdbClientActiveInstanceCountExtra struct {

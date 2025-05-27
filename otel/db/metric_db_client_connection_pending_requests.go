@@ -7,6 +7,7 @@ import (
 // The number of current pending requests for an open connection
 type ClientConnectionPendingRequests struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionPendingRequestsExtra
 }
 
 func NewClientConnectionPendingRequests() ClientConnectionPendingRequests {
@@ -21,7 +22,7 @@ func NewClientConnectionPendingRequests() ClientConnectionPendingRequests {
 func (m ClientConnectionPendingRequests) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionPendingRequestsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),

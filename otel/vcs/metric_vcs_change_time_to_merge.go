@@ -7,6 +7,7 @@ import (
 // The amount of time since its creation it took a change (pull request/merge request/changelist) to get merged into the target(base) ref.
 type ChangeTimeToMerge struct {
 	*prometheus.GaugeVec
+	extra ChangeTimeToMergeExtra
 }
 
 func NewChangeTimeToMerge() ChangeTimeToMerge {
@@ -27,7 +28,7 @@ func (m ChangeTimeToMerge) With(refHeadName AttrRefHeadName, repositoryUrlFull A
 	AttrVcsRefHeadRevision() AttrRefHeadRevision
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ChangeTimeToMergeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(refHeadName),
@@ -39,6 +40,31 @@ func (m ChangeTimeToMerge) With(refHeadName AttrRefHeadName, repositoryUrlFull A
 		string(extra.AttrVcsRefBaseRevision()),
 		string(extra.AttrVcsRefHeadRevision()),
 	)
+}
+
+func (a ChangeTimeToMerge) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) ChangeTimeToMerge {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a ChangeTimeToMerge) WithVcsRefBaseName(attr interface{ AttrVcsRefBaseName() AttrRefBaseName }) ChangeTimeToMerge {
+	a.extra.VcsRefBaseName = attr.AttrVcsRefBaseName()
+	return a
+}
+func (a ChangeTimeToMerge) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) ChangeTimeToMerge {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a ChangeTimeToMerge) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) ChangeTimeToMerge {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
+}
+func (a ChangeTimeToMerge) WithVcsRefBaseRevision(attr interface{ AttrVcsRefBaseRevision() AttrRefBaseRevision }) ChangeTimeToMerge {
+	a.extra.VcsRefBaseRevision = attr.AttrVcsRefBaseRevision()
+	return a
+}
+func (a ChangeTimeToMerge) WithVcsRefHeadRevision(attr interface{ AttrVcsRefHeadRevision() AttrRefHeadRevision }) ChangeTimeToMerge {
+	a.extra.VcsRefHeadRevision = attr.AttrVcsRefHeadRevision()
+	return a
 }
 
 type ChangeTimeToMergeExtra struct {

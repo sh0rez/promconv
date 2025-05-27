@@ -7,6 +7,7 @@ import (
 // The total number of objects collected inside a generation since interpreter start.
 type GcCollectedObjects struct {
 	*prometheus.CounterVec
+	extra GcCollectedObjectsExtra
 }
 
 func NewGcCollectedObjects() GcCollectedObjects {
@@ -21,7 +22,7 @@ func NewGcCollectedObjects() GcCollectedObjects {
 func (m GcCollectedObjects) With(gcGeneration AttrGcGeneration, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = GcCollectedObjectsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(gcGeneration),

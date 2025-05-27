@@ -7,6 +7,7 @@ import (
 // Process threads count.
 type ThreadCount struct {
 	*prometheus.GaugeVec
+	extra ThreadCountExtra
 }
 
 func NewThreadCount() ThreadCount {
@@ -21,7 +22,7 @@ func NewThreadCount() ThreadCount {
 func (m ThreadCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ThreadCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

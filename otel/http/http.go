@@ -47,7 +47,6 @@ func Scheme(r *http.Request) url.AttrScheme {
 	return url.AttrScheme(r.URL.Scheme)
 }
 
-
 func Instrument(m Metrics, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var attrs Attributes

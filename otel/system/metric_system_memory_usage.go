@@ -7,6 +7,7 @@ import (
 // Reports memory in use by state.
 type MemoryUsage struct {
 	*prometheus.GaugeVec
+	extra MemoryUsageExtra
 }
 
 func NewMemoryUsage() MemoryUsage {
@@ -22,11 +23,16 @@ func (m MemoryUsage) With(extra interface {
 	AttrSystemMemoryState() AttrMemoryState
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemMemoryState()),
 	)
+}
+
+func (a MemoryUsage) WithSystemMemoryState(attr interface{ AttrSystemMemoryState() AttrMemoryState }) MemoryUsage {
+	a.extra.SystemMemoryState = attr.AttrSystemMemoryState()
+	return a
 }
 
 type MemoryUsageExtra struct {

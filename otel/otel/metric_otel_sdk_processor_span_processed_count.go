@@ -7,6 +7,7 @@ import (
 // Deprecated, use `otel.sdk.processor.span.processed` instead.
 type SdkProcessorSpanProcessedCount struct {
 	*prometheus.GaugeVec
+	extra SdkProcessorSpanProcessedCountExtra
 }
 
 func NewSdkProcessorSpanProcessedCount() SdkProcessorSpanProcessedCount {
@@ -21,7 +22,7 @@ func NewSdkProcessorSpanProcessedCount() SdkProcessorSpanProcessedCount {
 func (m SdkProcessorSpanProcessedCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SdkProcessorSpanProcessedCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

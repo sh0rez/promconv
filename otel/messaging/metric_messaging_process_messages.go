@@ -12,6 +12,7 @@ import (
 // Deprecated. Use `messaging.client.consumed.messages` instead.
 type ProcessMessages struct {
 	*prometheus.CounterVec
+	extra ProcessMessagesExtra
 }
 
 func NewProcessMessages() ProcessMessages {
@@ -29,7 +30,7 @@ func (m ProcessMessages) With(operationName AttrOperationName, extra interface {
 	AttrServerPort() server.AttrPort
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ProcessMessagesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(operationName),
@@ -37,6 +38,19 @@ func (m ProcessMessages) With(operationName AttrOperationName, extra interface {
 		string(extra.AttrServerAddress()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a ProcessMessages) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ProcessMessages {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ProcessMessages) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ProcessMessages {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ProcessMessages) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ProcessMessages {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type ProcessMessagesExtra struct {
@@ -140,17 +154,16 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server port number.",
+                    "brief": "The system-specific name of the messaging operation.\n",
                     "examples": [
-                        80,
-                        8080,
-                        443,
+                        "ack",
+                        "nack",
+                        "send",
                     ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
+                    "name": "messaging.operation.name",
+                    "requirement_level": "required",
+                    "stability": "development",
+                    "type": "string",
                 },
                 {
                     "brief": "Describes a class of error the operation ended with.\n",
@@ -180,16 +193,17 @@ State {
                     },
                 },
                 {
-                    "brief": "The system-specific name of the messaging operation.\n",
+                    "brief": "Server port number.",
                     "examples": [
-                        "ack",
-                        "nack",
-                        "send",
+                        80,
+                        8080,
+                        443,
                     ],
-                    "name": "messaging.operation.name",
-                    "requirement_level": "required",
-                    "stability": "development",
-                    "type": "string",
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
                 },
                 {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",

@@ -7,6 +7,7 @@ import (
 // The amount of physical memory in use.
 type MemoryUsage struct {
 	*prometheus.GaugeVec
+	extra MemoryUsageExtra
 }
 
 func NewMemoryUsage() MemoryUsage {
@@ -21,7 +22,7 @@ func NewMemoryUsage() MemoryUsage {
 func (m MemoryUsage) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

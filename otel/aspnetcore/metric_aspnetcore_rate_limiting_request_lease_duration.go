@@ -7,6 +7,7 @@ import (
 // The duration of rate limiting lease held by requests on the server.
 type RateLimitingRequestLeaseDuration struct {
 	*prometheus.HistogramVec
+	extra RateLimitingRequestLeaseDurationExtra
 }
 
 func NewRateLimitingRequestLeaseDuration() RateLimitingRequestLeaseDuration {
@@ -22,11 +23,16 @@ func (m RateLimitingRequestLeaseDuration) With(extra interface {
 	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
 }) prometheus.Observer {
 	if extra == nil {
-		extra = RateLimitingRequestLeaseDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrAspnetcoreRateLimitingPolicy()),
 	)
+}
+
+func (a RateLimitingRequestLeaseDuration) WithAspnetcoreRateLimitingPolicy(attr interface{ AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) RateLimitingRequestLeaseDuration {
+	a.extra.AspnetcoreRateLimitingPolicy = attr.AttrAspnetcoreRateLimitingPolicy()
+	return a
 }
 
 type RateLimitingRequestLeaseDurationExtra struct {

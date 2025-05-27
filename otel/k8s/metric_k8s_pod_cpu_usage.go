@@ -7,6 +7,7 @@ import (
 // Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs
 type PodCpuUsage struct {
 	*prometheus.GaugeVec
+	extra PodCpuUsageExtra
 }
 
 func NewPodCpuUsage() PodCpuUsage {
@@ -21,7 +22,7 @@ func NewPodCpuUsage() PodCpuUsage {
 func (m PodCpuUsage) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = PodCpuUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

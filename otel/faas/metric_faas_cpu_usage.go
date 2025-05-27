@@ -7,6 +7,7 @@ import (
 // Distribution of CPU usage per invocation
 type CpuUsage struct {
 	*prometheus.HistogramVec
+	extra CpuUsageExtra
 }
 
 func NewCpuUsage() CpuUsage {
@@ -22,11 +23,16 @@ func (m CpuUsage) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Observer {
 	if extra == nil {
-		extra = CpuUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a CpuUsage) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) CpuUsage {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type CpuUsageExtra struct {

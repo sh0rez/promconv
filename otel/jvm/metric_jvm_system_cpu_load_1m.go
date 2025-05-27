@@ -7,6 +7,7 @@ import (
 // Average CPU load of the whole system for the last minute as reported by the JVM.
 type SystemCpuLoad1m struct {
 	*prometheus.GaugeVec
+	extra SystemCpuLoad1mExtra
 }
 
 func NewSystemCpuLoad1m() SystemCpuLoad1m {
@@ -21,7 +22,7 @@ func NewSystemCpuLoad1m() SystemCpuLoad1m {
 func (m SystemCpuLoad1m) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SystemCpuLoad1mExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

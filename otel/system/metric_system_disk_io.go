@@ -10,6 +10,7 @@ import (
 
 type DiskIo struct {
 	*prometheus.CounterVec
+	extra DiskIoExtra
 }
 
 func NewDiskIo() DiskIo {
@@ -26,12 +27,21 @@ func (m DiskIo) With(extra interface {
 	AttrSystemDevice() AttrDevice
 }) prometheus.Counter {
 	if extra == nil {
-		extra = DiskIoExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrDiskIoDirection()),
 		string(extra.AttrSystemDevice()),
 	)
+}
+
+func (a DiskIo) WithDiskIoDirection(attr interface{ AttrDiskIoDirection() disk.AttrIoDirection }) DiskIo {
+	a.extra.DiskIoDirection = attr.AttrDiskIoDirection()
+	return a
+}
+func (a DiskIo) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskIo {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
 }
 
 type DiskIoExtra struct {
@@ -105,16 +115,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The device identifier",
-                    "examples": [
-                        "(identifier)",
-                    ],
-                    "name": "system.device",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "The disk IO operation direction.",
                     "examples": [
                         "read",
@@ -143,6 +143,16 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "The device identifier",
+                    "examples": [
+                        "(identifier)",
+                    ],
+                    "name": "system.device",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
             ],
             "entity_associations": [

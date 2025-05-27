@@ -12,6 +12,7 @@ import (
 // Number of active HTTP server requests.
 type ServerActiveRequests struct {
 	*prometheus.GaugeVec
+	extra ServerActiveRequestsExtra
 }
 
 func NewServerActiveRequests() ServerActiveRequests {
@@ -28,7 +29,7 @@ func (m ServerActiveRequests) With(requestMethod AttrRequestMethod, scheme url.A
 	AttrServerPort() server.AttrPort
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ServerActiveRequestsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(requestMethod),
@@ -36,6 +37,15 @@ func (m ServerActiveRequests) With(requestMethod AttrRequestMethod, scheme url.A
 		string(extra.AttrServerAddress()),
 		string(extra.AttrServerPort()),
 	)
+}
+
+func (a ServerActiveRequests) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ServerActiveRequests {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a ServerActiveRequests) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ServerActiveRequests {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
 }
 
 type ServerActiveRequestsExtra struct {

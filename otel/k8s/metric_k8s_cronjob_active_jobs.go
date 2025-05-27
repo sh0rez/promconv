@@ -7,6 +7,7 @@ import (
 // The number of actively running jobs for a cronjob
 type CronjobActiveJobs struct {
 	*prometheus.GaugeVec
+	extra CronjobActiveJobsExtra
 }
 
 func NewCronjobActiveJobs() CronjobActiveJobs {
@@ -21,7 +22,7 @@ func NewCronjobActiveJobs() CronjobActiveJobs {
 func (m CronjobActiveJobs) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CronjobActiveJobsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

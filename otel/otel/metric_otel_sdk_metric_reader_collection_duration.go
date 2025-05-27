@@ -11,6 +11,7 @@ import (
 // The duration of the collect operation of the metric reader.
 type SdkMetricReaderCollectionDuration struct {
 	*prometheus.HistogramVec
+	extra SdkMetricReaderCollectionDurationExtra
 }
 
 func NewSdkMetricReaderCollectionDuration() SdkMetricReaderCollectionDuration {
@@ -28,13 +29,26 @@ func (m SdkMetricReaderCollectionDuration) With(extra interface {
 	AttrOtelComponentType() AttrComponentType
 }) prometheus.Observer {
 	if extra == nil {
-		extra = SdkMetricReaderCollectionDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrErrorType()),
 		string(extra.AttrOtelComponentName()),
 		string(extra.AttrOtelComponentType()),
 	)
+}
+
+func (a SdkMetricReaderCollectionDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) SdkMetricReaderCollectionDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a SdkMetricReaderCollectionDuration) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkMetricReaderCollectionDuration {
+	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+	return a
+}
+func (a SdkMetricReaderCollectionDuration) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkMetricReaderCollectionDuration {
+	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+	return a
 }
 
 type SdkMetricReaderCollectionDurationExtra struct {

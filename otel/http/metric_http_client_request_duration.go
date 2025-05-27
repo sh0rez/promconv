@@ -14,6 +14,7 @@ import (
 // Duration of HTTP client requests.
 type ClientRequestDuration struct {
 	*prometheus.HistogramVec
+	extra ClientRequestDurationExtra
 }
 
 func NewClientRequestDuration() ClientRequestDuration {
@@ -34,7 +35,7 @@ func (m ClientRequestDuration) With(requestMethod AttrRequestMethod, address ser
 	AttrUrlTemplate() url.AttrTemplate
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientRequestDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(requestMethod),
@@ -47,6 +48,35 @@ func (m ClientRequestDuration) With(requestMethod AttrRequestMethod, address ser
 		string(extra.AttrUrlScheme()),
 		string(extra.AttrUrlTemplate()),
 	)
+}
+
+func (a ClientRequestDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientRequestDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a ClientRequestDuration) WithHttpResponseStatusCode(attr interface{ AttrHttpResponseStatusCode() AttrResponseStatusCode }) ClientRequestDuration {
+	a.extra.HttpResponseStatusCode = attr.AttrHttpResponseStatusCode()
+	return a
+}
+func (a ClientRequestDuration) WithNetworkProtocolName(attr interface {
+	AttrNetworkProtocolName() network.AttrProtocolName
+}) ClientRequestDuration {
+	a.extra.NetworkProtocolName = attr.AttrNetworkProtocolName()
+	return a
+}
+func (a ClientRequestDuration) WithNetworkProtocolVersion(attr interface {
+	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+}) ClientRequestDuration {
+	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	return a
+}
+func (a ClientRequestDuration) WithUrlScheme(attr interface{ AttrUrlScheme() url.AttrScheme }) ClientRequestDuration {
+	a.extra.UrlScheme = attr.AttrUrlScheme()
+	return a
+}
+func (a ClientRequestDuration) WithUrlTemplate(attr interface{ AttrUrlTemplate() url.AttrTemplate }) ClientRequestDuration {
+	a.extra.UrlTemplate = attr.AttrUrlTemplate()
+	return a
 }
 
 type ClientRequestDurationExtra struct {
@@ -313,6 +343,18 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).",
+                    "examples": [
+                        200,
+                    ],
+                    "name": "http.response.status_code",
+                    "requirement_level": {
+                        "conditionally_required": "If and only if one was received/sent.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
                     "brief": "Describes a class of error the operation ended with.\n",
                     "examples": [
                         "timeout",
@@ -339,70 +381,6 @@ State {
                             },
                         ],
                     },
-                },
-                {
-                    "brief": "[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).",
-                    "examples": [
-                        200,
-                    ],
-                    "name": "http.response.status_code",
-                    "requirement_level": {
-                        "conditionally_required": "If and only if one was received/sent.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
-                    "brief": "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.",
-                    "examples": [
-                        "http",
-                        "spdy",
-                    ],
-                    "name": "network.protocol.name",
-                    "note": "The value SHOULD be normalized to lowercase.",
-                    "requirement_level": {
-                        "conditionally_required": "If not `http` and `network.protocol.version` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The actual version of the protocol used for network communication.",
-                    "examples": [
-                        "1.0",
-                        "1.1",
-                        "2",
-                        "3",
-                    ],
-                    "name": "network.protocol.version",
-                    "note": "If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
-                    "examples": [
-                        "http",
-                        "https",
-                    ],
-                    "name": "url.scheme",
-                    "requirement_level": "opt_in",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).\n",
-                    "examples": [
-                        "/users/{id}",
-                        "/users/:id",
-                        "/users?id={id}",
-                    ],
-                    "name": "url.template",
-                    "note": "The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.\n",
-                    "requirement_level": "opt_in",
-                    "stability": "development",
-                    "type": "string",
                 },
                 {
                     "brief": "HTTP request method.",
@@ -500,6 +478,58 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.",
+                    "examples": [
+                        "http",
+                        "spdy",
+                    ],
+                    "name": "network.protocol.name",
+                    "note": "The value SHOULD be normalized to lowercase.",
+                    "requirement_level": {
+                        "conditionally_required": "If not `http` and `network.protocol.version` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The actual version of the protocol used for network communication.",
+                    "examples": [
+                        "1.0",
+                        "1.1",
+                        "2",
+                        "3",
+                    ],
+                    "name": "network.protocol.version",
+                    "note": "If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
+                    "examples": [
+                        "http",
+                        "https",
+                    ],
+                    "name": "url.scheme",
+                    "requirement_level": "opt_in",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).\n",
+                    "examples": [
+                        "/users/{id}",
+                        "/users/:id",
+                        "/users?id={id}",
+                    ],
+                    "name": "url.template",
+                    "note": "The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.\n",
+                    "requirement_level": "opt_in",
+                    "stability": "development",
+                    "type": "string",
                 },
                 {
                     "brief": "Host identifier of the [\"URI origin\"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to.\n",

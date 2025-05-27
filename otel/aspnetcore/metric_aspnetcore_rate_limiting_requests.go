@@ -7,6 +7,7 @@ import (
 // Number of requests that tried to acquire a rate limiting lease.
 type RateLimitingRequests struct {
 	*prometheus.CounterVec
+	extra RateLimitingRequestsExtra
 }
 
 func NewRateLimitingRequests() RateLimitingRequests {
@@ -22,12 +23,17 @@ func (m RateLimitingRequests) With(rateLimitingResult AttrRateLimitingResult, ex
 	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
 }) prometheus.Counter {
 	if extra == nil {
-		extra = RateLimitingRequestsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(rateLimitingResult),
 		string(extra.AttrAspnetcoreRateLimitingPolicy()),
 	)
+}
+
+func (a RateLimitingRequests) WithAspnetcoreRateLimitingPolicy(attr interface{ AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) RateLimitingRequests {
+	a.extra.AspnetcoreRateLimitingPolicy = attr.AttrAspnetcoreRateLimitingPolicy()
+	return a
 }
 
 type RateLimitingRequestsExtra struct {

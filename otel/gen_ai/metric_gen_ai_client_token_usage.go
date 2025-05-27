@@ -11,6 +11,7 @@ import (
 // Measures number of input and output tokens used
 type ClientTokenUsage struct {
 	*prometheus.HistogramVec
+	extra ClientTokenUsageExtra
 }
 
 func NewClientTokenUsage() ClientTokenUsage {
@@ -29,7 +30,7 @@ func (m ClientTokenUsage) With(operationName AttrOperationName, system AttrSyste
 	AttrServerAddress() server.AttrAddress
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ClientTokenUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(operationName),
@@ -40,6 +41,23 @@ func (m ClientTokenUsage) With(operationName AttrOperationName, system AttrSyste
 		string(extra.AttrGenAiResponseModel()),
 		string(extra.AttrServerAddress()),
 	)
+}
+
+func (a ClientTokenUsage) WithGenAiRequestModel(attr interface{ AttrGenAiRequestModel() AttrRequestModel }) ClientTokenUsage {
+	a.extra.GenAiRequestModel = attr.AttrGenAiRequestModel()
+	return a
+}
+func (a ClientTokenUsage) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientTokenUsage {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a ClientTokenUsage) WithGenAiResponseModel(attr interface{ AttrGenAiResponseModel() AttrResponseModel }) ClientTokenUsage {
+	a.extra.GenAiResponseModel = attr.AttrGenAiResponseModel()
+	return a
+}
+func (a ClientTokenUsage) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientTokenUsage {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
 }
 
 type ClientTokenUsageExtra struct {
@@ -395,74 +413,6 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "The name of the operation being performed.",
-                    "name": "gen_ai.operation.name",
-                    "note": "If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.\n",
-                    "requirement_level": "required",
-                    "stability": "development",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)",
-                                "deprecated": none,
-                                "id": "chat",
-                                "note": none,
-                                "stability": "development",
-                                "value": "chat",
-                            },
-                            {
-                                "brief": "Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)",
-                                "deprecated": none,
-                                "id": "generate_content",
-                                "note": none,
-                                "stability": "development",
-                                "value": "generate_content",
-                            },
-                            {
-                                "brief": "Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)",
-                                "deprecated": none,
-                                "id": "text_completion",
-                                "note": none,
-                                "stability": "development",
-                                "value": "text_completion",
-                            },
-                            {
-                                "brief": "Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)",
-                                "deprecated": none,
-                                "id": "embeddings",
-                                "note": none,
-                                "stability": "development",
-                                "value": "embeddings",
-                            },
-                            {
-                                "brief": "Create GenAI agent",
-                                "deprecated": none,
-                                "id": "create_agent",
-                                "note": none,
-                                "stability": "development",
-                                "value": "create_agent",
-                            },
-                            {
-                                "brief": "Invoke GenAI agent",
-                                "deprecated": none,
-                                "id": "invoke_agent",
-                                "note": none,
-                                "stability": "development",
-                                "value": "invoke_agent",
-                            },
-                            {
-                                "brief": "Execute a tool",
-                                "deprecated": none,
-                                "id": "execute_tool",
-                                "note": none,
-                                "stability": "development",
-                                "value": "execute_tool",
-                            },
-                        ],
-                    },
-                },
-                {
                     "brief": "GenAI server address.",
                     "examples": [
                         "example.com",
@@ -489,6 +439,16 @@ State {
                     },
                     "stability": "stable",
                     "type": "int",
+                },
+                {
+                    "brief": "The name of the GenAI model a request is being made to.",
+                    "examples": "gpt-4",
+                    "name": "gen_ai.request.model",
+                    "requirement_level": {
+                        "conditionally_required": "If available.",
+                    },
+                    "stability": "development",
+                    "type": "string",
                 },
                 {
                     "brief": "The Generative AI product as identified by the client or server instrumentation.",
@@ -640,14 +600,72 @@ State {
                     },
                 },
                 {
-                    "brief": "The name of the GenAI model a request is being made to.",
-                    "examples": "gpt-4",
-                    "name": "gen_ai.request.model",
-                    "requirement_level": {
-                        "conditionally_required": "If available.",
-                    },
+                    "brief": "The name of the operation being performed.",
+                    "name": "gen_ai.operation.name",
+                    "note": "If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.\n",
+                    "requirement_level": "required",
                     "stability": "development",
-                    "type": "string",
+                    "type": {
+                        "allow_custom_values": none,
+                        "members": [
+                            {
+                                "brief": "Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)",
+                                "deprecated": none,
+                                "id": "chat",
+                                "note": none,
+                                "stability": "development",
+                                "value": "chat",
+                            },
+                            {
+                                "brief": "Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)",
+                                "deprecated": none,
+                                "id": "generate_content",
+                                "note": none,
+                                "stability": "development",
+                                "value": "generate_content",
+                            },
+                            {
+                                "brief": "Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)",
+                                "deprecated": none,
+                                "id": "text_completion",
+                                "note": none,
+                                "stability": "development",
+                                "value": "text_completion",
+                            },
+                            {
+                                "brief": "Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)",
+                                "deprecated": none,
+                                "id": "embeddings",
+                                "note": none,
+                                "stability": "development",
+                                "value": "embeddings",
+                            },
+                            {
+                                "brief": "Create GenAI agent",
+                                "deprecated": none,
+                                "id": "create_agent",
+                                "note": none,
+                                "stability": "development",
+                                "value": "create_agent",
+                            },
+                            {
+                                "brief": "Invoke GenAI agent",
+                                "deprecated": none,
+                                "id": "invoke_agent",
+                                "note": none,
+                                "stability": "development",
+                                "value": "invoke_agent",
+                            },
+                            {
+                                "brief": "Execute a tool",
+                                "deprecated": none,
+                                "id": "execute_tool",
+                                "note": none,
+                                "stability": "development",
+                                "value": "execute_tool",
+                            },
+                        ],
+                    },
                 },
                 {
                     "brief": "The type of token being counted.",

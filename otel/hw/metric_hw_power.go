@@ -7,6 +7,7 @@ import (
 // Instantaneous power consumed by the component
 type Power struct {
 	*prometheus.GaugeVec
+	extra PowerExtra
 }
 
 func NewPower() Power {
@@ -23,7 +24,7 @@ func (m Power) With(id AttrId, kind AttrType, extra interface {
 	AttrHwParent() AttrParent
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = PowerExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(id),
@@ -31,6 +32,15 @@ func (m Power) With(id AttrId, kind AttrType, extra interface {
 		string(extra.AttrHwName()),
 		string(extra.AttrHwParent()),
 	)
+}
+
+func (a Power) WithHwName(attr interface{ AttrHwName() AttrName }) Power {
+	a.extra.HwName = attr.AttrHwName()
+	return a
+}
+func (a Power) WithHwParent(attr interface{ AttrHwParent() AttrParent }) Power {
+	a.extra.HwParent = attr.AttrHwParent()
+	return a
 }
 
 type PowerExtra struct {

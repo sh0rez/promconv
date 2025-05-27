@@ -7,6 +7,7 @@ import (
 // The number of unique contributors to a repository
 type ContributorCount struct {
 	*prometheus.GaugeVec
+	extra ContributorCountExtra
 }
 
 func NewContributorCount() ContributorCount {
@@ -24,7 +25,7 @@ func (m ContributorCount) With(repositoryUrlFull AttrRepositoryUrlFull, extra in
 	AttrVcsProviderName() AttrProviderName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ContributorCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(repositoryUrlFull),
@@ -32,6 +33,19 @@ func (m ContributorCount) With(repositoryUrlFull AttrRepositoryUrlFull, extra in
 		string(extra.AttrVcsRepositoryName()),
 		string(extra.AttrVcsProviderName()),
 	)
+}
+
+func (a ContributorCount) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) ContributorCount {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a ContributorCount) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) ContributorCount {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a ContributorCount) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) ContributorCount {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
 }
 
 type ContributorCountExtra struct {

@@ -7,6 +7,7 @@ import (
 // Number of times the process has been context switched.
 type ContextSwitches struct {
 	*prometheus.CounterVec
+	extra ContextSwitchesExtra
 }
 
 func NewContextSwitches() ContextSwitches {
@@ -22,11 +23,16 @@ func (m ContextSwitches) With(extra interface {
 	AttrProcessContextSwitchType() AttrContextSwitchType
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ContextSwitchesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrProcessContextSwitchType()),
 	)
+}
+
+func (a ContextSwitches) WithProcessContextSwitchType(attr interface{ AttrProcessContextSwitchType() AttrContextSwitchType }) ContextSwitches {
+	a.extra.ProcessContextSwitchType = attr.AttrProcessContextSwitchType()
+	return a
 }
 
 type ContextSwitchesExtra struct {

@@ -7,6 +7,7 @@ import (
 // Total CPU time consumed
 type NodeCpuTime struct {
 	*prometheus.CounterVec
+	extra NodeCpuTimeExtra
 }
 
 func NewNodeCpuTime() NodeCpuTime {
@@ -21,7 +22,7 @@ func NewNodeCpuTime() NodeCpuTime {
 func (m NodeCpuTime) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = NodeCpuTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

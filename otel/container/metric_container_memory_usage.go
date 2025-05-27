@@ -7,6 +7,7 @@ import (
 // Memory usage of the container.
 type MemoryUsage struct {
 	*prometheus.CounterVec
+	extra MemoryUsageExtra
 }
 
 func NewMemoryUsage() MemoryUsage {
@@ -21,7 +22,7 @@ func NewMemoryUsage() MemoryUsage {
 func (m MemoryUsage) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = MemoryUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

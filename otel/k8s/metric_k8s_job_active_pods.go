@@ -7,6 +7,7 @@ import (
 // The number of pending and actively running pods for a job
 type JobActivePods struct {
 	*prometheus.GaugeVec
+	extra JobActivePodsExtra
 }
 
 func NewJobActivePods() JobActivePods {
@@ -21,7 +22,7 @@ func NewJobActivePods() JobActivePods {
 func (m JobActivePods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = JobActivePodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

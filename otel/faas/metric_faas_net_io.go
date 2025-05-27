@@ -7,6 +7,7 @@ import (
 // Distribution of net I/O usage per invocation
 type NetIo struct {
 	*prometheus.HistogramVec
+	extra NetIoExtra
 }
 
 func NewNetIo() NetIo {
@@ -22,11 +23,16 @@ func (m NetIo) With(extra interface {
 	AttrFaasTrigger() AttrTrigger
 }) prometheus.Observer {
 	if extra == nil {
-		extra = NetIoExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrFaasTrigger()),
 	)
+}
+
+func (a NetIo) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) NetIo {
+	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+	return a
 }
 
 type NetIoExtra struct {

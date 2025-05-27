@@ -7,6 +7,7 @@ import (
 // The number of thread pool threads that currently exist.
 type ThreadPoolThreadCount struct {
 	*prometheus.GaugeVec
+	extra ThreadPoolThreadCountExtra
 }
 
 func NewThreadPoolThreadCount() ThreadPoolThreadCount {
@@ -21,7 +22,7 @@ func NewThreadPoolThreadCount() ThreadPoolThreadCount {
 func (m ThreadPoolThreadCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ThreadPoolThreadCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

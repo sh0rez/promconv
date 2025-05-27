@@ -7,6 +7,7 @@ import (
 // Number of classes currently loaded.
 type ClassCount struct {
 	*prometheus.GaugeVec
+	extra ClassCountExtra
 }
 
 func NewClassCount() ClassCount {
@@ -21,7 +22,7 @@ func NewClassCount() ClassCount {
 func (m ClassCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClassCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

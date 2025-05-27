@@ -7,6 +7,7 @@ import (
 // Total heap memory size pre-allocated.
 type MemoryHeapLimit struct {
 	*prometheus.GaugeVec
+	extra MemoryHeapLimitExtra
 }
 
 func NewMemoryHeapLimit() MemoryHeapLimit {
@@ -21,7 +22,7 @@ func NewMemoryHeapLimit() MemoryHeapLimit {
 func (m MemoryHeapLimit) With(heapSpaceName AttrHeapSpaceName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemoryHeapLimitExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(heapSpaceName),

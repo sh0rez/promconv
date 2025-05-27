@@ -7,6 +7,7 @@ import (
 // The number of pods which reached phase Failed for a job
 type JobFailedPods struct {
 	*prometheus.GaugeVec
+	extra JobFailedPodsExtra
 }
 
 func NewJobFailedPods() JobFailedPods {
@@ -21,7 +22,7 @@ func NewJobFailedPods() JobFailedPods {
 func (m JobFailedPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = JobFailedPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

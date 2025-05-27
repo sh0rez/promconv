@@ -7,6 +7,7 @@ import (
 // Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler
 type HpaDesiredPods struct {
 	*prometheus.GaugeVec
+	extra HpaDesiredPodsExtra
 }
 
 func NewHpaDesiredPods() HpaDesiredPods {
@@ -21,7 +22,7 @@ func NewHpaDesiredPods() HpaDesiredPods {
 func (m HpaDesiredPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = HpaDesiredPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

@@ -7,6 +7,7 @@ import (
 // Deprecated, use `otel.sdk.span.live` instead.
 type SdkSpanLiveCount struct {
 	*prometheus.GaugeVec
+	extra SdkSpanLiveCountExtra
 }
 
 func NewSdkSpanLiveCount() SdkSpanLiveCount {
@@ -21,7 +22,7 @@ func NewSdkSpanLiveCount() SdkSpanLiveCount {
 func (m SdkSpanLiveCount) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SdkSpanLiveCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

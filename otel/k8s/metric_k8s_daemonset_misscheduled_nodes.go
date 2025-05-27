@@ -7,6 +7,7 @@ import (
 // Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod
 type DaemonsetMisscheduledNodes struct {
 	*prometheus.GaugeVec
+	extra DaemonsetMisscheduledNodesExtra
 }
 
 func NewDaemonsetMisscheduledNodes() DaemonsetMisscheduledNodes {
@@ -21,7 +22,7 @@ func NewDaemonsetMisscheduledNodes() DaemonsetMisscheduledNodes {
 func (m DaemonsetMisscheduledNodes) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = DaemonsetMisscheduledNodesExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

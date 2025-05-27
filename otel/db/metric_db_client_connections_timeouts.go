@@ -7,6 +7,7 @@ import (
 // Deprecated, use `db.client.connection.timeouts` instead.
 type ClientConnectionsTimeouts struct {
 	*prometheus.CounterVec
+	extra ClientConnectionsTimeoutsExtra
 }
 
 func NewClientConnectionsTimeouts() ClientConnectionsTimeouts {
@@ -21,7 +22,7 @@ func NewClientConnectionsTimeouts() ClientConnectionsTimeouts {
 func (m ClientConnectionsTimeouts) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ClientConnectionsTimeoutsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),

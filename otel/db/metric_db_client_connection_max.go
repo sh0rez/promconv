@@ -7,6 +7,7 @@ import (
 // The maximum number of open connections allowed
 type ClientConnectionMax struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionMaxExtra
 }
 
 func NewClientConnectionMax() ClientConnectionMax {
@@ -21,7 +22,7 @@ func NewClientConnectionMax() ClientConnectionMax {
 func (m ClientConnectionMax) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionMaxExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),

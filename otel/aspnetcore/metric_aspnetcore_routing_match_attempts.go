@@ -11,6 +11,7 @@ import (
 // Number of requests that were attempted to be matched to an endpoint.
 type RoutingMatchAttempts struct {
 	*prometheus.CounterVec
+	extra RoutingMatchAttemptsExtra
 }
 
 func NewRoutingMatchAttempts() RoutingMatchAttempts {
@@ -27,13 +28,22 @@ func (m RoutingMatchAttempts) With(routingMatchStatus AttrRoutingMatchStatus, ex
 	AttrHttpRoute() http.AttrRoute
 }) prometheus.Counter {
 	if extra == nil {
-		extra = RoutingMatchAttemptsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(routingMatchStatus),
 		string(extra.AttrAspnetcoreRoutingIsFallback()),
 		string(extra.AttrHttpRoute()),
 	)
+}
+
+func (a RoutingMatchAttempts) WithAspnetcoreRoutingIsFallback(attr interface{ AttrAspnetcoreRoutingIsFallback() AttrRoutingIsFallback }) RoutingMatchAttempts {
+	a.extra.AspnetcoreRoutingIsFallback = attr.AttrAspnetcoreRoutingIsFallback()
+	return a
+}
+func (a RoutingMatchAttempts) WithHttpRoute(attr interface{ AttrHttpRoute() http.AttrRoute }) RoutingMatchAttempts {
+	a.extra.HttpRoute = attr.AttrHttpRoute()
+	return a
 }
 
 type RoutingMatchAttemptsExtra struct {

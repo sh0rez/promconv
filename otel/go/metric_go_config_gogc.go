@@ -7,6 +7,7 @@ import (
 // Heap size target percentage configured by the user, otherwise 100.
 type ConfigGogc struct {
 	*prometheus.GaugeVec
+	extra ConfigGogcExtra
 }
 
 func NewConfigGogc() ConfigGogc {
@@ -21,7 +22,7 @@ func NewConfigGogc() ConfigGogc {
 func (m ConfigGogc) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ConfigGogcExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

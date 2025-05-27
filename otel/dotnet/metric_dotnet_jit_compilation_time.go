@@ -7,6 +7,7 @@ import (
 // The amount of time the JIT compiler has spent compiling methods since the process has started.
 type JitCompilationTime struct {
 	*prometheus.CounterVec
+	extra JitCompilationTimeExtra
 }
 
 func NewJitCompilationTime() JitCompilationTime {
@@ -21,7 +22,7 @@ func NewJitCompilationTime() JitCompilationTime {
 func (m JitCompilationTime) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = JitCompilationTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

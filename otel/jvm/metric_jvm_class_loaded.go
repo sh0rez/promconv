@@ -7,6 +7,7 @@ import (
 // Number of classes loaded since JVM start.
 type ClassLoaded struct {
 	*prometheus.CounterVec
+	extra ClassLoadedExtra
 }
 
 func NewClassLoaded() ClassLoaded {
@@ -21,7 +22,7 @@ func NewClassLoaded() ClassLoaded {
 func (m ClassLoaded) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ClassLoadedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

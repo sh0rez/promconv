@@ -7,6 +7,7 @@ import (
 // The desired number of successfully finished pods the job should be run with
 type JobDesiredSuccessfulPods struct {
 	*prometheus.GaugeVec
+	extra JobDesiredSuccessfulPodsExtra
 }
 
 func NewJobDesiredSuccessfulPods() JobDesiredSuccessfulPods {
@@ -21,7 +22,7 @@ func NewJobDesiredSuccessfulPods() JobDesiredSuccessfulPods {
 func (m JobDesiredSuccessfulPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = JobDesiredSuccessfulPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

@@ -7,6 +7,7 @@ import (
 // Time disk spent activated
 type DiskIoTime struct {
 	*prometheus.CounterVec
+	extra DiskIoTimeExtra
 }
 
 func NewDiskIoTime() DiskIoTime {
@@ -22,11 +23,16 @@ func (m DiskIoTime) With(extra interface {
 	AttrSystemDevice() AttrDevice
 }) prometheus.Counter {
 	if extra == nil {
-		extra = DiskIoTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSystemDevice()),
 	)
+}
+
+func (a DiskIoTime) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskIoTime {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
 }
 
 type DiskIoTimeExtra struct {

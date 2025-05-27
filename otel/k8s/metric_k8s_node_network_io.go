@@ -11,6 +11,7 @@ import (
 // Network bytes for the Node
 type NodeNetworkIo struct {
 	*prometheus.CounterVec
+	extra NodeNetworkIoExtra
 }
 
 func NewNodeNetworkIo() NodeNetworkIo {
@@ -27,12 +28,25 @@ func (m NodeNetworkIo) With(extra interface {
 	AttrNetworkIoDirection() network.AttrIoDirection
 }) prometheus.Counter {
 	if extra == nil {
-		extra = NodeNetworkIoExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkInterfaceName()),
 		string(extra.AttrNetworkIoDirection()),
 	)
+}
+
+func (a NodeNetworkIo) WithNetworkInterfaceName(attr interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+}) NodeNetworkIo {
+	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	return a
+}
+func (a NodeNetworkIo) WithNetworkIoDirection(attr interface {
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) NodeNetworkIo {
+	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	return a
 }
 
 type NodeNetworkIoExtra struct {

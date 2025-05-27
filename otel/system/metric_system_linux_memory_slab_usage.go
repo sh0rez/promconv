@@ -11,6 +11,7 @@ import (
 // Reports the memory used by the Linux kernel for managing caches of frequently used objects.
 type LinuxMemorySlabUsage struct {
 	*prometheus.GaugeVec
+	extra LinuxMemorySlabUsageExtra
 }
 
 func NewLinuxMemorySlabUsage() LinuxMemorySlabUsage {
@@ -26,11 +27,18 @@ func (m LinuxMemorySlabUsage) With(extra interface {
 	AttrLinuxMemorySlabState() linux.AttrMemorySlabState
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = LinuxMemorySlabUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrLinuxMemorySlabState()),
 	)
+}
+
+func (a LinuxMemorySlabUsage) WithLinuxMemorySlabState(attr interface {
+	AttrLinuxMemorySlabState() linux.AttrMemorySlabState
+}) LinuxMemorySlabUsage {
+	a.extra.LinuxMemorySlabState = attr.AttrLinuxMemorySlabState()
+	return a
 }
 
 type LinuxMemorySlabUsageExtra struct {

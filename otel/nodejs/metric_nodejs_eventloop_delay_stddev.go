@@ -7,6 +7,7 @@ import (
 // Event loop standard deviation delay.
 type EventloopDelayStddev struct {
 	*prometheus.GaugeVec
+	extra EventloopDelayStddevExtra
 }
 
 func NewEventloopDelayStddev() EventloopDelayStddev {
@@ -21,7 +22,7 @@ func NewEventloopDelayStddev() EventloopDelayStddev {
 func (m EventloopDelayStddev) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = EventloopDelayStddevExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

@@ -7,6 +7,7 @@ import (
 // Duration of JVM garbage collection actions.
 type GcDuration struct {
 	*prometheus.HistogramVec
+	extra GcDurationExtra
 }
 
 func NewGcDuration() GcDuration {
@@ -24,13 +25,26 @@ func (m GcDuration) With(extra interface {
 	AttrJvmGcCause() AttrGcCause
 }) prometheus.Observer {
 	if extra == nil {
-		extra = GcDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmGcAction()),
 		string(extra.AttrJvmGcName()),
 		string(extra.AttrJvmGcCause()),
 	)
+}
+
+func (a GcDuration) WithJvmGcAction(attr interface{ AttrJvmGcAction() AttrGcAction }) GcDuration {
+	a.extra.JvmGcAction = attr.AttrJvmGcAction()
+	return a
+}
+func (a GcDuration) WithJvmGcName(attr interface{ AttrJvmGcName() AttrGcName }) GcDuration {
+	a.extra.JvmGcName = attr.AttrJvmGcName()
+	return a
+}
+func (a GcDuration) WithJvmGcCause(attr interface{ AttrJvmGcCause() AttrGcCause }) GcDuration {
+	a.extra.JvmGcCause = attr.AttrJvmGcCause()
+	return a
 }
 
 type GcDurationExtra struct {

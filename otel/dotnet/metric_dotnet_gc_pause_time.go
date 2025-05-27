@@ -7,6 +7,7 @@ import (
 // The total amount of time paused in GC since the process has started.
 type GcPauseTime struct {
 	*prometheus.CounterVec
+	extra GcPauseTimeExtra
 }
 
 func NewGcPauseTime() GcPauseTime {
@@ -21,7 +22,7 @@ func NewGcPauseTime() GcPauseTime {
 func (m GcPauseTime) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = GcPauseTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

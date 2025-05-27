@@ -7,6 +7,7 @@ import (
 // The total number of objects which were found to be uncollectable inside a generation since interpreter start.
 type GcUncollectableObjects struct {
 	*prometheus.CounterVec
+	extra GcUncollectableObjectsExtra
 }
 
 func NewGcUncollectableObjects() GcUncollectableObjects {
@@ -21,7 +22,7 @@ func NewGcUncollectableObjects() GcUncollectableObjects {
 func (m GcUncollectableObjects) With(gcGeneration AttrGcGeneration, extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = GcUncollectableObjectsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(gcGeneration),

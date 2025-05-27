@@ -7,6 +7,7 @@ import (
 // Number of desired replica pods in this replication controller
 type ReplicationcontrollerDesiredPods struct {
 	*prometheus.GaugeVec
+	extra ReplicationcontrollerDesiredPodsExtra
 }
 
 func NewReplicationcontrollerDesiredPods() ReplicationcontrollerDesiredPods {
@@ -21,7 +22,7 @@ func NewReplicationcontrollerDesiredPods() ReplicationcontrollerDesiredPods {
 func (m ReplicationcontrollerDesiredPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ReplicationcontrollerDesiredPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

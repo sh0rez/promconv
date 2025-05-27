@@ -7,6 +7,7 @@ import (
 // The duration of connections on the server.
 type ServerConnectionDuration struct {
 	*prometheus.HistogramVec
+	extra ServerConnectionDurationExtra
 }
 
 func NewServerConnectionDuration() ServerConnectionDuration {
@@ -23,12 +24,21 @@ func (m ServerConnectionDuration) With(extra interface {
 	AttrSignalrTransport() AttrTransport
 }) prometheus.Observer {
 	if extra == nil {
-		extra = ServerConnectionDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrSignalrConnectionStatus()),
 		string(extra.AttrSignalrTransport()),
 	)
+}
+
+func (a ServerConnectionDuration) WithSignalrConnectionStatus(attr interface{ AttrSignalrConnectionStatus() AttrConnectionStatus }) ServerConnectionDuration {
+	a.extra.SignalrConnectionStatus = attr.AttrSignalrConnectionStatus()
+	return a
+}
+func (a ServerConnectionDuration) WithSignalrTransport(attr interface{ AttrSignalrTransport() AttrTransport }) ServerConnectionDuration {
+	a.extra.SignalrTransport = attr.AttrSignalrTransport()
+	return a
 }
 
 type ServerConnectionDurationExtra struct {

@@ -11,6 +11,7 @@ import (
 // Sum of the time each operation took to complete
 type DiskOperationTime struct {
 	*prometheus.CounterVec
+	extra DiskOperationTimeExtra
 }
 
 func NewDiskOperationTime() DiskOperationTime {
@@ -27,12 +28,21 @@ func (m DiskOperationTime) With(extra interface {
 	AttrSystemDevice() AttrDevice
 }) prometheus.Counter {
 	if extra == nil {
-		extra = DiskOperationTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrDiskIoDirection()),
 		string(extra.AttrSystemDevice()),
 	)
+}
+
+func (a DiskOperationTime) WithDiskIoDirection(attr interface{ AttrDiskIoDirection() disk.AttrIoDirection }) DiskOperationTime {
+	a.extra.DiskIoDirection = attr.AttrDiskIoDirection()
+	return a
+}
+func (a DiskOperationTime) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskOperationTime {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
 }
 
 type DiskOperationTimeExtra struct {
@@ -106,16 +116,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The device identifier",
-                    "examples": [
-                        "(identifier)",
-                    ],
-                    "name": "system.device",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "The disk IO operation direction.",
                     "examples": [
                         "read",
@@ -144,6 +144,16 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "The device identifier",
+                    "examples": [
+                        "(identifier)",
+                    ],
+                    "name": "system.device",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
             ],
             "brief": "Sum of the time each operation took to complete",

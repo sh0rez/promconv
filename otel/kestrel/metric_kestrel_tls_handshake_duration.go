@@ -14,6 +14,7 @@ import (
 // The duration of TLS handshakes on the server.
 type TlsHandshakeDuration struct {
 	*prometheus.HistogramVec
+	extra TlsHandshakeDurationExtra
 }
 
 func NewTlsHandshakeDuration() TlsHandshakeDuration {
@@ -34,7 +35,7 @@ func (m TlsHandshakeDuration) With(extra interface {
 	AttrTlsProtocolVersion() tls.AttrProtocolVersion
 }) prometheus.Observer {
 	if extra == nil {
-		extra = TlsHandshakeDurationExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrErrorType()),
@@ -44,6 +45,33 @@ func (m TlsHandshakeDuration) With(extra interface {
 		string(extra.AttrServerPort()),
 		string(extra.AttrTlsProtocolVersion()),
 	)
+}
+
+func (a TlsHandshakeDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) TlsHandshakeDuration {
+	a.extra.ErrorType = attr.AttrErrorType()
+	return a
+}
+func (a TlsHandshakeDuration) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) TlsHandshakeDuration {
+	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+	return a
+}
+func (a TlsHandshakeDuration) WithNetworkType(attr interface{ AttrNetworkType() network.AttrType }) TlsHandshakeDuration {
+	a.extra.NetworkType = attr.AttrNetworkType()
+	return a
+}
+func (a TlsHandshakeDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) TlsHandshakeDuration {
+	a.extra.ServerAddress = attr.AttrServerAddress()
+	return a
+}
+func (a TlsHandshakeDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) TlsHandshakeDuration {
+	a.extra.ServerPort = attr.AttrServerPort()
+	return a
+}
+func (a TlsHandshakeDuration) WithTlsProtocolVersion(attr interface {
+	AttrTlsProtocolVersion() tls.AttrProtocolVersion
+}) TlsHandshakeDuration {
+	a.extra.TlsProtocolVersion = attr.AttrTlsProtocolVersion()
+	return a
 }
 
 type TlsHandshakeDurationExtra struct {
@@ -246,30 +274,15 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "brief": "Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)\n",
                     "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
+                        "1.2",
+                        "3",
                     ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "name": "tls.protocol.version",
                     "requirement_level": "recommended",
-                    "stability": "stable",
+                    "stability": "development",
                     "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
                 },
                 {
                     "brief": "[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.",
@@ -388,15 +401,30 @@ State {
                     },
                 },
                 {
-                    "brief": "Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)\n",
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
                     "examples": [
-                        "1.2",
-                        "3",
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
                     ],
-                    "name": "tls.protocol.version",
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
                     "requirement_level": "recommended",
-                    "stability": "development",
+                    "stability": "stable",
                     "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "The duration of TLS handshakes on the server.",

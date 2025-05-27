@@ -7,6 +7,7 @@ import (
 // Deprecated, use `jvm.buffer.memory.used` instead.
 type BufferMemoryUsage struct {
 	*prometheus.GaugeVec
+	extra BufferMemoryUsageExtra
 }
 
 func NewBufferMemoryUsage() BufferMemoryUsage {
@@ -22,11 +23,16 @@ func (m BufferMemoryUsage) With(extra interface {
 	AttrJvmBufferPoolName() AttrBufferPoolName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = BufferMemoryUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrJvmBufferPoolName()),
 	)
+}
+
+func (a BufferMemoryUsage) WithJvmBufferPoolName(attr interface{ AttrJvmBufferPoolName() AttrBufferPoolName }) BufferMemoryUsage {
+	a.extra.JvmBufferPoolName = attr.AttrJvmBufferPoolName()
+	return a
 }
 
 type BufferMemoryUsageExtra struct {

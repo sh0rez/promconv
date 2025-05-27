@@ -7,6 +7,7 @@ import (
 // Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment
 type DeploymentAvailablePods struct {
 	*prometheus.GaugeVec
+	extra DeploymentAvailablePodsExtra
 }
 
 func NewDeploymentAvailablePods() DeploymentAvailablePods {
@@ -21,7 +22,7 @@ func NewDeploymentAvailablePods() DeploymentAvailablePods {
 func (m DeploymentAvailablePods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = DeploymentAvailablePodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

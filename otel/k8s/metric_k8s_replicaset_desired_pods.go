@@ -7,6 +7,7 @@ import (
 // Number of desired replica pods in this replicaset
 type ReplicasetDesiredPods struct {
 	*prometheus.GaugeVec
+	extra ReplicasetDesiredPodsExtra
 }
 
 func NewReplicasetDesiredPods() ReplicasetDesiredPods {
@@ -21,7 +22,7 @@ func NewReplicasetDesiredPods() ReplicasetDesiredPods {
 func (m ReplicasetDesiredPods) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ReplicasetDesiredPodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

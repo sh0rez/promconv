@@ -7,6 +7,7 @@ import (
 // Shared memory used (mostly by tmpfs).
 type MemoryShared struct {
 	*prometheus.GaugeVec
+	extra MemorySharedExtra
 }
 
 func NewMemoryShared() MemoryShared {
@@ -21,7 +22,7 @@ func NewMemoryShared() MemoryShared {
 func (m MemoryShared) With(extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = MemorySharedExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

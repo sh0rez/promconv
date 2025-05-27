@@ -10,6 +10,7 @@ import (
 
 type DiskOperations struct {
 	*prometheus.CounterVec
+	extra DiskOperationsExtra
 }
 
 func NewDiskOperations() DiskOperations {
@@ -26,12 +27,21 @@ func (m DiskOperations) With(extra interface {
 	AttrSystemDevice() AttrDevice
 }) prometheus.Counter {
 	if extra == nil {
-		extra = DiskOperationsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrDiskIoDirection()),
 		string(extra.AttrSystemDevice()),
 	)
+}
+
+func (a DiskOperations) WithDiskIoDirection(attr interface{ AttrDiskIoDirection() disk.AttrIoDirection }) DiskOperations {
+	a.extra.DiskIoDirection = attr.AttrDiskIoDirection()
+	return a
+}
+func (a DiskOperations) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskOperations {
+	a.extra.SystemDevice = attr.AttrSystemDevice()
+	return a
 }
 
 type DiskOperationsExtra struct {
@@ -105,16 +115,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The device identifier",
-                    "examples": [
-                        "(identifier)",
-                    ],
-                    "name": "system.device",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "The disk IO operation direction.",
                     "examples": [
                         "read",
@@ -143,6 +143,16 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "The device identifier",
+                    "examples": [
+                        "(identifier)",
+                    ],
+                    "name": "system.device",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "string",
                 },
             ],
             "entity_associations": [

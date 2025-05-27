@@ -7,6 +7,7 @@ import (
 // The maximum number of idle open connections allowed
 type ClientConnectionIdleMax struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionIdleMaxExtra
 }
 
 func NewClientConnectionIdleMax() ClientConnectionIdleMax {
@@ -21,7 +22,7 @@ func NewClientConnectionIdleMax() ClientConnectionIdleMax {
 func (m ClientConnectionIdleMax) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionIdleMaxExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionPoolName),

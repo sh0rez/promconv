@@ -7,6 +7,7 @@ import (
 // The maximum number of log records the queue of a given instance of an SDK Log Record processor can hold
 type SdkProcessorLogQueueCapacity struct {
 	*prometheus.GaugeVec
+	extra SdkProcessorLogQueueCapacityExtra
 }
 
 func NewSdkProcessorLogQueueCapacity() SdkProcessorLogQueueCapacity {
@@ -23,12 +24,21 @@ func (m SdkProcessorLogQueueCapacity) With(extra interface {
 	AttrOtelComponentType() AttrComponentType
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = SdkProcessorLogQueueCapacityExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrOtelComponentName()),
 		string(extra.AttrOtelComponentType()),
 	)
+}
+
+func (a SdkProcessorLogQueueCapacity) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkProcessorLogQueueCapacity {
+	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+	return a
+}
+func (a SdkProcessorLogQueueCapacity) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkProcessorLogQueueCapacity {
+	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+	return a
 }
 
 type SdkProcessorLogQueueCapacityExtra struct {

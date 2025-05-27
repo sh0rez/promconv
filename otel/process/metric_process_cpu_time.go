@@ -11,6 +11,7 @@ import (
 // Total CPU seconds broken down by different states.
 type CpuTime struct {
 	*prometheus.CounterVec
+	extra CpuTimeExtra
 }
 
 func NewCpuTime() CpuTime {
@@ -26,11 +27,16 @@ func (m CpuTime) With(extra interface {
 	AttrCpuMode() cpu.AttrMode
 }) prometheus.Counter {
 	if extra == nil {
-		extra = CpuTimeExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrCpuMode()),
 	)
+}
+
+func (a CpuTime) WithCpuMode(attr interface{ AttrCpuMode() cpu.AttrMode }) CpuTime {
+	a.extra.CpuMode = attr.AttrCpuMode()
+	return a
 }
 
 type CpuTimeExtra struct {

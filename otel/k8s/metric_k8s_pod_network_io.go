@@ -11,6 +11,7 @@ import (
 // Network bytes for the Pod
 type PodNetworkIo struct {
 	*prometheus.CounterVec
+	extra PodNetworkIoExtra
 }
 
 func NewPodNetworkIo() PodNetworkIo {
@@ -27,12 +28,25 @@ func (m PodNetworkIo) With(extra interface {
 	AttrNetworkIoDirection() network.AttrIoDirection
 }) prometheus.Counter {
 	if extra == nil {
-		extra = PodNetworkIoExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrNetworkInterfaceName()),
 		string(extra.AttrNetworkIoDirection()),
 	)
+}
+
+func (a PodNetworkIo) WithNetworkInterfaceName(attr interface {
+	AttrNetworkInterfaceName() network.AttrInterfaceName
+}) PodNetworkIo {
+	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	return a
+}
+func (a PodNetworkIo) WithNetworkIoDirection(attr interface {
+	AttrNetworkIoDirection() network.AttrIoDirection
+}) PodNetworkIo {
+	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	return a
 }
 
 type PodNetworkIoExtra struct {

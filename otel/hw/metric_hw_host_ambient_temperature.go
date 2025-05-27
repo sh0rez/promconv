@@ -7,6 +7,7 @@ import (
 // Ambient (external) temperature of the physical host
 type HostAmbientTemperature struct {
 	*prometheus.GaugeVec
+	extra HostAmbientTemperatureExtra
 }
 
 func NewHostAmbientTemperature() HostAmbientTemperature {
@@ -23,13 +24,22 @@ func (m HostAmbientTemperature) With(id AttrId, extra interface {
 	AttrHwParent() AttrParent
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = HostAmbientTemperatureExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(id),
 		string(extra.AttrHwName()),
 		string(extra.AttrHwParent()),
 	)
+}
+
+func (a HostAmbientTemperature) WithHwName(attr interface{ AttrHwName() AttrName }) HostAmbientTemperature {
+	a.extra.HwName = attr.AttrHwName()
+	return a
+}
+func (a HostAmbientTemperature) WithHwParent(attr interface{ AttrHwParent() AttrParent }) HostAmbientTemperature {
+	a.extra.HwParent = attr.AttrHwParent()
+	return a
 }
 
 type HostAmbientTemperatureExtra struct {

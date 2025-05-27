@@ -7,6 +7,7 @@ import (
 // The number of revisions (commits) a ref (branch) is ahead/behind the branch from the `vcs.ref.base.name` attribute
 type RefRevisionsDelta struct {
 	*prometheus.GaugeVec
+	extra RefRevisionsDeltaExtra
 }
 
 func NewRefRevisionsDelta() RefRevisionsDelta {
@@ -25,7 +26,7 @@ func (m RefRevisionsDelta) With(refBaseName AttrRefBaseName, refBaseType AttrRef
 	AttrVcsProviderName() AttrProviderName
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = RefRevisionsDeltaExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(refBaseName),
@@ -39,6 +40,23 @@ func (m RefRevisionsDelta) With(refBaseName AttrRefBaseName, refBaseType AttrRef
 		string(extra.AttrVcsRepositoryName()),
 		string(extra.AttrVcsProviderName()),
 	)
+}
+
+func (a RefRevisionsDelta) WithVcsChangeId(attr interface{ AttrVcsChangeId() AttrChangeId }) RefRevisionsDelta {
+	a.extra.VcsChangeId = attr.AttrVcsChangeId()
+	return a
+}
+func (a RefRevisionsDelta) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) RefRevisionsDelta {
+	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+	return a
+}
+func (a RefRevisionsDelta) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) RefRevisionsDelta {
+	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+	return a
+}
+func (a RefRevisionsDelta) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) RefRevisionsDelta {
+	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+	return a
 }
 
 type RefRevisionsDeltaExtra struct {

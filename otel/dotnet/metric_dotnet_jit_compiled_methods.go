@@ -7,6 +7,7 @@ import (
 // The number of times the JIT compiler (re)compiled methods since the process has started.
 type JitCompiledMethods struct {
 	*prometheus.CounterVec
+	extra JitCompiledMethodsExtra
 }
 
 func NewJitCompiledMethods() JitCompiledMethods {
@@ -21,7 +22,7 @@ func NewJitCompiledMethods() JitCompiledMethods {
 func (m JitCompiledMethods) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = JitCompiledMethodsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

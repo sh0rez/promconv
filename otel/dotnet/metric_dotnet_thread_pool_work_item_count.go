@@ -7,6 +7,7 @@ import (
 // The number of work items that the thread pool has completed since the process has started.
 type ThreadPoolWorkItemCount struct {
 	*prometheus.CounterVec
+	extra ThreadPoolWorkItemCountExtra
 }
 
 func NewThreadPoolWorkItemCount() ThreadPoolWorkItemCount {
@@ -21,7 +22,7 @@ func NewThreadPoolWorkItemCount() ThreadPoolWorkItemCount {
 func (m ThreadPoolWorkItemCount) With(extra interface {
 }) prometheus.Counter {
 	if extra == nil {
-		extra = ThreadPoolWorkItemCountExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues()
 }

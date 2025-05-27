@@ -11,6 +11,7 @@ import (
 // Number of exceptions caught by exception handling middleware.
 type DiagnosticsExceptions struct {
 	*prometheus.CounterVec
+	extra DiagnosticsExceptionsExtra
 }
 
 func NewDiagnosticsExceptions() DiagnosticsExceptions {
@@ -26,13 +27,20 @@ func (m DiagnosticsExceptions) With(diagnosticsExceptionResult AttrDiagnosticsEx
 	AttrAspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType
 }) prometheus.Counter {
 	if extra == nil {
-		extra = DiagnosticsExceptionsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(diagnosticsExceptionResult),
 		string(kind),
 		string(extra.AttrAspnetcoreDiagnosticsHandlerType()),
 	)
+}
+
+func (a DiagnosticsExceptions) WithAspnetcoreDiagnosticsHandlerType(attr interface {
+	AttrAspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType
+}) DiagnosticsExceptions {
+	a.extra.AspnetcoreDiagnosticsHandlerType = attr.AttrAspnetcoreDiagnosticsHandlerType()
+	return a
 }
 
 type DiagnosticsExceptionsExtra struct {

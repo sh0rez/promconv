@@ -12,6 +12,7 @@ import (
 // Number of active HTTP requests.
 type ClientActiveRequests struct {
 	*prometheus.GaugeVec
+	extra ClientActiveRequestsExtra
 }
 
 func NewClientActiveRequests() ClientActiveRequests {
@@ -29,7 +30,7 @@ func (m ClientActiveRequests) With(address server.AttrAddress, port server.AttrP
 	AttrUrlScheme() url.AttrScheme
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientActiveRequestsExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(address),
@@ -38,6 +39,19 @@ func (m ClientActiveRequests) With(address server.AttrAddress, port server.AttrP
 		string(extra.AttrHttpRequestMethod()),
 		string(extra.AttrUrlScheme()),
 	)
+}
+
+func (a ClientActiveRequests) WithUrlTemplate(attr interface{ AttrUrlTemplate() url.AttrTemplate }) ClientActiveRequests {
+	a.extra.UrlTemplate = attr.AttrUrlTemplate()
+	return a
+}
+func (a ClientActiveRequests) WithHttpRequestMethod(attr interface{ AttrHttpRequestMethod() AttrRequestMethod }) ClientActiveRequests {
+	a.extra.HttpRequestMethod = attr.AttrHttpRequestMethod()
+	return a
+}
+func (a ClientActiveRequests) WithUrlScheme(attr interface{ AttrUrlScheme() url.AttrScheme }) ClientActiveRequests {
+	a.extra.UrlScheme = attr.AttrUrlScheme()
+	return a
 }
 
 type ClientActiveRequestsExtra struct {

@@ -11,6 +11,7 @@ import (
 // Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs
 type CpuUsage struct {
 	*prometheus.GaugeVec
+	extra CpuUsageExtra
 }
 
 func NewCpuUsage() CpuUsage {
@@ -26,11 +27,16 @@ func (m CpuUsage) With(extra interface {
 	AttrCpuMode() cpu.AttrMode
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = CpuUsageExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(extra.AttrCpuMode()),
 	)
+}
+
+func (a CpuUsage) WithCpuMode(attr interface{ AttrCpuMode() cpu.AttrMode }) CpuUsage {
+	a.extra.CpuMode = attr.AttrCpuMode()
+	return a
 }
 
 type CpuUsageExtra struct {

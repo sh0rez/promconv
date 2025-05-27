@@ -7,6 +7,7 @@ import (
 // Deprecated, use `db.client.connection.idle.min` instead.
 type ClientConnectionsIdleMin struct {
 	*prometheus.GaugeVec
+	extra ClientConnectionsIdleMinExtra
 }
 
 func NewClientConnectionsIdleMin() ClientConnectionsIdleMin {
@@ -21,7 +22,7 @@ func NewClientConnectionsIdleMin() ClientConnectionsIdleMin {
 func (m ClientConnectionsIdleMin) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
 }) prometheus.Gauge {
 	if extra == nil {
-		extra = ClientConnectionsIdleMinExtra{}
+		extra = m.extra
 	}
 	return m.WithLabelValues(
 		string(clientConnectionsPoolName),
