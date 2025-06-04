@@ -1,14 +1,16 @@
 templates:
   - template: metric.go.j2
     application_mode: each
-    file_name: '{{ctx.root_namespace}}/{{ctx.id | snake_case}}.go'
+    file_name: "{{ctx.root_namespace}}/{{ctx.id | snake_case}}.go"
     filter: >
       semconv_metrics
   - template: attr.go.j2
     application_mode: each
-    file_name: '{{ctx.root_namespace}}/attributes.go'
+    file_name: "{{ctx.root_namespace}}/attributes.go"
     filter: >
       semconv_grouped_attributes
+
+acronyms: [TLS, RTT, DNS, SHA]
 
 comment_formats:
   go:

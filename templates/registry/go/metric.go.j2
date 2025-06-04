@@ -5,16 +5,17 @@ import (
 )
 
 {% set attributes = ctx.attributes | attribute_sort %}
+{% set module = params.module | default("shorez.de/promconv/otel") %}
 
 import (
 {% for pkg in attributes | map(attribute="name") | map("attribute_namespace") %}
    {%- if pkg != ctx.root_namespace -%}
-      "shorez.de/promconv/otel/{{pkg}}";
+      "{{module}}/{{pkg}}";
    {%- endif -%}
 {%- endfor%}
 )
 
-{% set Name = ctx.metric_name[(ctx.root_namespace | length)+1:] %}
+{% set Name = (ctx.id | split_id)[2:] | join(".") %}
 
 {% set Type = Name | pascal_case %}
 {% set AttrExtra = Type + "Extra" %}
@@ -33,72 +34,79 @@ type {{Type}} struct {
      extra {{AttrExtra}}
 }
 
+{% macro for_each_attr(attrs) %}
+    {%- for raw in attrs -%}
+        {%- set attr = namespace(raw) -%}
+        {%- set attr.id = attr.name -%}
+        {%- set attr.namespace = attr.name | attribute_namespace -%}
+        {%- set attr.name = attr.name | attribute_id | pascal_case -%}
+        {%- set attr.arg = attr.name | snake_case -%}
+        {%- set attr.fullname = attr.id | pascal_case -%}
+        {%- set attr.pkg = attr.namespace+"." if attr.namespace != ctx.root_namespace else "" -%}
+        {%- set attr.type = "Attr"+(attr.name|pascal_case) -%}
+        {%- set attr.ref = attr.pkg+attr.type -%}
+        {%- set attr.getter = "Attr"+attr.id|pascal_case -%}
+        {{ caller(attr) }}
+    {%- endfor -%}
+{% endmacro%}
+
 func New{{Type}}() {{Type}} {
      labels := []string{
-        {%- for attr in attributes %} "{{attr.name | snake_case}}", {% endfor -%}
+        {%- call(attr) for_each_attr(attributes) -%}
+            {{attr.ref}}("").Key(),
+        {%- endcall -%}
      }
      return {{Type}}{ {{Instr}}Vec: prometheus.New{{Instr}}Vec(prometheus.{{Instr}}Opts{
-            Namespace: "{{ctx.root_namespace}}",
-            Name: "{{Name | snake_case}}",
+            Name: "{{ctx.metric_name | snake_case}}",
             Help: "{{ctx.brief | trim }}",
      }, labels)}
 }
 
-
 func (m {{Type}}) With(
-{%- for attr in attributes | required -%}
-    {%- set id = attr.name | split_id -%}
-    {%- set name = id[1:] | join(".") | pascal_case -%}
-    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
-    {{name | camel_case | replace("type", "kind")}} {{type}}Attr{{name}},
-{%- endfor -%}
-extra interface {
-{% for attr in attributes | not_required -%}
-    {%- set id = attr.name | split_id -%}
-    {%- set name = id[1:] | join(".") | pascal_case -%}
-    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
-    Attr{{ attr.name | pascal_case}}() {{type}}Attr{{name|pascal_case}}
-{% endfor -%}
+{%- call(attr) for_each_attr(attributes|required) -%}
+    {{attr.arg}} {{attr.ref}},
+{%- endcall -%}
+extras ...interface {
+{%- call(attr) for_each_attr(attributes|not_required) -%}
+    {{attr.type}}() {{attr.ref}};
+{%- endcall -%}
 }) prometheus.{{Instr | replace("Histogram", "Observer")}} {
-    if extra == nil { extra = m.extra }
-     return m.WithLabelValues(
-        {% for attr in attributes | required -%}
-            {%- set id = attr.name | split_id -%}
-            {%- set name = id[1:] | join(".") | pascal_case -%}
-            string({{name | camel_case | replace("type", "kind")}}),
-        {%  endfor -%}
-        {% for attr in attributes | not_required -%}
-            string(extra.Attr{{attr.name | pascal_case}}()),
-        {% endfor %}
+    {%- if attributes | not_required | length > 0 %} 
+        if extras == nil { extras = append(extras, m.extra) }
+        extra := extras[0]
+    {% endif %}
+    return m.{{Instr}}Vec.WithLabelValues(
+        {%- call(attr) for_each_attr(attributes|required) -%}
+            string({{attr.arg}}),
+        {%- endcall -%}
+        {%- call(attr) for_each_attr(attributes|not_required) -%}
+            string(extra.{{attr.type}}()),
+        {%- endcall -%}
      )
 }
 
-{% for attr in attributes | not_required -%}
-    {%- set id = attr.name | split_id -%}
-    {%- set name = id[1:] | join(".") | pascal_case -%}
-    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
-    func (a {{Type}}) With{{attr.name|pascal_case}} (attr interface { Attr{{ attr.name | pascal_case}}() {{type}}Attr{{name|pascal_case}} } ) {{Type}} {
-        a.extra.{{attr.name|pascal_case}} = attr.Attr{{ attr.name | pascal_case}}()
-        return a
-    }
-{% endfor %}
-
-type {{AttrExtra}} struct {
-{% for attr in attributes | not_required -%}
-    {%- set id = attr.name | split_id -%}
-    {%- set name = id[1:] | join(".") | pascal_case -%}
-    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
-    // {{attr.brief | trim}}
-    {{ attr.name | pascal_case}} {{type}}Attr{{name|pascal_case}} `otel:"{{attr.name}}"`
-{% endfor %}
+// Deprecated: Use [{{Type}}.With] instead
+func (m {{Type}}) WithLabelValues(lvs ...string) prometheus.{{Instr | replace("Histogram", "Observer")}} {
+    return m.{{Instr}}Vec.WithLabelValues(lvs...)
 }
 
-{% for attr in attributes | not_required -%}
-    {%- set id = attr.name | split_id -%}
-    {%- set name = id[1:] | join(".") | pascal_case -%}
-    {%- set type = id[0]+"." if id[0] != ctx.root_namespace else "" -%}
-    func (a {{AttrExtra}}) Attr{{ attr.name | pascal_case}}() {{type}}Attr{{name|pascal_case}} {return a.{{attr.name|pascal_case}}}
-{% endfor %}
+{% call(attr) for_each_attr(attributes|not_required) -%}
+func (a {{Type}}) With{{attr.fullname}} (attr interface { {{ attr.getter }}() {{attr.ref}} } ) {{Type}} {
+    a.extra.{{attr.name}} = attr.{{attr.getter}}()
+    return a
+}
+{%- endcall %}
+
+type {{AttrExtra}} struct {
+{% call(attr) for_each_attr(attributes|not_required) -%}
+    {{attr.brief | comment}}
+    {{attr.fullname}} {{attr.type}} `otel:"{{attr.id}}"`
+{%- endcall %}
+}
+
+{% call(attr) for_each_attr(attributes|not_required) -%}
+    func (a {{AttrExtra}}) {{attr.getter}}() {{attr.ref}} {return a.{{attr.id|pascal_case}}}
+{%- endcall %}
 
 /*
 {{ debug() }}

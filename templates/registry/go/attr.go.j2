@@ -1,13 +1,19 @@
 package {{ctx.root_namespace | replace("go", "golang")}}
 
 {% for attr in ctx.attributes %}
-{% set Name = attr.name[(attr.root_namespace|length)+1:] | pascal_case %}
+{% set name = attr.name | regex_replace("\\w+\\.\\$?","") %}
+{% set Name = name | pascal_case | acronym %}
 {{ (attr.brief|default("") + "\n" + attr.note|default("")) | comment }}
 type Attr{{Name}} string // {{ attr.name }}
 
 func (Attr{{Name}}) {{attr.stability | pascal_case}}() {}
 func (Attr{{Name}}) {{attr.requirement_level | pascal_case}}() {}
-{% endfor %}
+func (Attr{{Name}}) Key() string { return "{{name | trim("_")}}" }
+func (a Attr{{Name}}) Value() string { return string(a) }
 
+{% for var in attr.type.members -%}
+const {{Name}}{{var.id|pascal_case|acronym}} Attr{{Name}} = "{{var.value}}"
+{% endfor %}
+{% endfor %}
 
 /* {{ debug() }} */
