@@ -1,0 +1,24 @@
+# Metrics
+
+{% for grp in ctx %}
+## {{grp.root_namespace}}
+{% for m in grp.metrics%}
+### {{m.metric_name}}
+
+```py
+# TYPE {{m.metric_name}} {{m.instrument | upper}}
+{{m.metric_name + "{"}}{{m.attributes | map(attribute='name') | join(", ") + "}"}}
+```
+
+{{m.brief}}
+
+{% if m.attributes | length > 0%}
+|Attribute|Type|Description|
+|-|-|-|
+{% for attr in m.attributes -%}
+| {{attr.name}} | {{ attr.type.members | default([]) | map(attribute="value") | map('pprint') | join(' \\| ') | replace('"', '`') | default(attr.type,true) }} | {{attr.brief}}  |
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% endfor %}

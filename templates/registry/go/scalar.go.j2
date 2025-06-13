@@ -1,0 +1,43 @@
+package {{ctx.root_namespace | replace("go", "golang")}}
+
+import (
+    "github.com/prometheus/client_golang/prometheus"
+)
+
+{% set Name = (ctx.id | split_id)[2:] | join(".") %}
+{% set Type = Name | pascal_case %}
+
+{% set InstrMap = {
+   "histogram": "Histogram",
+   "gauge": "Gauge",
+   "counter": "Counter",
+   "updowncounter": "Gauge",
+}%}
+{% set Instr = InstrMap[ctx.instrument] | default("TODO_"+ctx.instrument) %}
+
+
+// {{ctx.brief | trim}}
+type {{Type}} struct {
+    prometheus.{{Instr}}
+}
+
+func New{{Type}}() {{Type}} {
+    return {{Type}}{ {{Instr}}: prometheus.New{{Instr}}(prometheus.{{Instr}}Opts{
+            Name: "{{ctx.metric_name | snake_case}}",
+            Help: "{{ctx.brief | trim }}",
+    })}
+}
+
+func (m {{Type}}) Register(regs ...prometheus.Registerer) {{Type}} {
+    if regs == nil {
+        prometheus.DefaultRegisterer.MustRegister(m)
+    }
+    for _, reg := range regs {
+        reg.MustRegister(m)
+    }
+    return m
+}
+
+/*
+{{ debug() }}
+*/

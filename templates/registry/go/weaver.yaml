@@ -1,14 +1,24 @@
 templates:
-  - template: metric.go.j2
+  - template: vec.go.j2
     application_mode: each
     file_name: "{{ctx.root_namespace}}/{{ctx.id | snake_case}}.go"
     filter: >
-      semconv_metrics
+      semconv_metrics | .[] | select((.attributes|length) > 0)
+  - template: scalar.go.j2
+    file_name: "{{ctx.root_namespace}}/{{ctx.id | snake_case}}.go"
+    application_mode: each
+    filter: >
+      semconv_metrics | .[] | select((.attributes|length) == 0)
   - template: attr.go.j2
     application_mode: each
     file_name: "{{ctx.root_namespace}}/attributes.go"
     filter: >
       semconv_grouped_attributes
+  - template: metrics.md.j2
+    file_name: "metrics.md"
+    application_mode: single
+    filter: >
+      semconv_metrics | semconv_group_metrics_by_root_namespace
 
 acronyms: [TLS, RTT, DNS, SHA]
 
