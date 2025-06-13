@@ -6,37 +6,32 @@ import (
 
 // Number of classes loaded since JVM start.
 type ClassLoaded struct {
-	*prometheus.CounterVec
-	extra ClassLoadedExtra
+	prometheus.Counter
 }
 
 func NewClassLoaded() ClassLoaded {
-	labels := []string{}
-	return ClassLoaded{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "jvm",
-		Name:      "class_loaded",
-		Help:      "Number of classes loaded since JVM start.",
-	}, labels)}
+	return ClassLoaded{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "jvm_class_loaded",
+		Help: "Number of classes loaded since JVM start.",
+	})}
 }
 
-func (m ClassLoaded) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m ClassLoaded) Register(regs ...prometheus.Registerer) ClassLoaded {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ClassLoadedExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClassLoadedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "class.loaded",
         "Type": "ClassLoaded",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of classes loaded since JVM start.",
@@ -174,6 +168,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -260,7 +255,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

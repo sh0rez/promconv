@@ -6,37 +6,32 @@ import (
 
 // Number of file descriptors in use by the process.
 type OpenFileDescriptorCount struct {
-	*prometheus.GaugeVec
-	extra OpenFileDescriptorCountExtra
+	prometheus.Gauge
 }
 
 func NewOpenFileDescriptorCount() OpenFileDescriptorCount {
-	labels := []string{}
-	return OpenFileDescriptorCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "process",
-		Name:      "open_file_descriptor_count",
-		Help:      "Number of file descriptors in use by the process.",
-	}, labels)}
+	return OpenFileDescriptorCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "process_open_file_descriptor_count",
+		Help: "Number of file descriptors in use by the process.",
+	})}
 }
 
-func (m OpenFileDescriptorCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m OpenFileDescriptorCount) Register(regs ...prometheus.Registerer) OpenFileDescriptorCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type OpenFileDescriptorCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "OpenFileDescriptorCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "open_file_descriptor.count",
         "Type": "OpenFileDescriptorCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of file descriptors in use by the process.",
@@ -177,6 +171,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -263,7 +258,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

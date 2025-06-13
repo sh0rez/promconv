@@ -3,40 +3,55 @@ package log
 // The basename of the file
 type AttrFileName string // log.file.name
 
-func (AttrFileName) Development() {}
-func (AttrFileName) Recommended() {}
+func (AttrFileName) Development()    {}
+func (AttrFileName) Recommended()    {}
+func (AttrFileName) Key() string     { return "log_file_name" }
+func (a AttrFileName) Value() string { return string(a) }
 
 // The basename of the file, with symlinks resolved
 type AttrFileNameResolved string // log.file.name_resolved
 
-func (AttrFileNameResolved) Development() {}
-func (AttrFileNameResolved) Recommended() {}
+func (AttrFileNameResolved) Development()    {}
+func (AttrFileNameResolved) Recommended()    {}
+func (AttrFileNameResolved) Key() string     { return "log_file_name_resolved" }
+func (a AttrFileNameResolved) Value() string { return string(a) }
 
 // The full path to the file
 type AttrFilePath string // log.file.path
 
-func (AttrFilePath) Development() {}
-func (AttrFilePath) Recommended() {}
+func (AttrFilePath) Development()    {}
+func (AttrFilePath) Recommended()    {}
+func (AttrFilePath) Key() string     { return "log_file_path" }
+func (a AttrFilePath) Value() string { return string(a) }
 
 // The full path to the file, with symlinks resolved
 type AttrFilePathResolved string // log.file.path_resolved
 
-func (AttrFilePathResolved) Development() {}
-func (AttrFilePathResolved) Recommended() {}
+func (AttrFilePathResolved) Development()    {}
+func (AttrFilePathResolved) Recommended()    {}
+func (AttrFilePathResolved) Key() string     { return "log_file_path_resolved" }
+func (a AttrFilePathResolved) Value() string { return string(a) }
 
 // The stream associated with the log. See below for a list of well-known values
 type AttrIostream string // log.iostream
 
-func (AttrIostream) Development() {}
-func (AttrIostream) Recommended() {}
+func (AttrIostream) Development()    {}
+func (AttrIostream) Recommended()    {}
+func (AttrIostream) Key() string     { return "log_iostream" }
+func (a AttrIostream) Value() string { return string(a) }
+
+const IostreamStdout AttrIostream = "stdout"
+const IostreamStderr AttrIostream = "stderr"
 
 // The complete original Log Record.
 //
 // This value MAY be added when processing a Log Record which was originally transmitted as a string or equivalent data type AND the Body field of the Log Record does not contain the same value. (e.g. a syslog or a log record read from a file.)
 type AttrRecordOriginal string // log.record.original
 
-func (AttrRecordOriginal) Development() {}
-func (AttrRecordOriginal) Recommended() {}
+func (AttrRecordOriginal) Development()    {}
+func (AttrRecordOriginal) Recommended()    {}
+func (AttrRecordOriginal) Key() string     { return "log_record_original" }
+func (a AttrRecordOriginal) Value() string { return string(a) }
 
 // A unique identifier for the Log Record.
 //
@@ -46,8 +61,10 @@ func (AttrRecordOriginal) Recommended() {}
 // [Universally Unique Lexicographically Sortable Identifier (ULID)]: https://github.com/ulid/spec
 type AttrRecordUid string // log.record.uid
 
-func (AttrRecordUid) Development() {}
-func (AttrRecordUid) Recommended() {}
+func (AttrRecordUid) Development()    {}
+func (AttrRecordUid) Recommended()    {}
+func (AttrRecordUid) Key() string     { return "log_record_uid" }
+func (a AttrRecordUid) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -107,7 +124,6 @@ func (AttrRecordUid) Recommended() {}
                     "root_namespace": "log",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Logs from stdout stream",
@@ -263,6 +279,7 @@ func (AttrRecordUid) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

@@ -5,212 +5,289 @@ package aws
 // [guardrail]: https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html
 type AttrBedrockGuardrailId string // aws.bedrock.guardrail.id
 
-func (AttrBedrockGuardrailId) Development() {}
-func (AttrBedrockGuardrailId) Recommended() {}
+func (AttrBedrockGuardrailId) Development()    {}
+func (AttrBedrockGuardrailId) Recommended()    {}
+func (AttrBedrockGuardrailId) Key() string     { return "aws_bedrock_guardrail_id" }
+func (a AttrBedrockGuardrailId) Value() string { return string(a) }
 
 // The unique identifier of the AWS Bedrock Knowledge base. A [knowledge base] is a bank of information that can be queried by models to generate more relevant responses and augment prompts
 //
 // [knowledge base]: https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html
 type AttrBedrockKnowledgeBaseId string // aws.bedrock.knowledge_base.id
 
-func (AttrBedrockKnowledgeBaseId) Development() {}
-func (AttrBedrockKnowledgeBaseId) Recommended() {}
+func (AttrBedrockKnowledgeBaseId) Development()    {}
+func (AttrBedrockKnowledgeBaseId) Recommended()    {}
+func (AttrBedrockKnowledgeBaseId) Key() string     { return "aws_bedrock_knowledge_base_id" }
+func (a AttrBedrockKnowledgeBaseId) Value() string { return string(a) }
 
 // The JSON-serialized value of each item in the `AttributeDefinitions` request field
 type AttrDynamodbAttributeDefinitions string // aws.dynamodb.attribute_definitions
 
-func (AttrDynamodbAttributeDefinitions) Development() {}
-func (AttrDynamodbAttributeDefinitions) Recommended() {}
+func (AttrDynamodbAttributeDefinitions) Development()    {}
+func (AttrDynamodbAttributeDefinitions) Recommended()    {}
+func (AttrDynamodbAttributeDefinitions) Key() string     { return "aws_dynamodb_attribute_definitions" }
+func (a AttrDynamodbAttributeDefinitions) Value() string { return string(a) }
 
 // The value of the `AttributesToGet` request parameter
 type AttrDynamodbAttributesToGet string // aws.dynamodb.attributes_to_get
 
-func (AttrDynamodbAttributesToGet) Development() {}
-func (AttrDynamodbAttributesToGet) Recommended() {}
+func (AttrDynamodbAttributesToGet) Development()    {}
+func (AttrDynamodbAttributesToGet) Recommended()    {}
+func (AttrDynamodbAttributesToGet) Key() string     { return "aws_dynamodb_attributes_to_get" }
+func (a AttrDynamodbAttributesToGet) Value() string { return string(a) }
 
 // The value of the `ConsistentRead` request parameter
 type AttrDynamodbConsistentRead string // aws.dynamodb.consistent_read
 
-func (AttrDynamodbConsistentRead) Development() {}
-func (AttrDynamodbConsistentRead) Recommended() {}
+func (AttrDynamodbConsistentRead) Development()    {}
+func (AttrDynamodbConsistentRead) Recommended()    {}
+func (AttrDynamodbConsistentRead) Key() string     { return "aws_dynamodb_consistent_read" }
+func (a AttrDynamodbConsistentRead) Value() string { return string(a) }
 
 // The JSON-serialized value of each item in the `ConsumedCapacity` response field
 type AttrDynamodbConsumedCapacity string // aws.dynamodb.consumed_capacity
 
-func (AttrDynamodbConsumedCapacity) Development() {}
-func (AttrDynamodbConsumedCapacity) Recommended() {}
+func (AttrDynamodbConsumedCapacity) Development()    {}
+func (AttrDynamodbConsumedCapacity) Recommended()    {}
+func (AttrDynamodbConsumedCapacity) Key() string     { return "aws_dynamodb_consumed_capacity" }
+func (a AttrDynamodbConsumedCapacity) Value() string { return string(a) }
 
 // The value of the `Count` response parameter
 type AttrDynamodbCount string // aws.dynamodb.count
 
-func (AttrDynamodbCount) Development() {}
-func (AttrDynamodbCount) Recommended() {}
+func (AttrDynamodbCount) Development()    {}
+func (AttrDynamodbCount) Recommended()    {}
+func (AttrDynamodbCount) Key() string     { return "aws_dynamodb_count" }
+func (a AttrDynamodbCount) Value() string { return string(a) }
 
 // The value of the `ExclusiveStartTableName` request parameter
 type AttrDynamodbExclusiveStartTable string // aws.dynamodb.exclusive_start_table
 
-func (AttrDynamodbExclusiveStartTable) Development() {}
-func (AttrDynamodbExclusiveStartTable) Recommended() {}
+func (AttrDynamodbExclusiveStartTable) Development()    {}
+func (AttrDynamodbExclusiveStartTable) Recommended()    {}
+func (AttrDynamodbExclusiveStartTable) Key() string     { return "aws_dynamodb_exclusive_start_table" }
+func (a AttrDynamodbExclusiveStartTable) Value() string { return string(a) }
 
 // The JSON-serialized value of each item in the `GlobalSecondaryIndexUpdates` request field
 type AttrDynamodbGlobalSecondaryIndexUpdates string // aws.dynamodb.global_secondary_index_updates
 
 func (AttrDynamodbGlobalSecondaryIndexUpdates) Development() {}
 func (AttrDynamodbGlobalSecondaryIndexUpdates) Recommended() {}
+func (AttrDynamodbGlobalSecondaryIndexUpdates) Key() string {
+	return "aws_dynamodb_global_secondary_index_updates"
+}
+func (a AttrDynamodbGlobalSecondaryIndexUpdates) Value() string { return string(a) }
 
 // The JSON-serialized value of each item of the `GlobalSecondaryIndexes` request field
 type AttrDynamodbGlobalSecondaryIndexes string // aws.dynamodb.global_secondary_indexes
 
 func (AttrDynamodbGlobalSecondaryIndexes) Development() {}
 func (AttrDynamodbGlobalSecondaryIndexes) Recommended() {}
+func (AttrDynamodbGlobalSecondaryIndexes) Key() string {
+	return "aws_dynamodb_global_secondary_indexes"
+}
+func (a AttrDynamodbGlobalSecondaryIndexes) Value() string { return string(a) }
 
 // The value of the `IndexName` request parameter
 type AttrDynamodbIndexName string // aws.dynamodb.index_name
 
-func (AttrDynamodbIndexName) Development() {}
-func (AttrDynamodbIndexName) Recommended() {}
+func (AttrDynamodbIndexName) Development()    {}
+func (AttrDynamodbIndexName) Recommended()    {}
+func (AttrDynamodbIndexName) Key() string     { return "aws_dynamodb_index_name" }
+func (a AttrDynamodbIndexName) Value() string { return string(a) }
 
 // The JSON-serialized value of the `ItemCollectionMetrics` response field
 type AttrDynamodbItemCollectionMetrics string // aws.dynamodb.item_collection_metrics
 
-func (AttrDynamodbItemCollectionMetrics) Development() {}
-func (AttrDynamodbItemCollectionMetrics) Recommended() {}
+func (AttrDynamodbItemCollectionMetrics) Development()    {}
+func (AttrDynamodbItemCollectionMetrics) Recommended()    {}
+func (AttrDynamodbItemCollectionMetrics) Key() string     { return "aws_dynamodb_item_collection_metrics" }
+func (a AttrDynamodbItemCollectionMetrics) Value() string { return string(a) }
 
 // The value of the `Limit` request parameter
 type AttrDynamodbLimit string // aws.dynamodb.limit
 
-func (AttrDynamodbLimit) Development() {}
-func (AttrDynamodbLimit) Recommended() {}
+func (AttrDynamodbLimit) Development()    {}
+func (AttrDynamodbLimit) Recommended()    {}
+func (AttrDynamodbLimit) Key() string     { return "aws_dynamodb_limit" }
+func (a AttrDynamodbLimit) Value() string { return string(a) }
 
 // The JSON-serialized value of each item of the `LocalSecondaryIndexes` request field
 type AttrDynamodbLocalSecondaryIndexes string // aws.dynamodb.local_secondary_indexes
 
-func (AttrDynamodbLocalSecondaryIndexes) Development() {}
-func (AttrDynamodbLocalSecondaryIndexes) Recommended() {}
+func (AttrDynamodbLocalSecondaryIndexes) Development()    {}
+func (AttrDynamodbLocalSecondaryIndexes) Recommended()    {}
+func (AttrDynamodbLocalSecondaryIndexes) Key() string     { return "aws_dynamodb_local_secondary_indexes" }
+func (a AttrDynamodbLocalSecondaryIndexes) Value() string { return string(a) }
 
 // The value of the `ProjectionExpression` request parameter
 type AttrDynamodbProjection string // aws.dynamodb.projection
 
-func (AttrDynamodbProjection) Development() {}
-func (AttrDynamodbProjection) Recommended() {}
+func (AttrDynamodbProjection) Development()    {}
+func (AttrDynamodbProjection) Recommended()    {}
+func (AttrDynamodbProjection) Key() string     { return "aws_dynamodb_projection" }
+func (a AttrDynamodbProjection) Value() string { return string(a) }
 
 // The value of the `ProvisionedThroughput.ReadCapacityUnits` request parameter
 type AttrDynamodbProvisionedReadCapacity string // aws.dynamodb.provisioned_read_capacity
 
 func (AttrDynamodbProvisionedReadCapacity) Development() {}
 func (AttrDynamodbProvisionedReadCapacity) Recommended() {}
+func (AttrDynamodbProvisionedReadCapacity) Key() string {
+	return "aws_dynamodb_provisioned_read_capacity"
+}
+func (a AttrDynamodbProvisionedReadCapacity) Value() string { return string(a) }
 
 // The value of the `ProvisionedThroughput.WriteCapacityUnits` request parameter
 type AttrDynamodbProvisionedWriteCapacity string // aws.dynamodb.provisioned_write_capacity
 
 func (AttrDynamodbProvisionedWriteCapacity) Development() {}
 func (AttrDynamodbProvisionedWriteCapacity) Recommended() {}
+func (AttrDynamodbProvisionedWriteCapacity) Key() string {
+	return "aws_dynamodb_provisioned_write_capacity"
+}
+func (a AttrDynamodbProvisionedWriteCapacity) Value() string { return string(a) }
 
 // The value of the `ScanIndexForward` request parameter
 type AttrDynamodbScanForward string // aws.dynamodb.scan_forward
 
-func (AttrDynamodbScanForward) Development() {}
-func (AttrDynamodbScanForward) Recommended() {}
+func (AttrDynamodbScanForward) Development()    {}
+func (AttrDynamodbScanForward) Recommended()    {}
+func (AttrDynamodbScanForward) Key() string     { return "aws_dynamodb_scan_forward" }
+func (a AttrDynamodbScanForward) Value() string { return string(a) }
 
 // The value of the `ScannedCount` response parameter
 type AttrDynamodbScannedCount string // aws.dynamodb.scanned_count
 
-func (AttrDynamodbScannedCount) Development() {}
-func (AttrDynamodbScannedCount) Recommended() {}
+func (AttrDynamodbScannedCount) Development()    {}
+func (AttrDynamodbScannedCount) Recommended()    {}
+func (AttrDynamodbScannedCount) Key() string     { return "aws_dynamodb_scanned_count" }
+func (a AttrDynamodbScannedCount) Value() string { return string(a) }
 
 // The value of the `Segment` request parameter
 type AttrDynamodbSegment string // aws.dynamodb.segment
 
-func (AttrDynamodbSegment) Development() {}
-func (AttrDynamodbSegment) Recommended() {}
+func (AttrDynamodbSegment) Development()    {}
+func (AttrDynamodbSegment) Recommended()    {}
+func (AttrDynamodbSegment) Key() string     { return "aws_dynamodb_segment" }
+func (a AttrDynamodbSegment) Value() string { return string(a) }
 
 // The value of the `Select` request parameter
 type AttrDynamodbSelect string // aws.dynamodb.select
 
-func (AttrDynamodbSelect) Development() {}
-func (AttrDynamodbSelect) Recommended() {}
+func (AttrDynamodbSelect) Development()    {}
+func (AttrDynamodbSelect) Recommended()    {}
+func (AttrDynamodbSelect) Key() string     { return "aws_dynamodb_select" }
+func (a AttrDynamodbSelect) Value() string { return string(a) }
 
 // The number of items in the `TableNames` response parameter
 type AttrDynamodbTableCount string // aws.dynamodb.table_count
 
-func (AttrDynamodbTableCount) Development() {}
-func (AttrDynamodbTableCount) Recommended() {}
+func (AttrDynamodbTableCount) Development()    {}
+func (AttrDynamodbTableCount) Recommended()    {}
+func (AttrDynamodbTableCount) Key() string     { return "aws_dynamodb_table_count" }
+func (a AttrDynamodbTableCount) Value() string { return string(a) }
 
 // The keys in the `RequestItems` object field
 type AttrDynamodbTableNames string // aws.dynamodb.table_names
 
-func (AttrDynamodbTableNames) Development() {}
-func (AttrDynamodbTableNames) Recommended() {}
+func (AttrDynamodbTableNames) Development()    {}
+func (AttrDynamodbTableNames) Recommended()    {}
+func (AttrDynamodbTableNames) Key() string     { return "aws_dynamodb_table_names" }
+func (a AttrDynamodbTableNames) Value() string { return string(a) }
 
 // The value of the `TotalSegments` request parameter
 type AttrDynamodbTotalSegments string // aws.dynamodb.total_segments
 
-func (AttrDynamodbTotalSegments) Development() {}
-func (AttrDynamodbTotalSegments) Recommended() {}
+func (AttrDynamodbTotalSegments) Development()    {}
+func (AttrDynamodbTotalSegments) Recommended()    {}
+func (AttrDynamodbTotalSegments) Key() string     { return "aws_dynamodb_total_segments" }
+func (a AttrDynamodbTotalSegments) Value() string { return string(a) }
 
 // The ARN of an [ECS cluster]
 //
 // [ECS cluster]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html
 type AttrEcsClusterArn string // aws.ecs.cluster.arn
 
-func (AttrEcsClusterArn) Development() {}
-func (AttrEcsClusterArn) Recommended() {}
+func (AttrEcsClusterArn) Development()    {}
+func (AttrEcsClusterArn) Recommended()    {}
+func (AttrEcsClusterArn) Key() string     { return "aws_ecs_cluster_arn" }
+func (a AttrEcsClusterArn) Value() string { return string(a) }
 
 // The Amazon Resource Name (ARN) of an [ECS container instance]
 //
 // [ECS container instance]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_instances.html
 type AttrEcsContainerArn string // aws.ecs.container.arn
 
-func (AttrEcsContainerArn) Development() {}
-func (AttrEcsContainerArn) Recommended() {}
+func (AttrEcsContainerArn) Development()    {}
+func (AttrEcsContainerArn) Recommended()    {}
+func (AttrEcsContainerArn) Key() string     { return "aws_ecs_container_arn" }
+func (a AttrEcsContainerArn) Value() string { return string(a) }
 
 // The [launch type] for an ECS task
 //
 // [launch type]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html
 type AttrEcsLaunchtype string // aws.ecs.launchtype
 
-func (AttrEcsLaunchtype) Development() {}
-func (AttrEcsLaunchtype) Recommended() {}
+func (AttrEcsLaunchtype) Development()    {}
+func (AttrEcsLaunchtype) Recommended()    {}
+func (AttrEcsLaunchtype) Key() string     { return "aws_ecs_launchtype" }
+func (a AttrEcsLaunchtype) Value() string { return string(a) }
+
+const EcsLaunchtypeEc2 AttrEcsLaunchtype = "ec2"
+const EcsLaunchtypeFargate AttrEcsLaunchtype = "fargate"
 
 // The ARN of a running [ECS task]
 //
 // [ECS task]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-account-settings.html#ecs-resource-ids
 type AttrEcsTaskArn string // aws.ecs.task.arn
 
-func (AttrEcsTaskArn) Development() {}
-func (AttrEcsTaskArn) Recommended() {}
+func (AttrEcsTaskArn) Development()    {}
+func (AttrEcsTaskArn) Recommended()    {}
+func (AttrEcsTaskArn) Key() string     { return "aws_ecs_task_arn" }
+func (a AttrEcsTaskArn) Value() string { return string(a) }
 
 // The family name of the [ECS task definition] used to create the ECS task
 //
 // [ECS task definition]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html
 type AttrEcsTaskFamily string // aws.ecs.task.family
 
-func (AttrEcsTaskFamily) Development() {}
-func (AttrEcsTaskFamily) Recommended() {}
+func (AttrEcsTaskFamily) Development()    {}
+func (AttrEcsTaskFamily) Recommended()    {}
+func (AttrEcsTaskFamily) Key() string     { return "aws_ecs_task_family" }
+func (a AttrEcsTaskFamily) Value() string { return string(a) }
 
 // The ID of a running ECS task. The ID MUST be extracted from `task.arn`
 type AttrEcsTaskId string // aws.ecs.task.id
 
-func (AttrEcsTaskId) Development() {}
-func (AttrEcsTaskId) Recommended() {}
+func (AttrEcsTaskId) Development()    {}
+func (AttrEcsTaskId) Recommended()    {}
+func (AttrEcsTaskId) Key() string     { return "aws_ecs_task_id" }
+func (a AttrEcsTaskId) Value() string { return string(a) }
 
 // The revision for the task definition used to create the ECS task
 type AttrEcsTaskRevision string // aws.ecs.task.revision
 
-func (AttrEcsTaskRevision) Development() {}
-func (AttrEcsTaskRevision) Recommended() {}
+func (AttrEcsTaskRevision) Development()    {}
+func (AttrEcsTaskRevision) Recommended()    {}
+func (AttrEcsTaskRevision) Key() string     { return "aws_ecs_task_revision" }
+func (a AttrEcsTaskRevision) Value() string { return string(a) }
 
 // The ARN of an EKS cluster
 type AttrEksClusterArn string // aws.eks.cluster.arn
 
-func (AttrEksClusterArn) Development() {}
-func (AttrEksClusterArn) Recommended() {}
+func (AttrEksClusterArn) Development()    {}
+func (AttrEksClusterArn) Recommended()    {}
+func (AttrEksClusterArn) Key() string     { return "aws_eks_cluster_arn" }
+func (a AttrEksClusterArn) Value() string { return string(a) }
 
 // The AWS extended request ID as returned in the response header `x-amz-id-2`
 type AttrExtendedRequestId string // aws.extended_request_id
 
-func (AttrExtendedRequestId) Development() {}
-func (AttrExtendedRequestId) Recommended() {}
+func (AttrExtendedRequestId) Development()    {}
+func (AttrExtendedRequestId) Recommended()    {}
+func (AttrExtendedRequestId) Key() string     { return "aws_extended_request_id" }
+func (a AttrExtendedRequestId) Value() string { return string(a) }
 
 // The name of the AWS Kinesis [stream] the request refers to. Corresponds to the `--stream-name` parameter of the Kinesis [describe-stream] operation
 //
@@ -218,24 +295,30 @@ func (AttrExtendedRequestId) Recommended() {}
 // [describe-stream]: https://docs.aws.amazon.com/cli/latest/reference/kinesis/describe-stream.html
 type AttrKinesisStreamName string // aws.kinesis.stream_name
 
-func (AttrKinesisStreamName) Development() {}
-func (AttrKinesisStreamName) Recommended() {}
+func (AttrKinesisStreamName) Development()    {}
+func (AttrKinesisStreamName) Recommended()    {}
+func (AttrKinesisStreamName) Key() string     { return "aws_kinesis_stream_name" }
+func (a AttrKinesisStreamName) Value() string { return string(a) }
 
 // The full invoked ARN as provided on the `Context` passed to the function (`Lambda-Runtime-Invoked-Function-Arn` header on the `/runtime/invocation/next` applicable).
 //
 // This may be different from `cloud.resource_id` if an alias is involved
 type AttrLambdaInvokedArn string // aws.lambda.invoked_arn
 
-func (AttrLambdaInvokedArn) Development() {}
-func (AttrLambdaInvokedArn) Recommended() {}
+func (AttrLambdaInvokedArn) Development()    {}
+func (AttrLambdaInvokedArn) Recommended()    {}
+func (AttrLambdaInvokedArn) Key() string     { return "aws_lambda_invoked_arn" }
+func (a AttrLambdaInvokedArn) Value() string { return string(a) }
 
 // The UUID of the [AWS Lambda EvenSource Mapping]. An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping
 //
 // [AWS Lambda EvenSource Mapping]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html
 type AttrLambdaResourceMappingId string // aws.lambda.resource_mapping.id
 
-func (AttrLambdaResourceMappingId) Development() {}
-func (AttrLambdaResourceMappingId) Recommended() {}
+func (AttrLambdaResourceMappingId) Development()    {}
+func (AttrLambdaResourceMappingId) Recommended()    {}
+func (AttrLambdaResourceMappingId) Key() string     { return "aws_lambda_resource_mapping_id" }
+func (a AttrLambdaResourceMappingId) Value() string { return string(a) }
 
 // The Amazon Resource Name(s) (ARN) of the AWS log group(s).
 //
@@ -244,16 +327,20 @@ func (AttrLambdaResourceMappingId) Recommended() {}
 // [log group ARN format documentation]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/iam-access-control-overview-cwl.html#CWL_ARN_Format
 type AttrLogGroupArns string // aws.log.group.arns
 
-func (AttrLogGroupArns) Development() {}
-func (AttrLogGroupArns) Recommended() {}
+func (AttrLogGroupArns) Development()    {}
+func (AttrLogGroupArns) Recommended()    {}
+func (AttrLogGroupArns) Key() string     { return "aws_log_group_arns" }
+func (a AttrLogGroupArns) Value() string { return string(a) }
 
 // The name(s) of the AWS log group(s) an application is writing to.
 //
 // Multiple log groups must be supported for cases like multi-container applications, where a single application has sidecar containers, and each write to their own log group
 type AttrLogGroupNames string // aws.log.group.names
 
-func (AttrLogGroupNames) Development() {}
-func (AttrLogGroupNames) Recommended() {}
+func (AttrLogGroupNames) Development()    {}
+func (AttrLogGroupNames) Recommended()    {}
+func (AttrLogGroupNames) Key() string     { return "aws_log_group_names" }
+func (a AttrLogGroupNames) Value() string { return string(a) }
 
 // The ARN(s) of the AWS log stream(s).
 //
@@ -262,20 +349,26 @@ func (AttrLogGroupNames) Recommended() {}
 // [log stream ARN format documentation]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/iam-access-control-overview-cwl.html#CWL_ARN_Format
 type AttrLogStreamArns string // aws.log.stream.arns
 
-func (AttrLogStreamArns) Development() {}
-func (AttrLogStreamArns) Recommended() {}
+func (AttrLogStreamArns) Development()    {}
+func (AttrLogStreamArns) Recommended()    {}
+func (AttrLogStreamArns) Key() string     { return "aws_log_stream_arns" }
+func (a AttrLogStreamArns) Value() string { return string(a) }
 
 // The name(s) of the AWS log stream(s) an application is writing to
 type AttrLogStreamNames string // aws.log.stream.names
 
-func (AttrLogStreamNames) Development() {}
-func (AttrLogStreamNames) Recommended() {}
+func (AttrLogStreamNames) Development()    {}
+func (AttrLogStreamNames) Recommended()    {}
+func (AttrLogStreamNames) Key() string     { return "aws_log_stream_names" }
+func (a AttrLogStreamNames) Value() string { return string(a) }
 
 // The AWS request ID as returned in the response headers `x-amzn-requestid`, `x-amzn-request-id` or `x-amz-request-id`
 type AttrRequestId string // aws.request_id
 
-func (AttrRequestId) Development() {}
-func (AttrRequestId) Recommended() {}
+func (AttrRequestId) Development()    {}
+func (AttrRequestId) Recommended()    {}
+func (AttrRequestId) Key() string     { return "aws_request_id" }
+func (a AttrRequestId) Value() string { return string(a) }
 
 // The S3 bucket name the request refers to. Corresponds to the `--bucket` parameter of the [S3 API] operations.
 // The `bucket` attribute is applicable to all S3 operations that reference a bucket, i.e. that require the bucket name as a mandatory parameter.
@@ -284,8 +377,10 @@ func (AttrRequestId) Recommended() {}
 // [S3 API]: https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html
 type AttrS3Bucket string // aws.s3.bucket
 
-func (AttrS3Bucket) Development() {}
-func (AttrS3Bucket) Recommended() {}
+func (AttrS3Bucket) Development()    {}
+func (AttrS3Bucket) Recommended()    {}
+func (AttrS3Bucket) Key() string     { return "aws_s3_bucket" }
+func (a AttrS3Bucket) Value() string { return string(a) }
 
 // The source object (in the form `bucket`/`key`) for the copy operation.
 // The `copy_source` attribute applies to S3 copy operations and corresponds to the `--copy-source` parameter
@@ -300,8 +395,10 @@ func (AttrS3Bucket) Recommended() {}
 // [upload-part-copy]: https://docs.aws.amazon.com/cli/latest/reference/s3api/upload-part-copy.html
 type AttrS3CopySource string // aws.s3.copy_source
 
-func (AttrS3CopySource) Development() {}
-func (AttrS3CopySource) Recommended() {}
+func (AttrS3CopySource) Development()    {}
+func (AttrS3CopySource) Recommended()    {}
+func (AttrS3CopySource) Key() string     { return "aws_s3_copy_source" }
+func (a AttrS3CopySource) Value() string { return string(a) }
 
 // The delete request container that specifies the objects to be deleted.
 // The `delete` attribute is only applicable to the [delete-object] operation.
@@ -312,8 +409,10 @@ func (AttrS3CopySource) Recommended() {}
 // [delete-objects operation within the S3 API]: https://docs.aws.amazon.com/cli/latest/reference/s3api/delete-objects.html
 type AttrS3Delete string // aws.s3.delete
 
-func (AttrS3Delete) Development() {}
-func (AttrS3Delete) Recommended() {}
+func (AttrS3Delete) Development()    {}
+func (AttrS3Delete) Recommended()    {}
+func (AttrS3Delete) Key() string     { return "aws_s3_delete" }
+func (a AttrS3Delete) Value() string { return string(a) }
 
 // The S3 object key the request refers to. Corresponds to the `--key` parameter of the [S3 API] operations.
 // The `key` attribute is applicable to all object-related S3 operations, i.e. that require the object key as a mandatory parameter.
@@ -349,8 +448,10 @@ func (AttrS3Delete) Recommended() {}
 // [upload-part-copy]: https://docs.aws.amazon.com/cli/latest/reference/s3api/upload-part-copy.html
 type AttrS3Key string // aws.s3.key
 
-func (AttrS3Key) Development() {}
-func (AttrS3Key) Recommended() {}
+func (AttrS3Key) Development()    {}
+func (AttrS3Key) Recommended()    {}
+func (AttrS3Key) Key() string     { return "aws_s3_key" }
+func (a AttrS3Key) Value() string { return string(a) }
 
 // The part number of the part being uploaded in a multipart-upload operation. This is a positive integer between 1 and 10,000.
 // The `part_number` attribute is only applicable to the [upload-part]
@@ -363,8 +464,10 @@ func (AttrS3Key) Recommended() {}
 // [upload-part operation within the S3 API]: https://docs.aws.amazon.com/cli/latest/reference/s3api/upload-part.html
 type AttrS3PartNumber string // aws.s3.part_number
 
-func (AttrS3PartNumber) Development() {}
-func (AttrS3PartNumber) Recommended() {}
+func (AttrS3PartNumber) Development()    {}
+func (AttrS3PartNumber) Recommended()    {}
+func (AttrS3PartNumber) Key() string     { return "aws_s3_part_number" }
+func (a AttrS3PartNumber) Value() string { return string(a) }
 
 // Upload ID that identifies the multipart upload.
 // The `upload_id` attribute applies to S3 multipart-upload operations and corresponds to the `--upload-id` parameter
@@ -385,40 +488,52 @@ func (AttrS3PartNumber) Recommended() {}
 // [upload-part-copy]: https://docs.aws.amazon.com/cli/latest/reference/s3api/upload-part-copy.html
 type AttrS3UploadId string // aws.s3.upload_id
 
-func (AttrS3UploadId) Development() {}
-func (AttrS3UploadId) Recommended() {}
+func (AttrS3UploadId) Development()    {}
+func (AttrS3UploadId) Recommended()    {}
+func (AttrS3UploadId) Key() string     { return "aws_s3_upload_id" }
+func (a AttrS3UploadId) Value() string { return string(a) }
 
 // The ARN of the Secret stored in the Secrets Mangger
 type AttrSecretsmanagerSecretArn string // aws.secretsmanager.secret.arn
 
-func (AttrSecretsmanagerSecretArn) Development() {}
-func (AttrSecretsmanagerSecretArn) Recommended() {}
+func (AttrSecretsmanagerSecretArn) Development()    {}
+func (AttrSecretsmanagerSecretArn) Recommended()    {}
+func (AttrSecretsmanagerSecretArn) Key() string     { return "aws_secretsmanager_secret_arn" }
+func (a AttrSecretsmanagerSecretArn) Value() string { return string(a) }
 
 // The ARN of the AWS SNS Topic. An Amazon SNS [topic] is a logical access point that acts as a communication channel
 //
 // [topic]: https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html
 type AttrSnsTopicArn string // aws.sns.topic.arn
 
-func (AttrSnsTopicArn) Development() {}
-func (AttrSnsTopicArn) Recommended() {}
+func (AttrSnsTopicArn) Development()    {}
+func (AttrSnsTopicArn) Recommended()    {}
+func (AttrSnsTopicArn) Key() string     { return "aws_sns_topic_arn" }
+func (a AttrSnsTopicArn) Value() string { return string(a) }
 
 // The URL of the AWS SQS Queue. It's a unique identifier for a queue in Amazon Simple Queue Service (SQS) and is used to access the queue and perform actions on it
 type AttrSqsQueueUrl string // aws.sqs.queue.url
 
-func (AttrSqsQueueUrl) Development() {}
-func (AttrSqsQueueUrl) Recommended() {}
+func (AttrSqsQueueUrl) Development()    {}
+func (AttrSqsQueueUrl) Recommended()    {}
+func (AttrSqsQueueUrl) Key() string     { return "aws_sqs_queue_url" }
+func (a AttrSqsQueueUrl) Value() string { return string(a) }
 
 // The ARN of the AWS Step Functions Activity
 type AttrStepFunctionsActivityArn string // aws.step_functions.activity.arn
 
-func (AttrStepFunctionsActivityArn) Development() {}
-func (AttrStepFunctionsActivityArn) Recommended() {}
+func (AttrStepFunctionsActivityArn) Development()    {}
+func (AttrStepFunctionsActivityArn) Recommended()    {}
+func (AttrStepFunctionsActivityArn) Key() string     { return "aws_step_functions_activity_arn" }
+func (a AttrStepFunctionsActivityArn) Value() string { return string(a) }
 
 // The ARN of the AWS Step Functions State Machine
 type AttrStepFunctionsStateMachineArn string // aws.step_functions.state_machine.arn
 
-func (AttrStepFunctionsStateMachineArn) Development() {}
-func (AttrStepFunctionsStateMachineArn) Recommended() {}
+func (AttrStepFunctionsStateMachineArn) Development()    {}
+func (AttrStepFunctionsStateMachineArn) Recommended()    {}
+func (AttrStepFunctionsStateMachineArn) Key() string     { return "aws_step_functions_state_machine_arn" }
+func (a AttrStepFunctionsStateMachineArn) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -736,7 +851,6 @@ func (AttrStepFunctionsStateMachineArn) Recommended() {}
                     "root_namespace": "aws",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -1165,6 +1279,7 @@ func (AttrStepFunctionsStateMachineArn) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

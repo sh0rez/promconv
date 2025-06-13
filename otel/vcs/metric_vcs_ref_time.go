@@ -11,61 +11,58 @@ type RefTime struct {
 }
 
 func NewRefTime() RefTime {
-	labels := []string{"vcs_ref_head_name", "vcs_ref_head_type", "vcs_repository_url_full", "vcs_owner_name", "vcs_repository_name", "vcs_provider_name"}
+	labels := []string{AttrRefHeadName("").Key(), AttrRefHeadType("").Key(), AttrRepositoryUrlFull("").Key(), AttrOwnerName("").Key(), AttrRepositoryName("").Key(), AttrProviderName("").Key()}
 	return RefTime{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "vcs",
-		Name:      "ref_time",
-		Help:      "Time a ref (branch) created from the default branch (trunk) has existed. The `ref.type` attribute will always be `branch`",
+		Name: "vcs_ref_time",
+		Help: "Time a ref (branch) created from the default branch (trunk) has existed. The `ref.type` attribute will always be `branch`",
 	}, labels)}
 }
 
-func (m RefTime) With(refHeadName AttrRefHeadName, refHeadType AttrRefHeadType, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
-	AttrVcsOwnerName() AttrOwnerName
-	AttrVcsRepositoryName() AttrRepositoryName
-	AttrVcsProviderName() AttrProviderName
+func (m RefTime) With(refHeadName AttrRefHeadName, refHeadKind AttrRefHeadType, repositoryUrlFull AttrRepositoryUrlFull, extras ...interface {
+	VcsOwnerName() AttrOwnerName
+	VcsRepositoryName() AttrRepositoryName
+	VcsProviderName() AttrProviderName
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(refHeadName),
-		string(refHeadType),
-		string(repositoryUrlFull),
-		string(extra.AttrVcsOwnerName()),
-		string(extra.AttrVcsRepositoryName()),
-		string(extra.AttrVcsProviderName()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(refHeadName.Value(), refHeadKind.Value(), repositoryUrlFull.Value(), extra.VcsOwnerName().Value(), extra.VcsRepositoryName().Value(), extra.VcsProviderName().Value())
 }
 
-func (a RefTime) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) RefTime {
-	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+// Deprecated: Use [RefTime.With] instead
+func (m RefTime) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a RefTime) WithOwnerName(attr interface{ VcsOwnerName() AttrOwnerName }) RefTime {
+	a.extra.AttrOwnerName = attr.VcsOwnerName()
 	return a
 }
-func (a RefTime) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) RefTime {
-	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+func (a RefTime) WithRepositoryName(attr interface{ VcsRepositoryName() AttrRepositoryName }) RefTime {
+	a.extra.AttrRepositoryName = attr.VcsRepositoryName()
 	return a
 }
-func (a RefTime) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) RefTime {
-	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+func (a RefTime) WithProviderName(attr interface{ VcsProviderName() AttrProviderName }) RefTime {
+	a.extra.AttrProviderName = attr.VcsProviderName()
 	return a
 }
 
 type RefTimeExtra struct {
-	// The group owner within the version control system.
-	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
-	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
-	VcsRepositoryName AttrRepositoryName `otel:"vcs.repository.name"`
-	// The name of the version control system provider.
-	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
+	// The group owner within the version control system
+	AttrOwnerName      AttrOwnerName      `otel:"vcs.owner.name"`      // The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub
+	AttrRepositoryName AttrRepositoryName `otel:"vcs.repository.name"` // The name of the version control system provider
+	AttrProviderName   AttrProviderName   `otel:"vcs.provider.name"`
 }
 
-func (a RefTimeExtra) AttrVcsOwnerName() AttrOwnerName           { return a.VcsOwnerName }
-func (a RefTimeExtra) AttrVcsRepositoryName() AttrRepositoryName { return a.VcsRepositoryName }
-func (a RefTimeExtra) AttrVcsProviderName() AttrProviderName     { return a.VcsProviderName }
+func (a RefTimeExtra) VcsOwnerName() AttrOwnerName           { return a.AttrOwnerName }
+func (a RefTimeExtra) VcsRepositoryName() AttrRepositoryName { return a.AttrRepositoryName }
+func (a RefTimeExtra) VcsProviderName() AttrProviderName     { return a.AttrProviderName }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -103,7 +100,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "[branch](https://git-scm.com/docs/gitglossary#Documentation/gitglossary.txt-aiddefbranchabranch)",
@@ -172,7 +168,6 @@ State {
                 "requirement_level": "opt_in",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "[GitHub](https://github.com)",
@@ -268,7 +263,6 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[GitHub](https://github.com)",
@@ -336,7 +330,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[branch](https://git-scm.com/docs/gitglossary#Documentation/gitglossary.txt-aiddefbranchabranch)",
@@ -453,6 +446,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -560,6 +555,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -646,7 +642,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

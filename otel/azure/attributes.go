@@ -3,22 +3,37 @@ package azure
 // The unique identifier of the client instance
 type AttrClientId string // azure.client.id
 
-func (AttrClientId) Development() {}
-func (AttrClientId) Recommended() {}
+func (AttrClientId) Development()    {}
+func (AttrClientId) Recommended()    {}
+func (AttrClientId) Key() string     { return "azure_client_id" }
+func (a AttrClientId) Value() string { return string(a) }
 
 // Cosmos client connection mode
 type AttrCosmosdbConnectionMode string // azure.cosmosdb.connection.mode
 
-func (AttrCosmosdbConnectionMode) Development() {}
-func (AttrCosmosdbConnectionMode) Recommended() {}
+func (AttrCosmosdbConnectionMode) Development()    {}
+func (AttrCosmosdbConnectionMode) Recommended()    {}
+func (AttrCosmosdbConnectionMode) Key() string     { return "azure_cosmosdb_connection_mode" }
+func (a AttrCosmosdbConnectionMode) Value() string { return string(a) }
+
+const CosmosdbConnectionModeGateway AttrCosmosdbConnectionMode = "gateway"
+const CosmosdbConnectionModeDirect AttrCosmosdbConnectionMode = "direct"
 
 // Account or request [consistency level]
 //
 // [consistency level]: https://learn.microsoft.com/azure/cosmos-db/consistency-levels
 type AttrCosmosdbConsistencyLevel string // azure.cosmosdb.consistency.level
 
-func (AttrCosmosdbConsistencyLevel) Development() {}
-func (AttrCosmosdbConsistencyLevel) Recommended() {}
+func (AttrCosmosdbConsistencyLevel) Development()    {}
+func (AttrCosmosdbConsistencyLevel) Recommended()    {}
+func (AttrCosmosdbConsistencyLevel) Key() string     { return "azure_cosmosdb_consistency_level" }
+func (a AttrCosmosdbConsistencyLevel) Value() string { return string(a) }
+
+const CosmosdbConsistencyLevelStrong AttrCosmosdbConsistencyLevel = "Strong"
+const CosmosdbConsistencyLevelBoundedStaleness AttrCosmosdbConsistencyLevel = "BoundedStaleness"
+const CosmosdbConsistencyLevelSession AttrCosmosdbConsistencyLevel = "Session"
+const CosmosdbConsistencyLevelEventual AttrCosmosdbConsistencyLevel = "Eventual"
+const CosmosdbConsistencyLevelConsistentPrefix AttrCosmosdbConsistencyLevel = "ConsistentPrefix"
 
 // List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.
 //
@@ -29,24 +44,38 @@ type AttrCosmosdbOperationContactedRegions string // azure.cosmosdb.operation.co
 
 func (AttrCosmosdbOperationContactedRegions) Development() {}
 func (AttrCosmosdbOperationContactedRegions) Recommended() {}
+func (AttrCosmosdbOperationContactedRegions) Key() string {
+	return "azure_cosmosdb_operation_contacted_regions"
+}
+func (a AttrCosmosdbOperationContactedRegions) Value() string { return string(a) }
 
 // The number of request units consumed by the operation
 type AttrCosmosdbOperationRequestCharge string // azure.cosmosdb.operation.request_charge
 
 func (AttrCosmosdbOperationRequestCharge) Development() {}
 func (AttrCosmosdbOperationRequestCharge) Recommended() {}
+func (AttrCosmosdbOperationRequestCharge) Key() string {
+	return "azure_cosmosdb_operation_request_charge"
+}
+func (a AttrCosmosdbOperationRequestCharge) Value() string { return string(a) }
 
 // Request payload size in bytes
 type AttrCosmosdbRequestBodySize string // azure.cosmosdb.request.body.size
 
-func (AttrCosmosdbRequestBodySize) Development() {}
-func (AttrCosmosdbRequestBodySize) Recommended() {}
+func (AttrCosmosdbRequestBodySize) Development()    {}
+func (AttrCosmosdbRequestBodySize) Recommended()    {}
+func (AttrCosmosdbRequestBodySize) Key() string     { return "azure_cosmosdb_request_body_size" }
+func (a AttrCosmosdbRequestBodySize) Value() string { return string(a) }
 
 // Cosmos DB sub status code
 type AttrCosmosdbResponseSubStatusCode string // azure.cosmosdb.response.sub_status_code
 
 func (AttrCosmosdbResponseSubStatusCode) Development() {}
 func (AttrCosmosdbResponseSubStatusCode) Recommended() {}
+func (AttrCosmosdbResponseSubStatusCode) Key() string {
+	return "azure_cosmosdb_response_sub_status_code"
+}
+func (a AttrCosmosdbResponseSubStatusCode) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -74,7 +103,6 @@ func (AttrCosmosdbResponseSubStatusCode) Recommended() {}
                     "root_namespace": "azure",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Gateway (HTTP) connection.",
@@ -109,7 +137,6 @@ func (AttrCosmosdbResponseSubStatusCode) Recommended() {}
                     "root_namespace": "azure",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -312,6 +339,7 @@ func (AttrCosmosdbResponseSubStatusCode) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

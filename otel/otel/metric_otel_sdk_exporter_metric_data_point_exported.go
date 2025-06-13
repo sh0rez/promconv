@@ -16,84 +16,80 @@ type SdkExporterMetricDataPointExported struct {
 }
 
 func NewSdkExporterMetricDataPointExported() SdkExporterMetricDataPointExported {
-	labels := []string{"error_type", "otel_component_name", "otel_component_type", "server_address", "server_port"}
+	labels := []string{error.AttrType("").Key(), AttrComponentName("").Key(), AttrComponentType("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key()}
 	return SdkExporterMetricDataPointExported{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "otel",
-		Name:      "sdk_exporter_metric_data_point_exported",
-		Help:      "The number of metric data points for which the export has finished, either successful or failed",
+		Name: "otel_sdk_exporter_metric_data_point_exported",
+		Help: "The number of metric data points for which the export has finished, either successful or failed",
 	}, labels)}
 }
 
-func (m SdkExporterMetricDataPointExported) With(extra interface {
-	AttrErrorType() error.AttrType
-	AttrOtelComponentName() AttrComponentName
-	AttrOtelComponentType() AttrComponentType
-	AttrServerAddress() server.AttrAddress
-	AttrServerPort() server.AttrPort
+func (m SdkExporterMetricDataPointExported) With(extras ...interface {
+	ErrorType() error.AttrType
+	OtelComponentName() AttrComponentName
+	OtelComponentType() AttrComponentType
+	ServerAddress() server.AttrAddress
+	ServerPort() server.AttrPort
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrErrorType()),
-		string(extra.AttrOtelComponentName()),
-		string(extra.AttrOtelComponentType()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.ErrorType().Value(), extra.OtelComponentName().Value(), extra.OtelComponentType().Value(), extra.ServerAddress().Value(), extra.ServerPort().Value())
 }
 
-func (a SdkExporterMetricDataPointExported) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) SdkExporterMetricDataPointExported {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [SdkExporterMetricDataPointExported.With] instead
+func (m SdkExporterMetricDataPointExported) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a SdkExporterMetricDataPointExported) WithErrorType(attr interface{ ErrorType() error.AttrType }) SdkExporterMetricDataPointExported {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a SdkExporterMetricDataPointExported) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkExporterMetricDataPointExported {
-	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+func (a SdkExporterMetricDataPointExported) WithComponentName(attr interface{ OtelComponentName() AttrComponentName }) SdkExporterMetricDataPointExported {
+	a.extra.AttrComponentName = attr.OtelComponentName()
 	return a
 }
-func (a SdkExporterMetricDataPointExported) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkExporterMetricDataPointExported {
-	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+func (a SdkExporterMetricDataPointExported) WithComponentType(attr interface{ OtelComponentType() AttrComponentType }) SdkExporterMetricDataPointExported {
+	a.extra.AttrComponentType = attr.OtelComponentType()
 	return a
 }
-func (a SdkExporterMetricDataPointExported) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) SdkExporterMetricDataPointExported {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a SdkExporterMetricDataPointExported) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) SdkExporterMetricDataPointExported {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a SdkExporterMetricDataPointExported) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) SdkExporterMetricDataPointExported {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a SdkExporterMetricDataPointExported) WithServerPort(attr interface{ ServerPort() server.AttrPort }) SdkExporterMetricDataPointExported {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type SdkExporterMetricDataPointExportedExtra struct {
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
-	OtelComponentName AttrComponentName `otel:"otel.component.name"`
-	// A name identifying the type of the OpenTelemetry component.
-	OtelComponentType AttrComponentType `otel:"otel.component.type"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// Describes a class of error the operation ended with
+	AttrErrorType     error.AttrType     `otel:"error.type"`          // A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance
+	AttrComponentName AttrComponentName  `otel:"otel.component.name"` // A name identifying the type of the OpenTelemetry component
+	AttrComponentType AttrComponentType  `otel:"otel.component.type"` // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress server.AttrAddress `otel:"server.address"`      // Server port number
+	AttrServerPort    server.AttrPort    `otel:"server.port"`
 }
 
-func (a SdkExporterMetricDataPointExportedExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a SdkExporterMetricDataPointExportedExtra) AttrOtelComponentName() AttrComponentName {
-	return a.OtelComponentName
+func (a SdkExporterMetricDataPointExportedExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a SdkExporterMetricDataPointExportedExtra) OtelComponentName() AttrComponentName {
+	return a.AttrComponentName
 }
-func (a SdkExporterMetricDataPointExportedExtra) AttrOtelComponentType() AttrComponentType {
-	return a.OtelComponentType
+func (a SdkExporterMetricDataPointExportedExtra) OtelComponentType() AttrComponentType {
+	return a.AttrComponentType
 }
-func (a SdkExporterMetricDataPointExportedExtra) AttrServerAddress() server.AttrAddress {
-	return a.ServerAddress
+func (a SdkExporterMetricDataPointExportedExtra) ServerAddress() server.AttrAddress {
+	return a.AttrServerAddress
 }
-func (a SdkExporterMetricDataPointExportedExtra) AttrServerPort() server.AttrPort {
-	return a.ServerPort
+func (a SdkExporterMetricDataPointExportedExtra) ServerPort() server.AttrPort {
+	return a.AttrServerPort
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -121,7 +117,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -157,7 +152,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The builtin SDK batching span processor\n",
@@ -308,32 +302,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "rejected",
-                        "timeout",
-                        "500",
-                        "java.net.UnknownHostException",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
-                },
-                {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
                     "examples": [
                         "batching_span_processor",
@@ -344,7 +312,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The builtin SDK batching span processor\n",
@@ -474,6 +441,31 @@ State {
                     "type": "string",
                 },
                 {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "rejected",
+                        "timeout",
+                        "500",
+                        "java.net.UnknownHostException",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": {
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
                     "examples": [
                         "example.com",
@@ -581,6 +573,8 @@ State {
             "type": "metric",
             "unit": "{data_point}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -688,6 +682,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -774,7 +769,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -6,37 +6,32 @@ import (
 
 // Event loop mean delay.
 type EventloopDelayMean struct {
-	*prometheus.GaugeVec
-	extra EventloopDelayMeanExtra
+	prometheus.Gauge
 }
 
 func NewEventloopDelayMean() EventloopDelayMean {
-	labels := []string{}
-	return EventloopDelayMean{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "nodejs",
-		Name:      "eventloop_delay_mean",
-		Help:      "Event loop mean delay.",
-	}, labels)}
+	return EventloopDelayMean{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "nodejs_eventloop_delay_mean",
+		Help: "Event loop mean delay.",
+	})}
 }
 
-func (m EventloopDelayMean) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m EventloopDelayMean) Register(regs ...prometheus.Registerer) EventloopDelayMean {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type EventloopDelayMeanExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopDelayMeanExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "eventloop.delay.mean",
         "Type": "EventloopDelayMean",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Event loop mean delay.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

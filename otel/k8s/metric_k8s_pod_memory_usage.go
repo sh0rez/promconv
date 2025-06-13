@@ -6,37 +6,32 @@ import (
 
 // Memory usage of the Pod
 type PodMemoryUsage struct {
-	*prometheus.GaugeVec
-	extra PodMemoryUsageExtra
+	prometheus.Gauge
 }
 
 func NewPodMemoryUsage() PodMemoryUsage {
-	labels := []string{}
-	return PodMemoryUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "pod_memory_usage",
-		Help:      "Memory usage of the Pod",
-	}, labels)}
+	return PodMemoryUsage{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_pod_memory_usage",
+		Help: "Memory usage of the Pod",
+	})}
 }
 
-func (m PodMemoryUsage) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m PodMemoryUsage) Register(regs ...prometheus.Registerer) PodMemoryUsage {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type PodMemoryUsageExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PodMemoryUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "pod.memory.usage",
         "Type": "PodMemoryUsage",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Memory usage of the Pod",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

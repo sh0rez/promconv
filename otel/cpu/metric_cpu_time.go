@@ -4,56 +4,58 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Seconds each logical CPU spent on each mode
+// Deprecated. Use `system.cpu.time` instead.
 type Time struct {
 	*prometheus.CounterVec
 	extra TimeExtra
 }
 
 func NewTime() Time {
-	labels := []string{"cpu_logical_number", "cpu_mode"}
+	labels := []string{AttrLogicalNumber("").Key(), AttrMode("").Key()}
 	return Time{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "cpu",
-		Name:      "time",
-		Help:      "Seconds each logical CPU spent on each mode",
+		Name: "cpu_time",
+		Help: "Deprecated. Use `system.cpu.time` instead.",
 	}, labels)}
 }
 
-func (m Time) With(extra interface {
-	AttrCpuLogicalNumber() AttrLogicalNumber
-	AttrCpuMode() AttrMode
+func (m Time) With(extras ...interface {
+	CpuLogicalNumber() AttrLogicalNumber
+	CpuMode() AttrMode
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrCpuLogicalNumber()),
-		string(extra.AttrCpuMode()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.CpuLogicalNumber().Value(), extra.CpuMode().Value())
 }
 
-func (a Time) WithCpuLogicalNumber(attr interface{ AttrCpuLogicalNumber() AttrLogicalNumber }) Time {
-	a.extra.CpuLogicalNumber = attr.AttrCpuLogicalNumber()
+// Deprecated: Use [Time.With] instead
+func (m Time) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a Time) WithLogicalNumber(attr interface{ CpuLogicalNumber() AttrLogicalNumber }) Time {
+	a.extra.AttrLogicalNumber = attr.CpuLogicalNumber()
 	return a
 }
-func (a Time) WithCpuMode(attr interface{ AttrCpuMode() AttrMode }) Time {
-	a.extra.CpuMode = attr.AttrCpuMode()
+func (a Time) WithMode(attr interface{ CpuMode() AttrMode }) Time {
+	a.extra.AttrMode = attr.CpuMode()
 	return a
 }
 
 type TimeExtra struct {
 	// The logical CPU number [0..n-1]
-	CpuLogicalNumber AttrLogicalNumber `otel:"cpu.logical_number"`
-	// The mode of the CPU
-	CpuMode AttrMode `otel:"cpu.mode"`
+	AttrLogicalNumber AttrLogicalNumber `otel:"cpu.logical_number"` // The mode of the CPU
+	AttrMode          AttrMode          `otel:"cpu.mode"`
 }
 
-func (a TimeExtra) AttrCpuLogicalNumber() AttrLogicalNumber { return a.CpuLogicalNumber }
-func (a TimeExtra) AttrCpuMode() AttrMode                   { return a.CpuMode }
+func (a TimeExtra) CpuLogicalNumber() AttrLogicalNumber { return a.AttrLogicalNumber }
+func (a TimeExtra) CpuMode() AttrMode                   { return a.AttrMode }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -89,7 +91,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -182,7 +183,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -252,7 +252,12 @@ State {
                     },
                 },
             ],
-            "brief": "Seconds each logical CPU spent on each mode",
+            "brief": "Deprecated. Use `system.cpu.time` instead.",
+            "deprecated": {
+                "note": "Replaced by `system.cpu.time`.",
+                "reason": "renamed",
+                "renamed_to": "system.cpu.time",
+            },
             "events": [],
             "id": "metric.cpu.time",
             "instrument": "counter",
@@ -282,7 +287,7 @@ State {
                     },
                 },
                 "provenance": {
-                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/cpu/metrics.yaml",
+                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/cpu/deprecated.yaml",
                     "registry_id": "main",
                 },
             },
@@ -294,6 +299,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -401,6 +408,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -487,7 +495,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -15,53 +15,53 @@ type PipelineRunDuration struct {
 }
 
 func NewPipelineRunDuration() PipelineRunDuration {
-	labels := []string{"cicd_pipeline_name", "cicd_pipeline_run_state", "cicd_pipeline_result", "error_type"}
+	labels := []string{AttrPipelineName("").Key(), AttrPipelineRunState("").Key(), AttrPipelineResult("").Key(), error.AttrType("").Key()}
 	return PipelineRunDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "cicd",
-		Name:      "pipeline_run_duration",
-		Help:      "Duration of a pipeline run grouped by pipeline, state and result.",
+		Name: "cicd_pipeline_run_duration",
+		Help: "Duration of a pipeline run grouped by pipeline, state and result.",
 	}, labels)}
 }
 
-func (m PipelineRunDuration) With(pipelineName AttrPipelineName, pipelineRunState AttrPipelineRunState, extra interface {
-	AttrCicdPipelineResult() AttrPipelineResult
-	AttrErrorType() error.AttrType
+func (m PipelineRunDuration) With(pipelineName AttrPipelineName, pipelineRunState AttrPipelineRunState, extras ...interface {
+	CicdPipelineResult() AttrPipelineResult
+	ErrorType() error.AttrType
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(pipelineName),
-		string(pipelineRunState),
-		string(extra.AttrCicdPipelineResult()),
-		string(extra.AttrErrorType()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(pipelineName.Value(), pipelineRunState.Value(), extra.CicdPipelineResult().Value(), extra.ErrorType().Value())
 }
 
-func (a PipelineRunDuration) WithCicdPipelineResult(attr interface{ AttrCicdPipelineResult() AttrPipelineResult }) PipelineRunDuration {
-	a.extra.CicdPipelineResult = attr.AttrCicdPipelineResult()
+// Deprecated: Use [PipelineRunDuration.With] instead
+func (m PipelineRunDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a PipelineRunDuration) WithPipelineResult(attr interface{ CicdPipelineResult() AttrPipelineResult }) PipelineRunDuration {
+	a.extra.AttrPipelineResult = attr.CicdPipelineResult()
 	return a
 }
-func (a PipelineRunDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) PipelineRunDuration {
-	a.extra.ErrorType = attr.AttrErrorType()
+func (a PipelineRunDuration) WithErrorType(attr interface{ ErrorType() error.AttrType }) PipelineRunDuration {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
 
 type PipelineRunDurationExtra struct {
-	// The result of a pipeline run.
-	CicdPipelineResult AttrPipelineResult `otel:"cicd.pipeline.result"`
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
+	// The result of a pipeline run
+	AttrPipelineResult AttrPipelineResult `otel:"cicd.pipeline.result"` // Describes a class of error the operation ended with
+	AttrErrorType      error.AttrType     `otel:"error.type"`
 }
 
-func (a PipelineRunDurationExtra) AttrCicdPipelineResult() AttrPipelineResult {
-	return a.CicdPipelineResult
+func (a PipelineRunDurationExtra) CicdPipelineResult() AttrPipelineResult {
+	return a.AttrPipelineResult
 }
-func (a PipelineRunDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a PipelineRunDurationExtra) ErrorType() error.AttrType { return a.AttrErrorType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -100,7 +100,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The run pending state spans from the event triggering the pipeline run until the execution of the run starts (eg. time spent in a queue, provisioning agents, creating run resources).\n",
@@ -143,7 +142,6 @@ State {
                 },
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The pipeline run finished successfully.",
@@ -211,7 +209,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -251,7 +248,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The run pending state spans from the event triggering the pipeline run until the execution of the run starts (eg. time spent in a queue, provisioning agents, creating run resources).\n",
@@ -294,7 +290,6 @@ State {
                     },
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The pipeline run finished successfully.",
@@ -362,7 +357,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -447,6 +441,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -554,6 +550,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -640,7 +637,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

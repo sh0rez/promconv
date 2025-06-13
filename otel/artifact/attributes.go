@@ -5,8 +5,10 @@ package artifact
 // [SLSA Relationship]: https://slsa.dev/spec/v1.0/distributing-provenance#relationship-between-artifacts-and-attestations
 type AttrAttestationFilename string // artifact.attestation.filename
 
-func (AttrAttestationFilename) Development() {}
-func (AttrAttestationFilename) Recommended() {}
+func (AttrAttestationFilename) Development()    {}
+func (AttrAttestationFilename) Recommended()    {}
+func (AttrAttestationFilename) Key() string     { return "artifact_attestation_filename" }
+func (a AttrAttestationFilename) Value() string { return string(a) }
 
 // The full [hash value (see glossary)], of the built attestation. Some envelopes in the [software attestation space] also refer to this as the **digest**
 //
@@ -14,16 +16,20 @@ func (AttrAttestationFilename) Recommended() {}
 // [software attestation space]: https://github.com/in-toto/attestation/tree/main/spec
 type AttrAttestationHash string // artifact.attestation.hash
 
-func (AttrAttestationHash) Development() {}
-func (AttrAttestationHash) Recommended() {}
+func (AttrAttestationHash) Development()    {}
+func (AttrAttestationHash) Recommended()    {}
+func (AttrAttestationHash) Key() string     { return "artifact_attestation_hash" }
+func (a AttrAttestationHash) Value() string { return string(a) }
 
 // The id of the build [software attestation]
 //
 // [software attestation]: https://slsa.dev/attestation-model
 type AttrAttestationId string // artifact.attestation.id
 
-func (AttrAttestationId) Development() {}
-func (AttrAttestationId) Recommended() {}
+func (AttrAttestationId) Development()    {}
+func (AttrAttestationId) Recommended()    {}
+func (AttrAttestationId) Key() string     { return "artifact_attestation_id" }
+func (a AttrAttestationId) Value() string { return string(a) }
 
 // The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.
 //
@@ -36,8 +42,10 @@ func (AttrAttestationId) Recommended() {}
 // [can be published]: https://slsa.dev/spec/v1.0/terminology#software-supply-chain
 type AttrFilename string // artifact.filename
 
-func (AttrFilename) Development() {}
-func (AttrFilename) Recommended() {}
+func (AttrFilename) Development()    {}
+func (AttrFilename) Recommended()    {}
+func (AttrFilename) Key() string     { return "artifact_filename" }
+func (a AttrFilename) Value() string { return string(a) }
 
 // The full [hash value (see glossary)], often found in checksum.txt on a release of the artifact and used to verify package integrity.
 //
@@ -53,8 +61,10 @@ func (AttrFilename) Recommended() {}
 // [hash value (see glossary)]: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf
 type AttrHash string // artifact.hash
 
-func (AttrHash) Development() {}
-func (AttrHash) Recommended() {}
+func (AttrHash) Development()    {}
+func (AttrHash) Recommended()    {}
+func (AttrHash) Key() string     { return "artifact_hash" }
+func (a AttrHash) Value() string { return string(a) }
 
 // The [Package URL] of the [package artifact] provides a standard way to identify and locate the packaged artifact
 //
@@ -62,14 +72,18 @@ func (AttrHash) Recommended() {}
 // [package artifact]: https://slsa.dev/spec/v1.0/terminology#package-model
 type AttrPurl string // artifact.purl
 
-func (AttrPurl) Development() {}
-func (AttrPurl) Recommended() {}
+func (AttrPurl) Development()    {}
+func (AttrPurl) Recommended()    {}
+func (AttrPurl) Key() string     { return "artifact_purl" }
+func (a AttrPurl) Value() string { return string(a) }
 
 // The version of the artifact
 type AttrVersion string // artifact.version
 
-func (AttrVersion) Development() {}
-func (AttrVersion) Recommended() {}
+func (AttrVersion) Development()    {}
+func (AttrVersion) Recommended()    {}
+func (AttrVersion) Key() string     { return "artifact_version" }
+func (a AttrVersion) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -276,6 +290,7 @@ func (AttrVersion) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

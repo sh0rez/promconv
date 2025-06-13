@@ -6,37 +6,32 @@ import (
 
 // The amount of committed virtual memory.
 type MemoryVirtual struct {
-	*prometheus.GaugeVec
-	extra MemoryVirtualExtra
+	prometheus.Gauge
 }
 
 func NewMemoryVirtual() MemoryVirtual {
-	labels := []string{}
-	return MemoryVirtual{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "process",
-		Name:      "memory_virtual",
-		Help:      "The amount of committed virtual memory.",
-	}, labels)}
+	return MemoryVirtual{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "process_memory_virtual",
+		Help: "The amount of committed virtual memory.",
+	})}
 }
 
-func (m MemoryVirtual) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryVirtual) Register(regs ...prometheus.Registerer) MemoryVirtual {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MemoryVirtualExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryVirtualExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "memory.virtual",
         "Type": "MemoryVirtual",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The amount of committed virtual memory.",
@@ -177,6 +171,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -263,7 +258,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

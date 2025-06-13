@@ -6,37 +6,32 @@ import (
 
 // An estimate of how much memory is available for starting new applications, without causing swapping
 type LinuxMemoryAvailable struct {
-	*prometheus.GaugeVec
-	extra LinuxMemoryAvailableExtra
+	prometheus.Gauge
 }
 
 func NewLinuxMemoryAvailable() LinuxMemoryAvailable {
-	labels := []string{}
-	return LinuxMemoryAvailable{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "linux_memory_available",
-		Help:      "An estimate of how much memory is available for starting new applications, without causing swapping",
-	}, labels)}
+	return LinuxMemoryAvailable{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "system_linux_memory_available",
+		Help: "An estimate of how much memory is available for starting new applications, without causing swapping",
+	})}
 }
 
-func (m LinuxMemoryAvailable) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m LinuxMemoryAvailable) Register(regs ...prometheus.Registerer) LinuxMemoryAvailable {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type LinuxMemoryAvailableExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "LinuxMemoryAvailableExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "linux.memory.available",
         "Type": "LinuxMemoryAvailable",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "An estimate of how much memory is available for starting new applications, without causing swapping",
@@ -178,6 +172,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -264,7 +259,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

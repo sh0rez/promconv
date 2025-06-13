@@ -17,8 +17,10 @@ package device
 // [`app.installation.id`]: /docs/registry/attributes/app.md#app-installation-id
 type AttrId string // device.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "device_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // The name of the device manufacturer
 //
@@ -27,24 +29,30 @@ func (AttrId) Recommended() {}
 // [Build]: https://developer.android.com/reference/android/os/Build#MANUFACTURER
 type AttrManufacturer string // device.manufacturer
 
-func (AttrManufacturer) Development() {}
-func (AttrManufacturer) Recommended() {}
+func (AttrManufacturer) Development()    {}
+func (AttrManufacturer) Recommended()    {}
+func (AttrManufacturer) Key() string     { return "device_manufacturer" }
+func (a AttrManufacturer) Value() string { return string(a) }
 
 // The model identifier for the device
 //
 // It's recommended this value represents a machine-readable version of the model identifier rather than the market or consumer-friendly name of the device
 type AttrModelIdentifier string // device.model.identifier
 
-func (AttrModelIdentifier) Development() {}
-func (AttrModelIdentifier) Recommended() {}
+func (AttrModelIdentifier) Development()    {}
+func (AttrModelIdentifier) Recommended()    {}
+func (AttrModelIdentifier) Key() string     { return "device_model_identifier" }
+func (a AttrModelIdentifier) Value() string { return string(a) }
 
 // The marketing name for the device model
 //
 // It's recommended this value represents a human-readable version of the device model rather than a machine-readable alternative
 type AttrModelName string // device.model.name
 
-func (AttrModelName) Development() {}
-func (AttrModelName) Recommended() {}
+func (AttrModelName) Development()    {}
+func (AttrModelName) Recommended()    {}
+func (AttrModelName) Key() string     { return "device_model_name" }
+func (a AttrModelName) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -215,6 +223,7 @@ func (AttrModelName) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

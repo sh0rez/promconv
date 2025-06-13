@@ -3,30 +3,78 @@ package cloud
 // The cloud account ID the resource is assigned to
 type AttrAccountId string // cloud.account.id
 
-func (AttrAccountId) Development() {}
-func (AttrAccountId) Recommended() {}
+func (AttrAccountId) Development()    {}
+func (AttrAccountId) Recommended()    {}
+func (AttrAccountId) Key() string     { return "cloud_account_id" }
+func (a AttrAccountId) Value() string { return string(a) }
 
 // Cloud regions often have multiple, isolated locations known as zones to increase availability. Availability zone represents the zone where the resource is running.
 //
 // Availability zones are called "zones" on Alibaba Cloud and Google Cloud
 type AttrAvailabilityZone string // cloud.availability_zone
 
-func (AttrAvailabilityZone) Development() {}
-func (AttrAvailabilityZone) Recommended() {}
+func (AttrAvailabilityZone) Development()    {}
+func (AttrAvailabilityZone) Recommended()    {}
+func (AttrAvailabilityZone) Key() string     { return "cloud_availability_zone" }
+func (a AttrAvailabilityZone) Value() string { return string(a) }
 
 // The cloud platform in use.
 //
 // The prefix of the service SHOULD match the one specified in `cloud.provider`
 type AttrPlatform string // cloud.platform
 
-func (AttrPlatform) Development() {}
-func (AttrPlatform) Recommended() {}
+func (AttrPlatform) Development()    {}
+func (AttrPlatform) Recommended()    {}
+func (AttrPlatform) Key() string     { return "cloud_platform" }
+func (a AttrPlatform) Value() string { return string(a) }
+
+const PlatformAlibabaCloudEcs AttrPlatform = "alibaba_cloud_ecs"
+const PlatformAlibabaCloudFc AttrPlatform = "alibaba_cloud_fc"
+const PlatformAlibabaCloudOpenshift AttrPlatform = "alibaba_cloud_openshift"
+const PlatformAwsEc2 AttrPlatform = "aws_ec2"
+const PlatformAwsEcs AttrPlatform = "aws_ecs"
+const PlatformAwsEks AttrPlatform = "aws_eks"
+const PlatformAwsLambda AttrPlatform = "aws_lambda"
+const PlatformAwsElasticBeanstalk AttrPlatform = "aws_elastic_beanstalk"
+const PlatformAwsAppRunner AttrPlatform = "aws_app_runner"
+const PlatformAwsOpenshift AttrPlatform = "aws_openshift"
+const PlatformAzureVm AttrPlatform = "azure_vm"
+const PlatformAzureContainerApps AttrPlatform = "azure_container_apps"
+const PlatformAzureContainerInstances AttrPlatform = "azure_container_instances"
+const PlatformAzureAks AttrPlatform = "azure_aks"
+const PlatformAzureFunctions AttrPlatform = "azure_functions"
+const PlatformAzureAppService AttrPlatform = "azure_app_service"
+const PlatformAzureOpenshift AttrPlatform = "azure_openshift"
+const PlatformGcpBareMetalSolution AttrPlatform = "gcp_bare_metal_solution"
+const PlatformGcpComputeEngine AttrPlatform = "gcp_compute_engine"
+const PlatformGcpCloudRun AttrPlatform = "gcp_cloud_run"
+const PlatformGcpKubernetesEngine AttrPlatform = "gcp_kubernetes_engine"
+const PlatformGcpCloudFunctions AttrPlatform = "gcp_cloud_functions"
+const PlatformGcpAppEngine AttrPlatform = "gcp_app_engine"
+const PlatformGcpOpenshift AttrPlatform = "gcp_openshift"
+const PlatformIbmCloudOpenshift AttrPlatform = "ibm_cloud_openshift"
+const PlatformOracleCloudCompute AttrPlatform = "oracle_cloud_compute"
+const PlatformOracleCloudOke AttrPlatform = "oracle_cloud_oke"
+const PlatformTencentCloudCvm AttrPlatform = "tencent_cloud_cvm"
+const PlatformTencentCloudEks AttrPlatform = "tencent_cloud_eks"
+const PlatformTencentCloudScf AttrPlatform = "tencent_cloud_scf"
 
 // Name of the cloud provider
 type AttrProvider string // cloud.provider
 
-func (AttrProvider) Development() {}
-func (AttrProvider) Recommended() {}
+func (AttrProvider) Development()    {}
+func (AttrProvider) Recommended()    {}
+func (AttrProvider) Key() string     { return "cloud_provider" }
+func (a AttrProvider) Value() string { return string(a) }
+
+const ProviderAlibabaCloud AttrProvider = "alibaba_cloud"
+const ProviderAws AttrProvider = "aws"
+const ProviderAzure AttrProvider = "azure"
+const ProviderGcp AttrProvider = "gcp"
+const ProviderHeroku AttrProvider = "heroku"
+const ProviderIbmCloud AttrProvider = "ibm_cloud"
+const ProviderOracleCloud AttrProvider = "oracle_cloud"
+const ProviderTencentCloud AttrProvider = "tencent_cloud"
 
 // The geographical region within a cloud provider. When associated with a resource, this attribute specifies the region where the resource operates. When calling services or APIs deployed on a cloud, this attribute identifies the region where the called destination is deployed.
 //
@@ -39,8 +87,10 @@ func (AttrProvider) Recommended() {}
 // [Tencent Cloud regions]: https://www.tencentcloud.com/document/product/213/6091
 type AttrRegion string // cloud.region
 
-func (AttrRegion) Development() {}
-func (AttrRegion) Recommended() {}
+func (AttrRegion) Development()    {}
+func (AttrRegion) Recommended()    {}
+func (AttrRegion) Key() string     { return "cloud_region" }
+func (a AttrRegion) Value() string { return string(a) }
 
 // Cloud provider-specific native identifier of the monitored cloud resource (e.g. an [ARN] on AWS, a [fully qualified resource ID] on Azure, a [full resource name] on GCP)
 //
@@ -72,8 +122,10 @@ func (AttrRegion) Recommended() {}
 // [ARN]: https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
 type AttrResourceId string // cloud.resource_id
 
-func (AttrResourceId) Development() {}
-func (AttrResourceId) Recommended() {}
+func (AttrResourceId) Development()    {}
+func (AttrResourceId) Recommended()    {}
+func (AttrResourceId) Key() string     { return "cloud_resource_id" }
+func (a AttrResourceId) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -114,7 +166,6 @@ func (AttrResourceId) Recommended() {}
                     "root_namespace": "cloud",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Alibaba Cloud Elastic Compute Service",
@@ -366,7 +417,6 @@ func (AttrResourceId) Recommended() {}
                     "root_namespace": "cloud",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Alibaba Cloud",
@@ -572,6 +622,7 @@ func (AttrResourceId) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

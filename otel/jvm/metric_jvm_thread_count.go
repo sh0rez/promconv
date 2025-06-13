@@ -11,49 +11,51 @@ type ThreadCount struct {
 }
 
 func NewThreadCount() ThreadCount {
-	labels := []string{"jvm_thread_daemon", "jvm_thread_state"}
+	labels := []string{AttrThreadDaemon("").Key(), AttrThreadState("").Key()}
 	return ThreadCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "thread_count",
-		Help:      "Number of executing platform threads.",
+		Name: "jvm_thread_count",
+		Help: "Number of executing platform threads.",
 	}, labels)}
 }
 
-func (m ThreadCount) With(extra interface {
-	AttrJvmThreadDaemon() AttrThreadDaemon
-	AttrJvmThreadState() AttrThreadState
+func (m ThreadCount) With(extras ...interface {
+	JvmThreadDaemon() AttrThreadDaemon
+	JvmThreadState() AttrThreadState
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrJvmThreadDaemon()),
-		string(extra.AttrJvmThreadState()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.JvmThreadDaemon().Value(), extra.JvmThreadState().Value())
 }
 
-func (a ThreadCount) WithJvmThreadDaemon(attr interface{ AttrJvmThreadDaemon() AttrThreadDaemon }) ThreadCount {
-	a.extra.JvmThreadDaemon = attr.AttrJvmThreadDaemon()
+// Deprecated: Use [ThreadCount.With] instead
+func (m ThreadCount) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ThreadCount) WithThreadDaemon(attr interface{ JvmThreadDaemon() AttrThreadDaemon }) ThreadCount {
+	a.extra.AttrThreadDaemon = attr.JvmThreadDaemon()
 	return a
 }
-func (a ThreadCount) WithJvmThreadState(attr interface{ AttrJvmThreadState() AttrThreadState }) ThreadCount {
-	a.extra.JvmThreadState = attr.AttrJvmThreadState()
+func (a ThreadCount) WithThreadState(attr interface{ JvmThreadState() AttrThreadState }) ThreadCount {
+	a.extra.AttrThreadState = attr.JvmThreadState()
 	return a
 }
 
 type ThreadCountExtra struct {
-	// Whether the thread is daemon or not.
-	JvmThreadDaemon AttrThreadDaemon `otel:"jvm.thread.daemon"`
-	// State of the thread.
-	JvmThreadState AttrThreadState `otel:"jvm.thread.state"`
+	// Whether the thread is daemon or not
+	AttrThreadDaemon AttrThreadDaemon `otel:"jvm.thread.daemon"` // State of the thread
+	AttrThreadState  AttrThreadState  `otel:"jvm.thread.state"`
 }
 
-func (a ThreadCountExtra) AttrJvmThreadDaemon() AttrThreadDaemon { return a.JvmThreadDaemon }
-func (a ThreadCountExtra) AttrJvmThreadState() AttrThreadState   { return a.JvmThreadState }
+func (a ThreadCountExtra) JvmThreadDaemon() AttrThreadDaemon { return a.AttrThreadDaemon }
+func (a ThreadCountExtra) JvmThreadState() AttrThreadState   { return a.AttrThreadState }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -85,7 +87,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A thread that has not yet started is in this state.",
@@ -158,7 +159,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A thread that has not yet started is in this state.",
@@ -255,6 +255,8 @@ State {
             "type": "metric",
             "unit": "{thread}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -362,6 +364,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -448,7 +451,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

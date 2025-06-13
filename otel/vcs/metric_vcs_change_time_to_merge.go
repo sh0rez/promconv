@@ -11,93 +11,89 @@ type ChangeTimeToMerge struct {
 }
 
 func NewChangeTimeToMerge() ChangeTimeToMerge {
-	labels := []string{"vcs_ref_head_name", "vcs_repository_url_full", "vcs_owner_name", "vcs_ref_base_name", "vcs_repository_name", "vcs_provider_name", "vcs_ref_base_revision", "vcs_ref_head_revision"}
+	labels := []string{AttrRefHeadName("").Key(), AttrRepositoryUrlFull("").Key(), AttrOwnerName("").Key(), AttrRefBaseName("").Key(), AttrRepositoryName("").Key(), AttrProviderName("").Key(), AttrRefBaseRevision("").Key(), AttrRefHeadRevision("").Key()}
 	return ChangeTimeToMerge{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "vcs",
-		Name:      "change_time_to_merge",
-		Help:      "The amount of time since its creation it took a change (pull request/merge request/changelist) to get merged into the target(base) ref.",
+		Name: "vcs_change_time_to_merge",
+		Help: "The amount of time since its creation it took a change (pull request/merge request/changelist) to get merged into the target(base) ref.",
 	}, labels)}
 }
 
-func (m ChangeTimeToMerge) With(refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
-	AttrVcsOwnerName() AttrOwnerName
-	AttrVcsRefBaseName() AttrRefBaseName
-	AttrVcsRepositoryName() AttrRepositoryName
-	AttrVcsProviderName() AttrProviderName
-	AttrVcsRefBaseRevision() AttrRefBaseRevision
-	AttrVcsRefHeadRevision() AttrRefHeadRevision
+func (m ChangeTimeToMerge) With(refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extras ...interface {
+	VcsOwnerName() AttrOwnerName
+	VcsRefBaseName() AttrRefBaseName
+	VcsRepositoryName() AttrRepositoryName
+	VcsProviderName() AttrProviderName
+	VcsRefBaseRevision() AttrRefBaseRevision
+	VcsRefHeadRevision() AttrRefHeadRevision
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(refHeadName),
-		string(repositoryUrlFull),
-		string(extra.AttrVcsOwnerName()),
-		string(extra.AttrVcsRefBaseName()),
-		string(extra.AttrVcsRepositoryName()),
-		string(extra.AttrVcsProviderName()),
-		string(extra.AttrVcsRefBaseRevision()),
-		string(extra.AttrVcsRefHeadRevision()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(refHeadName.Value(), repositoryUrlFull.Value(), extra.VcsOwnerName().Value(), extra.VcsRefBaseName().Value(), extra.VcsRepositoryName().Value(), extra.VcsProviderName().Value(), extra.VcsRefBaseRevision().Value(), extra.VcsRefHeadRevision().Value())
 }
 
-func (a ChangeTimeToMerge) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) ChangeTimeToMerge {
-	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+// Deprecated: Use [ChangeTimeToMerge.With] instead
+func (m ChangeTimeToMerge) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ChangeTimeToMerge) WithOwnerName(attr interface{ VcsOwnerName() AttrOwnerName }) ChangeTimeToMerge {
+	a.extra.AttrOwnerName = attr.VcsOwnerName()
 	return a
 }
-func (a ChangeTimeToMerge) WithVcsRefBaseName(attr interface{ AttrVcsRefBaseName() AttrRefBaseName }) ChangeTimeToMerge {
-	a.extra.VcsRefBaseName = attr.AttrVcsRefBaseName()
+func (a ChangeTimeToMerge) WithRefBaseName(attr interface{ VcsRefBaseName() AttrRefBaseName }) ChangeTimeToMerge {
+	a.extra.AttrRefBaseName = attr.VcsRefBaseName()
 	return a
 }
-func (a ChangeTimeToMerge) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) ChangeTimeToMerge {
-	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+func (a ChangeTimeToMerge) WithRepositoryName(attr interface{ VcsRepositoryName() AttrRepositoryName }) ChangeTimeToMerge {
+	a.extra.AttrRepositoryName = attr.VcsRepositoryName()
 	return a
 }
-func (a ChangeTimeToMerge) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) ChangeTimeToMerge {
-	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+func (a ChangeTimeToMerge) WithProviderName(attr interface{ VcsProviderName() AttrProviderName }) ChangeTimeToMerge {
+	a.extra.AttrProviderName = attr.VcsProviderName()
 	return a
 }
-func (a ChangeTimeToMerge) WithVcsRefBaseRevision(attr interface{ AttrVcsRefBaseRevision() AttrRefBaseRevision }) ChangeTimeToMerge {
-	a.extra.VcsRefBaseRevision = attr.AttrVcsRefBaseRevision()
+func (a ChangeTimeToMerge) WithRefBaseRevision(attr interface{ VcsRefBaseRevision() AttrRefBaseRevision }) ChangeTimeToMerge {
+	a.extra.AttrRefBaseRevision = attr.VcsRefBaseRevision()
 	return a
 }
-func (a ChangeTimeToMerge) WithVcsRefHeadRevision(attr interface{ AttrVcsRefHeadRevision() AttrRefHeadRevision }) ChangeTimeToMerge {
-	a.extra.VcsRefHeadRevision = attr.AttrVcsRefHeadRevision()
+func (a ChangeTimeToMerge) WithRefHeadRevision(attr interface{ VcsRefHeadRevision() AttrRefHeadRevision }) ChangeTimeToMerge {
+	a.extra.AttrRefHeadRevision = attr.VcsRefHeadRevision()
 	return a
 }
 
 type ChangeTimeToMergeExtra struct {
-	// The group owner within the version control system.
-	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
-	// The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.
-	VcsRefBaseName AttrRefBaseName `otel:"vcs.ref.base.name"`
-	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
-	VcsRepositoryName AttrRepositoryName `otel:"vcs.repository.name"`
-	// The name of the version control system provider.
-	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
-	// The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.
-	VcsRefBaseRevision AttrRefBaseRevision `otel:"vcs.ref.base.revision"`
-	// The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.
-	VcsRefHeadRevision AttrRefHeadRevision `otel:"vcs.ref.head.revision"`
+	// The group owner within the version control system
+	AttrOwnerName AttrOwnerName `otel:"vcs.owner.name"` // The name of the [reference] such as **branch** or **tag** in the repository
+	//
+	// [reference]: https://git-scm.com/docs/gitglossary#def_ref
+	AttrRefBaseName    AttrRefBaseName    `otel:"vcs.ref.base.name"`   // The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub
+	AttrRepositoryName AttrRepositoryName `otel:"vcs.repository.name"` // The name of the version control system provider
+	AttrProviderName   AttrProviderName   `otel:"vcs.provider.name"`   // The revision, literally [revised version], The revision most often refers to a commit object in Git, or a revision number in SVN
+	//
+	// [revised version]: https://www.merriam-webster.com/dictionary/revision
+	AttrRefBaseRevision AttrRefBaseRevision `otel:"vcs.ref.base.revision"` // The revision, literally [revised version], The revision most often refers to a commit object in Git, or a revision number in SVN
+	//
+	// [revised version]: https://www.merriam-webster.com/dictionary/revision
+	AttrRefHeadRevision AttrRefHeadRevision `otel:"vcs.ref.head.revision"`
 }
 
-func (a ChangeTimeToMergeExtra) AttrVcsOwnerName() AttrOwnerName     { return a.VcsOwnerName }
-func (a ChangeTimeToMergeExtra) AttrVcsRefBaseName() AttrRefBaseName { return a.VcsRefBaseName }
-func (a ChangeTimeToMergeExtra) AttrVcsRepositoryName() AttrRepositoryName {
-	return a.VcsRepositoryName
+func (a ChangeTimeToMergeExtra) VcsOwnerName() AttrOwnerName           { return a.AttrOwnerName }
+func (a ChangeTimeToMergeExtra) VcsRefBaseName() AttrRefBaseName       { return a.AttrRefBaseName }
+func (a ChangeTimeToMergeExtra) VcsRepositoryName() AttrRepositoryName { return a.AttrRepositoryName }
+func (a ChangeTimeToMergeExtra) VcsProviderName() AttrProviderName     { return a.AttrProviderName }
+func (a ChangeTimeToMergeExtra) VcsRefBaseRevision() AttrRefBaseRevision {
+	return a.AttrRefBaseRevision
 }
-func (a ChangeTimeToMergeExtra) AttrVcsProviderName() AttrProviderName { return a.VcsProviderName }
-func (a ChangeTimeToMergeExtra) AttrVcsRefBaseRevision() AttrRefBaseRevision {
-	return a.VcsRefBaseRevision
-}
-func (a ChangeTimeToMergeExtra) AttrVcsRefHeadRevision() AttrRefHeadRevision {
-	return a.VcsRefHeadRevision
+func (a ChangeTimeToMergeExtra) VcsRefHeadRevision() AttrRefHeadRevision {
+	return a.AttrRefHeadRevision
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -184,7 +180,6 @@ State {
                 "requirement_level": "opt_in",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "[GitHub](https://github.com)",
@@ -320,7 +315,6 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[GitHub](https://github.com)",
@@ -526,6 +520,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -633,6 +629,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -719,7 +716,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

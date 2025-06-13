@@ -11,22 +11,20 @@ type GcCollectedObjects struct {
 }
 
 func NewGcCollectedObjects() GcCollectedObjects {
-	labels := []string{"cpython_gc_generation"}
+	labels := []string{AttrGcGeneration("").Key()}
 	return GcCollectedObjects{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "cpython",
-		Name:      "gc_collected_objects",
-		Help:      "The total number of objects collected inside a generation since interpreter start.",
+		Name: "cpython_gc_collected_objects",
+		Help: "The total number of objects collected inside a generation since interpreter start.",
 	}, labels)}
 }
 
-func (m GcCollectedObjects) With(gcGeneration AttrGcGeneration, extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(gcGeneration),
-	)
+func (m GcCollectedObjects) With(gcGeneration AttrGcGeneration, extras ...interface{}) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(gcGeneration.Value())
+}
+
+// Deprecated: Use [GcCollectedObjects.With] instead
+func (m GcCollectedObjects) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 type GcCollectedObjectsExtra struct {
@@ -34,7 +32,7 @@ type GcCollectedObjectsExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -60,7 +58,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Generation 0",
@@ -103,7 +100,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Generation 0",
@@ -166,6 +162,8 @@ State {
             "type": "metric",
             "unit": "{object}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -273,6 +271,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -359,7 +358,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

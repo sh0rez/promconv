@@ -3,8 +3,14 @@ package cpython
 // Value of the garbage collector collection generation
 type AttrGcGeneration string // cpython.gc.generation
 
-func (AttrGcGeneration) Development() {}
-func (AttrGcGeneration) Recommended() {}
+func (AttrGcGeneration) Development()    {}
+func (AttrGcGeneration) Recommended()    {}
+func (AttrGcGeneration) Key() string     { return "cpython_gc_generation" }
+func (a AttrGcGeneration) Value() string { return string(a) }
+
+const GcGenerationGeneration0 AttrGcGeneration = "0"
+const GcGenerationGeneration1 AttrGcGeneration = "1"
+const GcGenerationGeneration2 AttrGcGeneration = "2"
 
 /* State {
     name: "attr.go.j2",
@@ -25,7 +31,6 @@ func (AttrGcGeneration) Recommended() {}
                     "root_namespace": "cpython",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Generation 0",
@@ -164,6 +169,7 @@ func (AttrGcGeneration) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

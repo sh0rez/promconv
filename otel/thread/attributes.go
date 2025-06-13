@@ -3,14 +3,18 @@ package thread
 // Current "managed" thread ID (as opposed to OS thread ID)
 type AttrId string // thread.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "thread_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // Current thread name
 type AttrName string // thread.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "thread_name" }
+func (a AttrName) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -147,6 +151,7 @@ func (AttrName) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

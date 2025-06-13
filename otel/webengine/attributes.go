@@ -3,20 +3,26 @@ package webengine
 // Additional description of the web engine (e.g. detailed version and edition information)
 type AttrDescription string // webengine.description
 
-func (AttrDescription) Development() {}
-func (AttrDescription) Recommended() {}
+func (AttrDescription) Development()    {}
+func (AttrDescription) Recommended()    {}
+func (AttrDescription) Key() string     { return "webengine_description" }
+func (a AttrDescription) Value() string { return string(a) }
 
 // The name of the web engine
 type AttrName string // webengine.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "webengine_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // The version of the web engine
 type AttrVersion string // webengine.version
 
-func (AttrVersion) Development() {}
-func (AttrVersion) Recommended() {}
+func (AttrVersion) Development()    {}
+func (AttrVersion) Recommended()    {}
+func (AttrVersion) Key() string     { return "webengine_version" }
+func (a AttrVersion) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -168,6 +174,7 @@ func (AttrVersion) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

@@ -6,37 +6,32 @@ import (
 
 // Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs
 type PodCpuUsage struct {
-	*prometheus.GaugeVec
-	extra PodCpuUsageExtra
+	prometheus.Gauge
 }
 
 func NewPodCpuUsage() PodCpuUsage {
-	labels := []string{}
-	return PodCpuUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "pod_cpu_usage",
-		Help:      "Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs",
-	}, labels)}
+	return PodCpuUsage{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_pod_cpu_usage",
+		Help: "Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs",
+	})}
 }
 
-func (m PodCpuUsage) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m PodCpuUsage) Register(regs ...prometheus.Registerer) PodCpuUsage {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type PodCpuUsageExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PodCpuUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "pod.cpu.usage",
         "Type": "PodCpuUsage",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

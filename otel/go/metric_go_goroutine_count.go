@@ -6,37 +6,32 @@ import (
 
 // Count of live goroutines.
 type GoroutineCount struct {
-	*prometheus.GaugeVec
-	extra GoroutineCountExtra
+	prometheus.Gauge
 }
 
 func NewGoroutineCount() GoroutineCount {
-	labels := []string{}
-	return GoroutineCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "go",
-		Name:      "goroutine_count",
-		Help:      "Count of live goroutines.",
-	}, labels)}
+	return GoroutineCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "go_goroutine_count",
+		Help: "Count of live goroutines.",
+	})}
 }
 
-func (m GoroutineCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m GoroutineCount) Register(regs ...prometheus.Registerer) GoroutineCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type GoroutineCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GoroutineCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "goroutine.count",
         "Type": "GoroutineCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Count of live goroutines.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

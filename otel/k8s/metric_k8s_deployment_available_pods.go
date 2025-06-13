@@ -6,37 +6,32 @@ import (
 
 // Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment
 type DeploymentAvailablePods struct {
-	*prometheus.GaugeVec
-	extra DeploymentAvailablePodsExtra
+	prometheus.Gauge
 }
 
 func NewDeploymentAvailablePods() DeploymentAvailablePods {
-	labels := []string{}
-	return DeploymentAvailablePods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "deployment_available_pods",
-		Help:      "Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment",
-	}, labels)}
+	return DeploymentAvailablePods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_deployment_available_pods",
+		Help: "Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment",
+	})}
 }
 
-func (m DeploymentAvailablePods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m DeploymentAvailablePods) Register(regs ...prometheus.Registerer) DeploymentAvailablePods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type DeploymentAvailablePodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DeploymentAvailablePodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "deployment.available_pods",
         "Type": "DeploymentAvailablePods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

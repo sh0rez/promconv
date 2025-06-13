@@ -6,37 +6,32 @@ import (
 
 // The number of bytes of physical memory mapped to the process context.
 type ProcessMemoryWorkingSet struct {
-	*prometheus.GaugeVec
-	extra ProcessMemoryWorkingSetExtra
+	prometheus.Gauge
 }
 
 func NewProcessMemoryWorkingSet() ProcessMemoryWorkingSet {
-	labels := []string{}
-	return ProcessMemoryWorkingSet{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "dotnet",
-		Name:      "process_memory_working_set",
-		Help:      "The number of bytes of physical memory mapped to the process context.",
-	}, labels)}
+	return ProcessMemoryWorkingSet{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "dotnet_process_memory_working_set",
+		Help: "The number of bytes of physical memory mapped to the process context.",
+	})}
 }
 
-func (m ProcessMemoryWorkingSet) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ProcessMemoryWorkingSet) Register(regs ...prometheus.Registerer) ProcessMemoryWorkingSet {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ProcessMemoryWorkingSetExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessMemoryWorkingSetExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "process.memory.working_set",
         "Type": "ProcessMemoryWorkingSet",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of bytes of physical memory mapped to the process context.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

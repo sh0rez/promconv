@@ -8,8 +8,10 @@ package error
 // `error.message` is NOT RECOMMENDED for metrics or spans due to its unbounded cardinality and overlap with span status
 type AttrMessage string // error.message
 
-func (AttrMessage) Development() {}
-func (AttrMessage) Recommended() {}
+func (AttrMessage) Development()    {}
+func (AttrMessage) Recommended()    {}
+func (AttrMessage) Key() string     { return "error_message" }
+func (a AttrMessage) Value() string { return string(a) }
 
 // Describes a class of error the operation ended with.
 //
@@ -34,8 +36,12 @@ func (AttrMessage) Recommended() {}
 //   - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not
 type AttrType string // error.type
 
-func (AttrType) Stable()      {}
-func (AttrType) Recommended() {}
+func (AttrType) Stable()         {}
+func (AttrType) Recommended()    {}
+func (AttrType) Key() string     { return "error_type" }
+func (a AttrType) Value() string { return string(a) }
+
+const TypeOther AttrType = "_OTHER"
 
 /* State {
     name: "attr.go.j2",
@@ -71,7 +77,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "error",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -194,6 +199,7 @@ func (AttrType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

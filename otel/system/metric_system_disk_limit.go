@@ -11,40 +11,42 @@ type DiskLimit struct {
 }
 
 func NewDiskLimit() DiskLimit {
-	labels := []string{"system_device"}
+	labels := []string{AttrDevice("").Key()}
 	return DiskLimit{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "disk_limit",
-		Help:      "The total storage capacity of the disk",
+		Name: "system_disk_limit",
+		Help: "The total storage capacity of the disk",
 	}, labels)}
 }
 
-func (m DiskLimit) With(extra interface {
-	AttrSystemDevice() AttrDevice
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m DiskLimit) With(extras ...interface{ SystemDevice() AttrDevice }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemDevice()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.SystemDevice().Value())
 }
 
-func (a DiskLimit) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskLimit {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+// Deprecated: Use [DiskLimit.With] instead
+func (m DiskLimit) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a DiskLimit) WithDevice(attr interface{ SystemDevice() AttrDevice }) DiskLimit {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
 
 type DiskLimitExtra struct {
 	// The device identifier
-	SystemDevice AttrDevice `otel:"system.device"`
+	AttrDevice AttrDevice `otel:"system.device"`
 }
 
-func (a DiskLimitExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
+func (a DiskLimitExtra) SystemDevice() AttrDevice { return a.AttrDevice }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -116,6 +118,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -223,6 +227,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -309,7 +314,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

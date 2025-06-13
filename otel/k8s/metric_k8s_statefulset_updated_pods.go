@@ -6,37 +6,32 @@ import (
 
 // Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision
 type StatefulsetUpdatedPods struct {
-	*prometheus.GaugeVec
-	extra StatefulsetUpdatedPodsExtra
+	prometheus.Gauge
 }
 
 func NewStatefulsetUpdatedPods() StatefulsetUpdatedPods {
-	labels := []string{}
-	return StatefulsetUpdatedPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "statefulset_updated_pods",
-		Help:      "Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision",
-	}, labels)}
+	return StatefulsetUpdatedPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_statefulset_updated_pods",
+		Help: "Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision",
+	})}
 }
 
-func (m StatefulsetUpdatedPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m StatefulsetUpdatedPods) Register(regs ...prometheus.Registerer) StatefulsetUpdatedPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type StatefulsetUpdatedPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "StatefulsetUpdatedPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "statefulset.updated_pods",
         "Type": "StatefulsetUpdatedPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

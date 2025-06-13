@@ -10,51 +10,53 @@ type PagingOperations struct {
 }
 
 func NewPagingOperations() PagingOperations {
-	labels := []string{"system_paging_direction", "system_paging_type"}
+	labels := []string{AttrPagingDirection("").Key(), AttrPagingType("").Key()}
 	return PagingOperations{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "system",
-		Name:      "paging_operations",
-		Help:      "",
+		Name: "system_paging_operations",
+		Help: "",
 	}, labels)}
 }
 
-func (m PagingOperations) With(extra interface {
-	AttrSystemPagingDirection() AttrPagingDirection
-	AttrSystemPagingType() AttrPagingType
+func (m PagingOperations) With(extras ...interface {
+	SystemPagingDirection() AttrPagingDirection
+	SystemPagingType() AttrPagingType
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemPagingDirection()),
-		string(extra.AttrSystemPagingType()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.SystemPagingDirection().Value(), extra.SystemPagingType().Value())
 }
 
-func (a PagingOperations) WithSystemPagingDirection(attr interface{ AttrSystemPagingDirection() AttrPagingDirection }) PagingOperations {
-	a.extra.SystemPagingDirection = attr.AttrSystemPagingDirection()
+// Deprecated: Use [PagingOperations.With] instead
+func (m PagingOperations) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a PagingOperations) WithPagingDirection(attr interface{ SystemPagingDirection() AttrPagingDirection }) PagingOperations {
+	a.extra.AttrPagingDirection = attr.SystemPagingDirection()
 	return a
 }
-func (a PagingOperations) WithSystemPagingType(attr interface{ AttrSystemPagingType() AttrPagingType }) PagingOperations {
-	a.extra.SystemPagingType = attr.AttrSystemPagingType()
+func (a PagingOperations) WithPagingType(attr interface{ SystemPagingType() AttrPagingType }) PagingOperations {
+	a.extra.AttrPagingType = attr.SystemPagingType()
 	return a
 }
 
 type PagingOperationsExtra struct {
 	// The paging access direction
-	SystemPagingDirection AttrPagingDirection `otel:"system.paging.direction"`
-	// The memory paging type
-	SystemPagingType AttrPagingType `otel:"system.paging.type"`
+	AttrPagingDirection AttrPagingDirection `otel:"system.paging.direction"` // The memory paging type
+	AttrPagingType      AttrPagingType      `otel:"system.paging.type"`
 }
 
-func (a PagingOperationsExtra) AttrSystemPagingDirection() AttrPagingDirection {
-	return a.SystemPagingDirection
+func (a PagingOperationsExtra) SystemPagingDirection() AttrPagingDirection {
+	return a.AttrPagingDirection
 }
-func (a PagingOperationsExtra) AttrSystemPagingType() AttrPagingType { return a.SystemPagingType }
+func (a PagingOperationsExtra) SystemPagingType() AttrPagingType { return a.AttrPagingType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -78,7 +80,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -108,7 +109,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -141,7 +141,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -171,7 +170,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -235,6 +233,8 @@ State {
             "type": "metric",
             "unit": "{operation}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -342,6 +342,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -428,7 +429,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

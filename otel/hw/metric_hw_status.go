@@ -11,52 +11,51 @@ type Status struct {
 }
 
 func NewStatus() Status {
-	labels := []string{"hw_id", "hw_state", "hw_type", "hw_name", "hw_parent"}
+	labels := []string{AttrId("").Key(), AttrState("").Key(), AttrType("").Key(), AttrName("").Key(), AttrParent("").Key()}
 	return Status{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "hw",
-		Name:      "status",
-		Help:      "Operational status: `1` (true) or `0` (false) for each of the possible states",
+		Name: "hw_status",
+		Help: "Operational status: `1` (true) or `0` (false) for each of the possible states",
 	}, labels)}
 }
 
-func (m Status) With(id AttrId, state AttrState, kind AttrType, extra interface {
-	AttrHwName() AttrName
-	AttrHwParent() AttrParent
+func (m Status) With(id AttrId, state AttrState, kind AttrType, extras ...interface {
+	HwName() AttrName
+	HwParent() AttrParent
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(id),
-		string(state),
-		string(kind),
-		string(extra.AttrHwName()),
-		string(extra.AttrHwParent()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(id.Value(), state.Value(), kind.Value(), extra.HwName().Value(), extra.HwParent().Value())
 }
 
-func (a Status) WithHwName(attr interface{ AttrHwName() AttrName }) Status {
-	a.extra.HwName = attr.AttrHwName()
+// Deprecated: Use [Status.With] instead
+func (m Status) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a Status) WithName(attr interface{ HwName() AttrName }) Status {
+	a.extra.AttrName = attr.HwName()
 	return a
 }
-func (a Status) WithHwParent(attr interface{ AttrHwParent() AttrParent }) Status {
-	a.extra.HwParent = attr.AttrHwParent()
+func (a Status) WithParent(attr interface{ HwParent() AttrParent }) Status {
+	a.extra.AttrParent = attr.HwParent()
 	return a
 }
 
 type StatusExtra struct {
 	// An easily-recognizable name for the hardware component
-	HwName AttrName `otel:"hw.name"`
-	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
-	HwParent AttrParent `otel:"hw.parent"`
+	AttrName   AttrName   `otel:"hw.name"` // Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
+	AttrParent AttrParent `otel:"hw.parent"`
 }
 
-func (a StatusExtra) AttrHwName() AttrName     { return a.HwName }
-func (a StatusExtra) AttrHwParent() AttrParent { return a.HwParent }
+func (a StatusExtra) HwName() AttrName     { return a.AttrName }
+func (a StatusExtra) HwParent() AttrParent { return a.AttrParent }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -87,7 +86,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Ok",
@@ -123,7 +121,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Battery",
@@ -300,7 +297,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Battery",
@@ -423,7 +419,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Ok",
@@ -532,6 +527,8 @@ State {
             "type": "metric",
             "unit": "1",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -639,6 +636,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -725,7 +723,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

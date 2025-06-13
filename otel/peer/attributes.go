@@ -5,8 +5,10 @@ package peer
 // [`service.name`]: /docs/resource/README.md#service
 type AttrService string // peer.service
 
-func (AttrService) Development() {}
-func (AttrService) Recommended() {}
+func (AttrService) Development()    {}
+func (AttrService) Recommended()    {}
+func (AttrService) Key() string     { return "peer_service" }
+func (a AttrService) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -134,6 +136,7 @@ func (AttrService) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

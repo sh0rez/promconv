@@ -3,68 +3,110 @@ package db
 // Deprecated, use `cassandra.consistency.level` instead
 type AttrCassandraConsistencyLevel string // db.cassandra.consistency_level
 
-func (AttrCassandraConsistencyLevel) Development() {}
-func (AttrCassandraConsistencyLevel) Recommended() {}
+func (AttrCassandraConsistencyLevel) Development()    {}
+func (AttrCassandraConsistencyLevel) Recommended()    {}
+func (AttrCassandraConsistencyLevel) Key() string     { return "db_cassandra_consistency_level" }
+func (a AttrCassandraConsistencyLevel) Value() string { return string(a) }
+
+const CassandraConsistencyLevelAll AttrCassandraConsistencyLevel = "all"
+const CassandraConsistencyLevelEachQuorum AttrCassandraConsistencyLevel = "each_quorum"
+const CassandraConsistencyLevelQuorum AttrCassandraConsistencyLevel = "quorum"
+const CassandraConsistencyLevelLocalQuorum AttrCassandraConsistencyLevel = "local_quorum"
+const CassandraConsistencyLevelOne AttrCassandraConsistencyLevel = "one"
+const CassandraConsistencyLevelTwo AttrCassandraConsistencyLevel = "two"
+const CassandraConsistencyLevelThree AttrCassandraConsistencyLevel = "three"
+const CassandraConsistencyLevelLocalOne AttrCassandraConsistencyLevel = "local_one"
+const CassandraConsistencyLevelAny AttrCassandraConsistencyLevel = "any"
+const CassandraConsistencyLevelSerial AttrCassandraConsistencyLevel = "serial"
+const CassandraConsistencyLevelLocalSerial AttrCassandraConsistencyLevel = "local_serial"
 
 // Deprecated, use `cassandra.coordinator.dc` instead
 type AttrCassandraCoordinatorDc string // db.cassandra.coordinator.dc
 
-func (AttrCassandraCoordinatorDc) Development() {}
-func (AttrCassandraCoordinatorDc) Recommended() {}
+func (AttrCassandraCoordinatorDc) Development()    {}
+func (AttrCassandraCoordinatorDc) Recommended()    {}
+func (AttrCassandraCoordinatorDc) Key() string     { return "db_cassandra_coordinator_dc" }
+func (a AttrCassandraCoordinatorDc) Value() string { return string(a) }
 
 // Deprecated, use `cassandra.coordinator.id` instead
 type AttrCassandraCoordinatorId string // db.cassandra.coordinator.id
 
-func (AttrCassandraCoordinatorId) Development() {}
-func (AttrCassandraCoordinatorId) Recommended() {}
+func (AttrCassandraCoordinatorId) Development()    {}
+func (AttrCassandraCoordinatorId) Recommended()    {}
+func (AttrCassandraCoordinatorId) Key() string     { return "db_cassandra_coordinator_id" }
+func (a AttrCassandraCoordinatorId) Value() string { return string(a) }
 
 // Deprecated, use `cassandra.query.idempotent` instead
 type AttrCassandraIdempotence string // db.cassandra.idempotence
 
-func (AttrCassandraIdempotence) Development() {}
-func (AttrCassandraIdempotence) Recommended() {}
+func (AttrCassandraIdempotence) Development()    {}
+func (AttrCassandraIdempotence) Recommended()    {}
+func (AttrCassandraIdempotence) Key() string     { return "db_cassandra_idempotence" }
+func (a AttrCassandraIdempotence) Value() string { return string(a) }
 
 // Deprecated, use `cassandra.page.size` instead
 type AttrCassandraPageSize string // db.cassandra.page_size
 
-func (AttrCassandraPageSize) Development() {}
-func (AttrCassandraPageSize) Recommended() {}
+func (AttrCassandraPageSize) Development()    {}
+func (AttrCassandraPageSize) Recommended()    {}
+func (AttrCassandraPageSize) Key() string     { return "db_cassandra_page_size" }
+func (a AttrCassandraPageSize) Value() string { return string(a) }
 
 // Deprecated, use `cassandra.speculative_execution.count` instead
 type AttrCassandraSpeculativeExecutionCount string // db.cassandra.speculative_execution_count
 
 func (AttrCassandraSpeculativeExecutionCount) Development() {}
 func (AttrCassandraSpeculativeExecutionCount) Recommended() {}
+func (AttrCassandraSpeculativeExecutionCount) Key() string {
+	return "db_cassandra_speculative_execution_count"
+}
+func (a AttrCassandraSpeculativeExecutionCount) Value() string { return string(a) }
 
 // Deprecated, use `db.collection.name` instead
 type AttrCassandraTable string // db.cassandra.table
 
-func (AttrCassandraTable) Development() {}
-func (AttrCassandraTable) Recommended() {}
+func (AttrCassandraTable) Development()    {}
+func (AttrCassandraTable) Recommended()    {}
+func (AttrCassandraTable) Key() string     { return "db_cassandra_table" }
+func (a AttrCassandraTable) Value() string { return string(a) }
 
 // The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn't provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it
 type AttrClientConnectionPoolName string // db.client.connection.pool.name
 
-func (AttrClientConnectionPoolName) Development() {}
-func (AttrClientConnectionPoolName) Recommended() {}
+func (AttrClientConnectionPoolName) Development()    {}
+func (AttrClientConnectionPoolName) Recommended()    {}
+func (AttrClientConnectionPoolName) Key() string     { return "db_client_connection_pool_name" }
+func (a AttrClientConnectionPoolName) Value() string { return string(a) }
 
 // The state of a connection in the pool
 type AttrClientConnectionState string // db.client.connection.state
 
-func (AttrClientConnectionState) Development() {}
-func (AttrClientConnectionState) Recommended() {}
+func (AttrClientConnectionState) Development()    {}
+func (AttrClientConnectionState) Recommended()    {}
+func (AttrClientConnectionState) Key() string     { return "db_client_connection_state" }
+func (a AttrClientConnectionState) Value() string { return string(a) }
+
+const ClientConnectionStateIdle AttrClientConnectionState = "idle"
+const ClientConnectionStateUsed AttrClientConnectionState = "used"
 
 // Deprecated, use `db.client.connection.pool.name` instead
 type AttrClientConnectionsPoolName string // db.client.connections.pool.name
 
-func (AttrClientConnectionsPoolName) Development() {}
-func (AttrClientConnectionsPoolName) Recommended() {}
+func (AttrClientConnectionsPoolName) Development()    {}
+func (AttrClientConnectionsPoolName) Recommended()    {}
+func (AttrClientConnectionsPoolName) Key() string     { return "db_client_connections_pool_name" }
+func (a AttrClientConnectionsPoolName) Value() string { return string(a) }
 
 // Deprecated, use `db.client.connection.state` instead
 type AttrClientConnectionsState string // db.client.connections.state
 
-func (AttrClientConnectionsState) Development() {}
-func (AttrClientConnectionsState) Recommended() {}
+func (AttrClientConnectionsState) Development()    {}
+func (AttrClientConnectionsState) Recommended()    {}
+func (AttrClientConnectionsState) Key() string     { return "db_client_connections_state" }
+func (a AttrClientConnectionsState) Value() string { return string(a) }
+
+const ClientConnectionsStateIdle AttrClientConnectionsState = "idle"
+const ClientConnectionsStateUsed AttrClientConnectionsState = "used"
 
 // The name of a collection (table, container) within the database.
 // It is RECOMMENDED to capture the value as provided by the application
@@ -78,122 +120,187 @@ func (AttrClientConnectionsState) Recommended() {}
 // collection name then that collection name SHOULD be used
 type AttrCollectionName string // db.collection.name
 
-func (AttrCollectionName) Stable()      {}
-func (AttrCollectionName) Recommended() {}
+func (AttrCollectionName) Stable()         {}
+func (AttrCollectionName) Recommended()    {}
+func (AttrCollectionName) Key() string     { return "db_collection_name" }
+func (a AttrCollectionName) Value() string { return string(a) }
 
 // Deprecated, use `server.address`, `server.port` attributes instead
 type AttrConnectionString string // db.connection_string
 
-func (AttrConnectionString) Development() {}
-func (AttrConnectionString) Recommended() {}
+func (AttrConnectionString) Development()    {}
+func (AttrConnectionString) Recommended()    {}
+func (AttrConnectionString) Key() string     { return "db_connection_string" }
+func (a AttrConnectionString) Value() string { return string(a) }
 
 // Deprecated, use `azure.client.id` instead
 type AttrCosmosdbClientId string // db.cosmosdb.client_id
 
-func (AttrCosmosdbClientId) Development() {}
-func (AttrCosmosdbClientId) Recommended() {}
+func (AttrCosmosdbClientId) Development()    {}
+func (AttrCosmosdbClientId) Recommended()    {}
+func (AttrCosmosdbClientId) Key() string     { return "db_cosmosdb_client_id" }
+func (a AttrCosmosdbClientId) Value() string { return string(a) }
 
 // Deprecated, use `azure.cosmosdb.connection.mode` instead
 type AttrCosmosdbConnectionMode string // db.cosmosdb.connection_mode
 
-func (AttrCosmosdbConnectionMode) Development() {}
-func (AttrCosmosdbConnectionMode) Recommended() {}
+func (AttrCosmosdbConnectionMode) Development()    {}
+func (AttrCosmosdbConnectionMode) Recommended()    {}
+func (AttrCosmosdbConnectionMode) Key() string     { return "db_cosmosdb_connection_mode" }
+func (a AttrCosmosdbConnectionMode) Value() string { return string(a) }
+
+const CosmosdbConnectionModeGateway AttrCosmosdbConnectionMode = "gateway"
+const CosmosdbConnectionModeDirect AttrCosmosdbConnectionMode = "direct"
 
 // Deprecated, use `cosmosdb.consistency.level` instead
 type AttrCosmosdbConsistencyLevel string // db.cosmosdb.consistency_level
 
-func (AttrCosmosdbConsistencyLevel) Development() {}
-func (AttrCosmosdbConsistencyLevel) Recommended() {}
+func (AttrCosmosdbConsistencyLevel) Development()    {}
+func (AttrCosmosdbConsistencyLevel) Recommended()    {}
+func (AttrCosmosdbConsistencyLevel) Key() string     { return "db_cosmosdb_consistency_level" }
+func (a AttrCosmosdbConsistencyLevel) Value() string { return string(a) }
+
+const CosmosdbConsistencyLevelStrong AttrCosmosdbConsistencyLevel = "Strong"
+const CosmosdbConsistencyLevelBoundedStaleness AttrCosmosdbConsistencyLevel = "BoundedStaleness"
+const CosmosdbConsistencyLevelSession AttrCosmosdbConsistencyLevel = "Session"
+const CosmosdbConsistencyLevelEventual AttrCosmosdbConsistencyLevel = "Eventual"
+const CosmosdbConsistencyLevelConsistentPrefix AttrCosmosdbConsistencyLevel = "ConsistentPrefix"
 
 // Deprecated, use `db.collection.name` instead
 type AttrCosmosdbContainer string // db.cosmosdb.container
 
-func (AttrCosmosdbContainer) Development() {}
-func (AttrCosmosdbContainer) Recommended() {}
+func (AttrCosmosdbContainer) Development()    {}
+func (AttrCosmosdbContainer) Recommended()    {}
+func (AttrCosmosdbContainer) Key() string     { return "db_cosmosdb_container" }
+func (a AttrCosmosdbContainer) Value() string { return string(a) }
 
 // Deprecated, no replacement at this time
 type AttrCosmosdbOperationType string // db.cosmosdb.operation_type
 
-func (AttrCosmosdbOperationType) Development() {}
-func (AttrCosmosdbOperationType) Recommended() {}
+func (AttrCosmosdbOperationType) Development()    {}
+func (AttrCosmosdbOperationType) Recommended()    {}
+func (AttrCosmosdbOperationType) Key() string     { return "db_cosmosdb_operation_type" }
+func (a AttrCosmosdbOperationType) Value() string { return string(a) }
+
+const CosmosdbOperationTypeBatch AttrCosmosdbOperationType = "batch"
+const CosmosdbOperationTypeCreate AttrCosmosdbOperationType = "create"
+const CosmosdbOperationTypeDelete AttrCosmosdbOperationType = "delete"
+const CosmosdbOperationTypeExecute AttrCosmosdbOperationType = "execute"
+const CosmosdbOperationTypeExecuteJavascript AttrCosmosdbOperationType = "execute_javascript"
+const CosmosdbOperationTypeInvalid AttrCosmosdbOperationType = "invalid"
+const CosmosdbOperationTypeHead AttrCosmosdbOperationType = "head"
+const CosmosdbOperationTypeHeadFeed AttrCosmosdbOperationType = "head_feed"
+const CosmosdbOperationTypePatch AttrCosmosdbOperationType = "patch"
+const CosmosdbOperationTypeQuery AttrCosmosdbOperationType = "query"
+const CosmosdbOperationTypeQueryPlan AttrCosmosdbOperationType = "query_plan"
+const CosmosdbOperationTypeRead AttrCosmosdbOperationType = "read"
+const CosmosdbOperationTypeReadFeed AttrCosmosdbOperationType = "read_feed"
+const CosmosdbOperationTypeReplace AttrCosmosdbOperationType = "replace"
+const CosmosdbOperationTypeUpsert AttrCosmosdbOperationType = "upsert"
 
 // Deprecated, use `azure.cosmosdb.operation.contacted_regions` instead
 type AttrCosmosdbRegionsContacted string // db.cosmosdb.regions_contacted
 
-func (AttrCosmosdbRegionsContacted) Development() {}
-func (AttrCosmosdbRegionsContacted) Recommended() {}
+func (AttrCosmosdbRegionsContacted) Development()    {}
+func (AttrCosmosdbRegionsContacted) Recommended()    {}
+func (AttrCosmosdbRegionsContacted) Key() string     { return "db_cosmosdb_regions_contacted" }
+func (a AttrCosmosdbRegionsContacted) Value() string { return string(a) }
 
 // Deprecated, use `azure.cosmosdb.operation.request_charge` instead
 type AttrCosmosdbRequestCharge string // db.cosmosdb.request_charge
 
-func (AttrCosmosdbRequestCharge) Development() {}
-func (AttrCosmosdbRequestCharge) Recommended() {}
+func (AttrCosmosdbRequestCharge) Development()    {}
+func (AttrCosmosdbRequestCharge) Recommended()    {}
+func (AttrCosmosdbRequestCharge) Key() string     { return "db_cosmosdb_request_charge" }
+func (a AttrCosmosdbRequestCharge) Value() string { return string(a) }
 
 // Deprecated, use `azure.cosmosdb.request.body.size` instead
 type AttrCosmosdbRequestContentLength string // db.cosmosdb.request_content_length
 
-func (AttrCosmosdbRequestContentLength) Development() {}
-func (AttrCosmosdbRequestContentLength) Recommended() {}
+func (AttrCosmosdbRequestContentLength) Development()    {}
+func (AttrCosmosdbRequestContentLength) Recommended()    {}
+func (AttrCosmosdbRequestContentLength) Key() string     { return "db_cosmosdb_request_content_length" }
+func (a AttrCosmosdbRequestContentLength) Value() string { return string(a) }
 
 // Deprecated, use `db.response.status_code` instead
 type AttrCosmosdbStatusCode string // db.cosmosdb.status_code
 
-func (AttrCosmosdbStatusCode) Development() {}
-func (AttrCosmosdbStatusCode) Recommended() {}
+func (AttrCosmosdbStatusCode) Development()    {}
+func (AttrCosmosdbStatusCode) Recommended()    {}
+func (AttrCosmosdbStatusCode) Key() string     { return "db_cosmosdb_status_code" }
+func (a AttrCosmosdbStatusCode) Value() string { return string(a) }
 
 // Deprecated, use `azure.cosmosdb.response.sub_status_code` instead
 type AttrCosmosdbSubStatusCode string // db.cosmosdb.sub_status_code
 
-func (AttrCosmosdbSubStatusCode) Development() {}
-func (AttrCosmosdbSubStatusCode) Recommended() {}
+func (AttrCosmosdbSubStatusCode) Development()    {}
+func (AttrCosmosdbSubStatusCode) Recommended()    {}
+func (AttrCosmosdbSubStatusCode) Key() string     { return "db_cosmosdb_sub_status_code" }
+func (a AttrCosmosdbSubStatusCode) Value() string { return string(a) }
 
 // Deprecated, use `db.namespace` instead
 type AttrElasticsearchClusterName string // db.elasticsearch.cluster.name
 
-func (AttrElasticsearchClusterName) Development() {}
-func (AttrElasticsearchClusterName) Recommended() {}
+func (AttrElasticsearchClusterName) Development()    {}
+func (AttrElasticsearchClusterName) Recommended()    {}
+func (AttrElasticsearchClusterName) Key() string     { return "db_elasticsearch_cluster_name" }
+func (a AttrElasticsearchClusterName) Value() string { return string(a) }
 
 // Deprecated, use `elasticsearch.node.name` instead
 type AttrElasticsearchNodeName string // db.elasticsearch.node.name
 
-func (AttrElasticsearchNodeName) Development() {}
-func (AttrElasticsearchNodeName) Recommended() {}
+func (AttrElasticsearchNodeName) Development()    {}
+func (AttrElasticsearchNodeName) Recommended()    {}
+func (AttrElasticsearchNodeName) Key() string     { return "db_elasticsearch_node_name" }
+func (a AttrElasticsearchNodeName) Value() string { return string(a) }
 
 // Deprecated, use `db.operation.parameter` instead
 type AttrElasticsearchPathParts string // db.elasticsearch.path_parts
 
-func (AttrElasticsearchPathParts) Development() {}
-func (AttrElasticsearchPathParts) Recommended() {}
+func (AttrElasticsearchPathParts) Development()    {}
+func (AttrElasticsearchPathParts) Recommended()    {}
+func (AttrElasticsearchPathParts) Key() string     { return "db_elasticsearch_path_parts" }
+func (a AttrElasticsearchPathParts) Value() string { return string(a) }
 
 // Deprecated, no general replacement at this time. For Elasticsearch, use `db.elasticsearch.node.name` instead
 type AttrInstanceId string // db.instance.id
 
-func (AttrInstanceId) Development() {}
-func (AttrInstanceId) Recommended() {}
+func (AttrInstanceId) Development()    {}
+func (AttrInstanceId) Recommended()    {}
+func (AttrInstanceId) Key() string     { return "db_instance_id" }
+func (a AttrInstanceId) Value() string { return string(a) }
 
 // Removed, no replacement at this time
 type AttrJdbcDriverClassname string // db.jdbc.driver_classname
 
-func (AttrJdbcDriverClassname) Development() {}
-func (AttrJdbcDriverClassname) Recommended() {}
+func (AttrJdbcDriverClassname) Development()    {}
+func (AttrJdbcDriverClassname) Recommended()    {}
+func (AttrJdbcDriverClassname) Key() string     { return "db_jdbc_driver_classname" }
+func (a AttrJdbcDriverClassname) Value() string { return string(a) }
 
 // Deprecated, use `db.collection.name` instead
 type AttrMongodbCollection string // db.mongodb.collection
 
-func (AttrMongodbCollection) Development() {}
-func (AttrMongodbCollection) Recommended() {}
+func (AttrMongodbCollection) Development()    {}
+func (AttrMongodbCollection) Recommended()    {}
+func (AttrMongodbCollection) Key() string     { return "db_mongodb_collection" }
+func (a AttrMongodbCollection) Value() string { return string(a) }
 
 // Deprecated, SQL Server instance is now populated as a part of `db.namespace` attribute
 type AttrMssqlInstanceName string // db.mssql.instance_name
 
-func (AttrMssqlInstanceName) Development() {}
-func (AttrMssqlInstanceName) Recommended() {}
+func (AttrMssqlInstanceName) Development()    {}
+func (AttrMssqlInstanceName) Recommended()    {}
+func (AttrMssqlInstanceName) Key() string     { return "db_mssql_instance_name" }
+func (a AttrMssqlInstanceName) Value() string { return string(a) }
 
 // Deprecated, use `db.namespace` instead
 type AttrName string // db.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "db_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // The name of the database, fully qualified within the server address and port.
 //
@@ -202,21 +309,27 @@ func (AttrName) Recommended() {}
 // It is RECOMMENDED to capture the value as provided by the application without attempting to do any case normalization
 type AttrNamespace string // db.namespace
 
-func (AttrNamespace) Stable()      {}
-func (AttrNamespace) Recommended() {}
+func (AttrNamespace) Stable()         {}
+func (AttrNamespace) Recommended()    {}
+func (AttrNamespace) Key() string     { return "db_namespace" }
+func (a AttrNamespace) Value() string { return string(a) }
 
 // Deprecated, use `db.operation.name` instead
 type AttrOperation string // db.operation
 
-func (AttrOperation) Development() {}
-func (AttrOperation) Recommended() {}
+func (AttrOperation) Development()    {}
+func (AttrOperation) Recommended()    {}
+func (AttrOperation) Key() string     { return "db_operation" }
+func (a AttrOperation) Value() string { return string(a) }
 
 // The number of queries included in a batch operation.
 // Operations are only considered batches when they contain two or more operations, and so `db.operation.batch.size` SHOULD never be `1`
 type AttrOperationBatchSize string // db.operation.batch.size
 
-func (AttrOperationBatchSize) Stable()      {}
-func (AttrOperationBatchSize) Recommended() {}
+func (AttrOperationBatchSize) Stable()         {}
+func (AttrOperationBatchSize) Recommended()    {}
+func (AttrOperationBatchSize) Key() string     { return "db_operation_batch_size" }
+func (a AttrOperationBatchSize) Value() string { return string(a) }
 
 // The name of the operation or command being executed.
 //
@@ -236,8 +349,10 @@ func (AttrOperationBatchSize) Recommended() {}
 // system specific term if more applicable
 type AttrOperationName string // db.operation.name
 
-func (AttrOperationName) Stable()      {}
-func (AttrOperationName) Recommended() {}
+func (AttrOperationName) Stable()         {}
+func (AttrOperationName) Recommended()    {}
+func (AttrOperationName) Key() string     { return "db_operation_name" }
+func (a AttrOperationName) Value() string { return string(a) }
 
 // A database operation parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.
 //
@@ -248,8 +363,10 @@ func (AttrOperationName) Recommended() {}
 // instead of `db.operation.parameter.<key>`
 type AttrOperationParameter string // db.operation.parameter
 
-func (AttrOperationParameter) Development() {}
-func (AttrOperationParameter) Recommended() {}
+func (AttrOperationParameter) Development()    {}
+func (AttrOperationParameter) Recommended()    {}
+func (AttrOperationParameter) Key() string     { return "db_operation_parameter" }
+func (a AttrOperationParameter) Value() string { return string(a) }
 
 // A database query parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.
 //
@@ -269,8 +386,10 @@ func (AttrOperationParameter) Recommended() {}
 //     `username = "jdoe"`, the attribute `db.query.parameter.username` SHOULD be set to `"jdoe"`
 type AttrQueryParameter string // db.query.parameter
 
-func (AttrQueryParameter) Development() {}
-func (AttrQueryParameter) Recommended() {}
+func (AttrQueryParameter) Development()    {}
+func (AttrQueryParameter) Recommended()    {}
+func (AttrQueryParameter) Key() string     { return "db_query_parameter" }
+func (a AttrQueryParameter) Value() string { return string(a) }
 
 // Low cardinality summary of a database query.
 //
@@ -287,8 +406,10 @@ func (AttrQueryParameter) Recommended() {}
 // [Generating query summary]: /docs/database/database-spans.md#generating-a-summary-of-the-query
 type AttrQuerySummary string // db.query.summary
 
-func (AttrQuerySummary) Stable()      {}
-func (AttrQuerySummary) Recommended() {}
+func (AttrQuerySummary) Stable()         {}
+func (AttrQuerySummary) Recommended()    {}
+func (AttrQuerySummary) Key() string     { return "db_query_summary" }
+func (a AttrQuerySummary) Value() string { return string(a) }
 
 // The database query being executed.
 //
@@ -299,40 +420,52 @@ func (AttrQuerySummary) Recommended() {}
 // [Sanitization of `db.query.text`]: /docs/database/database-spans.md#sanitization-of-dbquerytext
 type AttrQueryText string // db.query.text
 
-func (AttrQueryText) Stable()      {}
-func (AttrQueryText) Recommended() {}
+func (AttrQueryText) Stable()         {}
+func (AttrQueryText) Recommended()    {}
+func (AttrQueryText) Key() string     { return "db_query_text" }
+func (a AttrQueryText) Value() string { return string(a) }
 
 // Deprecated, use `db.namespace` instead
 type AttrRedisDatabaseIndex string // db.redis.database_index
 
-func (AttrRedisDatabaseIndex) Development() {}
-func (AttrRedisDatabaseIndex) Recommended() {}
+func (AttrRedisDatabaseIndex) Development()    {}
+func (AttrRedisDatabaseIndex) Recommended()    {}
+func (AttrRedisDatabaseIndex) Key() string     { return "db_redis_database_index" }
+func (a AttrRedisDatabaseIndex) Value() string { return string(a) }
 
 // Number of rows returned by the operation
 type AttrResponseReturnedRows string // db.response.returned_rows
 
-func (AttrResponseReturnedRows) Development() {}
-func (AttrResponseReturnedRows) Recommended() {}
+func (AttrResponseReturnedRows) Development()    {}
+func (AttrResponseReturnedRows) Recommended()    {}
+func (AttrResponseReturnedRows) Key() string     { return "db_response_returned_rows" }
+func (a AttrResponseReturnedRows) Value() string { return string(a) }
 
 // Database response status code.
 // The status code returned by the database. Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
 // Semantic conventions for individual database systems SHOULD document what `db.response.status_code` means in the context of that system
 type AttrResponseStatusCode string // db.response.status_code
 
-func (AttrResponseStatusCode) Stable()      {}
-func (AttrResponseStatusCode) Recommended() {}
+func (AttrResponseStatusCode) Stable()         {}
+func (AttrResponseStatusCode) Recommended()    {}
+func (AttrResponseStatusCode) Key() string     { return "db_response_status_code" }
+func (a AttrResponseStatusCode) Value() string { return string(a) }
 
 // Deprecated, use `db.collection.name` instead
 type AttrSqlTable string // db.sql.table
 
-func (AttrSqlTable) Development() {}
-func (AttrSqlTable) Recommended() {}
+func (AttrSqlTable) Development()    {}
+func (AttrSqlTable) Recommended()    {}
+func (AttrSqlTable) Key() string     { return "db_sql_table" }
+func (a AttrSqlTable) Value() string { return string(a) }
 
 // The database statement being executed
 type AttrStatement string // db.statement
 
-func (AttrStatement) Development() {}
-func (AttrStatement) Recommended() {}
+func (AttrStatement) Development()    {}
+func (AttrStatement) Recommended()    {}
+func (AttrStatement) Key() string     { return "db_statement" }
+func (a AttrStatement) Value() string { return string(a) }
 
 // The name of a stored procedure within the database.
 // It is RECOMMENDED to capture the value as provided by the application
@@ -342,27 +475,132 @@ func (AttrStatement) Recommended() {}
 // stored procedure name then that stored procedure name SHOULD be used
 type AttrStoredProcedureName string // db.stored_procedure.name
 
-func (AttrStoredProcedureName) Stable()      {}
-func (AttrStoredProcedureName) Recommended() {}
+func (AttrStoredProcedureName) Stable()         {}
+func (AttrStoredProcedureName) Recommended()    {}
+func (AttrStoredProcedureName) Key() string     { return "db_stored_procedure_name" }
+func (a AttrStoredProcedureName) Value() string { return string(a) }
 
 // Deprecated, use `db.system.name` instead
 type AttrSystem string // db.system
 
-func (AttrSystem) Development() {}
-func (AttrSystem) Recommended() {}
+func (AttrSystem) Development()    {}
+func (AttrSystem) Recommended()    {}
+func (AttrSystem) Key() string     { return "db_system" }
+func (a AttrSystem) Value() string { return string(a) }
+
+const SystemOtherSql AttrSystem = "other_sql"
+const SystemAdabas AttrSystem = "adabas"
+const SystemCache AttrSystem = "cache"
+const SystemIntersystemsCache AttrSystem = "intersystems_cache"
+const SystemCassandra AttrSystem = "cassandra"
+const SystemClickhouse AttrSystem = "clickhouse"
+const SystemCloudscape AttrSystem = "cloudscape"
+const SystemCockroachdb AttrSystem = "cockroachdb"
+const SystemColdfusion AttrSystem = "coldfusion"
+const SystemCosmosdb AttrSystem = "cosmosdb"
+const SystemCouchbase AttrSystem = "couchbase"
+const SystemCouchdb AttrSystem = "couchdb"
+const SystemDb2 AttrSystem = "db2"
+const SystemDerby AttrSystem = "derby"
+const SystemDynamodb AttrSystem = "dynamodb"
+const SystemEdb AttrSystem = "edb"
+const SystemElasticsearch AttrSystem = "elasticsearch"
+const SystemFilemaker AttrSystem = "filemaker"
+const SystemFirebird AttrSystem = "firebird"
+const SystemFirstsql AttrSystem = "firstsql"
+const SystemGeode AttrSystem = "geode"
+const SystemH2 AttrSystem = "h2"
+const SystemHanadb AttrSystem = "hanadb"
+const SystemHbase AttrSystem = "hbase"
+const SystemHive AttrSystem = "hive"
+const SystemHsqldb AttrSystem = "hsqldb"
+const SystemInfluxdb AttrSystem = "influxdb"
+const SystemInformix AttrSystem = "informix"
+const SystemIngres AttrSystem = "ingres"
+const SystemInstantdb AttrSystem = "instantdb"
+const SystemInterbase AttrSystem = "interbase"
+const SystemMariadb AttrSystem = "mariadb"
+const SystemMaxdb AttrSystem = "maxdb"
+const SystemMemcached AttrSystem = "memcached"
+const SystemMongodb AttrSystem = "mongodb"
+const SystemMssql AttrSystem = "mssql"
+const SystemMssqlcompact AttrSystem = "mssqlcompact"
+const SystemMysql AttrSystem = "mysql"
+const SystemNeo4j AttrSystem = "neo4j"
+const SystemNetezza AttrSystem = "netezza"
+const SystemOpensearch AttrSystem = "opensearch"
+const SystemOracle AttrSystem = "oracle"
+const SystemPervasive AttrSystem = "pervasive"
+const SystemPointbase AttrSystem = "pointbase"
+const SystemPostgresql AttrSystem = "postgresql"
+const SystemProgress AttrSystem = "progress"
+const SystemRedis AttrSystem = "redis"
+const SystemRedshift AttrSystem = "redshift"
+const SystemSpanner AttrSystem = "spanner"
+const SystemSqlite AttrSystem = "sqlite"
+const SystemSybase AttrSystem = "sybase"
+const SystemTeradata AttrSystem = "teradata"
+const SystemTrino AttrSystem = "trino"
+const SystemVertica AttrSystem = "vertica"
 
 // The database management system (DBMS) product as identified by the client instrumentation.
 // The actual DBMS may differ from the one identified by the client. For example, when using PostgreSQL client libraries to connect to a CockroachDB, the `db.system.name` is set to `postgresql` based on the instrumentation's best knowledge
 type AttrSystemName string // db.system.name
 
-func (AttrSystemName) Stable()      {}
-func (AttrSystemName) Recommended() {}
+func (AttrSystemName) Stable()         {}
+func (AttrSystemName) Recommended()    {}
+func (AttrSystemName) Key() string     { return "db_system_name" }
+func (a AttrSystemName) Value() string { return string(a) }
+
+const SystemNameOtherSql AttrSystemName = "other_sql"
+const SystemNameSoftwareagAdabas AttrSystemName = "softwareag.adabas"
+const SystemNameActianIngres AttrSystemName = "actian.ingres"
+const SystemNameAwsDynamodb AttrSystemName = "aws.dynamodb"
+const SystemNameAwsRedshift AttrSystemName = "aws.redshift"
+const SystemNameAzureCosmosdb AttrSystemName = "azure.cosmosdb"
+const SystemNameIntersystemsCache AttrSystemName = "intersystems.cache"
+const SystemNameCassandra AttrSystemName = "cassandra"
+const SystemNameClickhouse AttrSystemName = "clickhouse"
+const SystemNameCockroachdb AttrSystemName = "cockroachdb"
+const SystemNameCouchbase AttrSystemName = "couchbase"
+const SystemNameCouchdb AttrSystemName = "couchdb"
+const SystemNameDerby AttrSystemName = "derby"
+const SystemNameElasticsearch AttrSystemName = "elasticsearch"
+const SystemNameFirebirdsql AttrSystemName = "firebirdsql"
+const SystemNameGcpSpanner AttrSystemName = "gcp.spanner"
+const SystemNameGeode AttrSystemName = "geode"
+const SystemNameH2database AttrSystemName = "h2database"
+const SystemNameHbase AttrSystemName = "hbase"
+const SystemNameHive AttrSystemName = "hive"
+const SystemNameHsqldb AttrSystemName = "hsqldb"
+const SystemNameIbmDb2 AttrSystemName = "ibm.db2"
+const SystemNameIbmInformix AttrSystemName = "ibm.informix"
+const SystemNameIbmNetezza AttrSystemName = "ibm.netezza"
+const SystemNameInfluxdb AttrSystemName = "influxdb"
+const SystemNameInstantdb AttrSystemName = "instantdb"
+const SystemNameMariadb AttrSystemName = "mariadb"
+const SystemNameMemcached AttrSystemName = "memcached"
+const SystemNameMongodb AttrSystemName = "mongodb"
+const SystemNameMicrosoftSqlServer AttrSystemName = "microsoft.sql_server"
+const SystemNameMysql AttrSystemName = "mysql"
+const SystemNameNeo4j AttrSystemName = "neo4j"
+const SystemNameOpensearch AttrSystemName = "opensearch"
+const SystemNameOracleDb AttrSystemName = "oracle.db"
+const SystemNamePostgresql AttrSystemName = "postgresql"
+const SystemNameRedis AttrSystemName = "redis"
+const SystemNameSapHana AttrSystemName = "sap.hana"
+const SystemNameSapMaxdb AttrSystemName = "sap.maxdb"
+const SystemNameSqlite AttrSystemName = "sqlite"
+const SystemNameTeradata AttrSystemName = "teradata"
+const SystemNameTrino AttrSystemName = "trino"
 
 // Deprecated, no replacement at this time
 type AttrUser string // db.user
 
-func (AttrUser) Development() {}
-func (AttrUser) Recommended() {}
+func (AttrUser) Development()    {}
+func (AttrUser) Recommended()    {}
+func (AttrUser) Key() string     { return "db_user" }
+func (a AttrUser) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -383,7 +621,6 @@ func (AttrUser) Recommended() {}
                     "root_namespace": "db",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -585,7 +822,6 @@ func (AttrUser) Recommended() {}
                     "root_namespace": "db",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -637,7 +873,6 @@ func (AttrUser) Recommended() {}
                     "root_namespace": "db",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -710,7 +945,6 @@ func (AttrUser) Recommended() {}
                     "root_namespace": "db",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Gateway (HTTP) connection.",
@@ -750,7 +984,6 @@ func (AttrUser) Recommended() {}
                     "root_namespace": "db",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -820,7 +1053,6 @@ func (AttrUser) Recommended() {}
                     "root_namespace": "db",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -1363,7 +1595,6 @@ func (AttrUser) Recommended() {}
                     "root_namespace": "db",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Some other SQL database. Fallback only. See notes.",
@@ -1808,7 +2039,6 @@ func (AttrUser) Recommended() {}
                     "root_namespace": "db",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Some other SQL database. Fallback only.",
@@ -2267,6 +2497,7 @@ func (AttrUser) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

@@ -11,43 +11,44 @@ type RateLimitingRequests struct {
 }
 
 func NewRateLimitingRequests() RateLimitingRequests {
-	labels := []string{"aspnetcore_rate_limiting_result", "aspnetcore_rate_limiting_policy"}
+	labels := []string{AttrRateLimitingResult("").Key(), AttrRateLimitingPolicy("").Key()}
 	return RateLimitingRequests{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "aspnetcore",
-		Name:      "rate_limiting_requests",
-		Help:      "Number of requests that tried to acquire a rate limiting lease.",
+		Name: "aspnetcore_rate_limiting_requests",
+		Help: "Number of requests that tried to acquire a rate limiting lease.",
 	}, labels)}
 }
 
-func (m RateLimitingRequests) With(rateLimitingResult AttrRateLimitingResult, extra interface {
-	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m RateLimitingRequests) With(rateLimitingResult AttrRateLimitingResult, extras ...interface{ AspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) prometheus.Counter {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(rateLimitingResult),
-		string(extra.AttrAspnetcoreRateLimitingPolicy()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(rateLimitingResult.Value(), extra.AspnetcoreRateLimitingPolicy().Value())
 }
 
-func (a RateLimitingRequests) WithAspnetcoreRateLimitingPolicy(attr interface{ AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) RateLimitingRequests {
-	a.extra.AspnetcoreRateLimitingPolicy = attr.AttrAspnetcoreRateLimitingPolicy()
+// Deprecated: Use [RateLimitingRequests.With] instead
+func (m RateLimitingRequests) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a RateLimitingRequests) WithRateLimitingPolicy(attr interface{ AspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) RateLimitingRequests {
+	a.extra.AttrRateLimitingPolicy = attr.AspnetcoreRateLimitingPolicy()
 	return a
 }
 
 type RateLimitingRequestsExtra struct {
-	// Rate limiting policy name.
-	AspnetcoreRateLimitingPolicy AttrRateLimitingPolicy `otel:"aspnetcore.rate_limiting.policy"`
+	// Rate limiting policy name
+	AttrRateLimitingPolicy AttrRateLimitingPolicy `otel:"aspnetcore.rate_limiting.policy"`
 }
 
-func (a RateLimitingRequestsExtra) AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy {
-	return a.AspnetcoreRateLimitingPolicy
+func (a RateLimitingRequestsExtra) AspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy {
+	return a.AttrRateLimitingPolicy
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -72,7 +73,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Lease was acquired",
@@ -150,7 +150,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Lease was acquired",
@@ -233,6 +232,8 @@ State {
             "type": "metric",
             "unit": "{request}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -340,6 +341,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -426,7 +428,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

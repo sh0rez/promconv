@@ -3,46 +3,73 @@ package aspnetcore
 // ASP.NET Core exception middleware handling result
 type AttrDiagnosticsExceptionResult string // aspnetcore.diagnostics.exception.result
 
-func (AttrDiagnosticsExceptionResult) Stable()      {}
-func (AttrDiagnosticsExceptionResult) Recommended() {}
+func (AttrDiagnosticsExceptionResult) Stable()         {}
+func (AttrDiagnosticsExceptionResult) Recommended()    {}
+func (AttrDiagnosticsExceptionResult) Key() string     { return "aspnetcore_diagnostics_exception_result" }
+func (a AttrDiagnosticsExceptionResult) Value() string { return string(a) }
+
+const DiagnosticsExceptionResultHandled AttrDiagnosticsExceptionResult = "handled"
+const DiagnosticsExceptionResultUnhandled AttrDiagnosticsExceptionResult = "unhandled"
+const DiagnosticsExceptionResultSkipped AttrDiagnosticsExceptionResult = "skipped"
+const DiagnosticsExceptionResultAborted AttrDiagnosticsExceptionResult = "aborted"
 
 // Full type name of the [`IExceptionHandler`] implementation that handled the exception
 //
 // [`IExceptionHandler`]: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler
 type AttrDiagnosticsHandlerType string // aspnetcore.diagnostics.handler.type
 
-func (AttrDiagnosticsHandlerType) Stable()      {}
-func (AttrDiagnosticsHandlerType) Recommended() {}
+func (AttrDiagnosticsHandlerType) Stable()         {}
+func (AttrDiagnosticsHandlerType) Recommended()    {}
+func (AttrDiagnosticsHandlerType) Key() string     { return "aspnetcore_diagnostics_handler_type" }
+func (a AttrDiagnosticsHandlerType) Value() string { return string(a) }
 
 // Rate limiting policy name
 type AttrRateLimitingPolicy string // aspnetcore.rate_limiting.policy
 
-func (AttrRateLimitingPolicy) Stable()      {}
-func (AttrRateLimitingPolicy) Recommended() {}
+func (AttrRateLimitingPolicy) Stable()         {}
+func (AttrRateLimitingPolicy) Recommended()    {}
+func (AttrRateLimitingPolicy) Key() string     { return "aspnetcore_rate_limiting_policy" }
+func (a AttrRateLimitingPolicy) Value() string { return string(a) }
 
 // Rate-limiting result, shows whether the lease was acquired or contains a rejection reason
 type AttrRateLimitingResult string // aspnetcore.rate_limiting.result
 
-func (AttrRateLimitingResult) Stable()      {}
-func (AttrRateLimitingResult) Recommended() {}
+func (AttrRateLimitingResult) Stable()         {}
+func (AttrRateLimitingResult) Recommended()    {}
+func (AttrRateLimitingResult) Key() string     { return "aspnetcore_rate_limiting_result" }
+func (a AttrRateLimitingResult) Value() string { return string(a) }
+
+const RateLimitingResultAcquired AttrRateLimitingResult = "acquired"
+const RateLimitingResultEndpointLimiter AttrRateLimitingResult = "endpoint_limiter"
+const RateLimitingResultGlobalLimiter AttrRateLimitingResult = "global_limiter"
+const RateLimitingResultRequestCanceled AttrRateLimitingResult = "request_canceled"
 
 // Flag indicating if request was handled by the application pipeline
 type AttrRequestIsUnhandled string // aspnetcore.request.is_unhandled
 
-func (AttrRequestIsUnhandled) Stable()      {}
-func (AttrRequestIsUnhandled) Recommended() {}
+func (AttrRequestIsUnhandled) Stable()         {}
+func (AttrRequestIsUnhandled) Recommended()    {}
+func (AttrRequestIsUnhandled) Key() string     { return "aspnetcore_request_is_unhandled" }
+func (a AttrRequestIsUnhandled) Value() string { return string(a) }
 
 // A value that indicates whether the matched route is a fallback route
 type AttrRoutingIsFallback string // aspnetcore.routing.is_fallback
 
-func (AttrRoutingIsFallback) Stable()      {}
-func (AttrRoutingIsFallback) Recommended() {}
+func (AttrRoutingIsFallback) Stable()         {}
+func (AttrRoutingIsFallback) Recommended()    {}
+func (AttrRoutingIsFallback) Key() string     { return "aspnetcore_routing_is_fallback" }
+func (a AttrRoutingIsFallback) Value() string { return string(a) }
 
 // Match result - success or failure
 type AttrRoutingMatchStatus string // aspnetcore.routing.match_status
 
-func (AttrRoutingMatchStatus) Stable()      {}
-func (AttrRoutingMatchStatus) Recommended() {}
+func (AttrRoutingMatchStatus) Stable()         {}
+func (AttrRoutingMatchStatus) Recommended()    {}
+func (AttrRoutingMatchStatus) Key() string     { return "aspnetcore_routing_match_status" }
+func (a AttrRoutingMatchStatus) Value() string { return string(a) }
+
+const RoutingMatchStatusSuccess AttrRoutingMatchStatus = "success"
+const RoutingMatchStatusFailure AttrRoutingMatchStatus = "failure"
 
 /* State {
     name: "attr.go.j2",
@@ -62,7 +89,6 @@ func (AttrRoutingMatchStatus) Recommended() {}
                     "root_namespace": "aspnetcore",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Exception was handled by the exception handling middleware.",
@@ -134,7 +160,6 @@ func (AttrRoutingMatchStatus) Recommended() {}
                     "root_namespace": "aspnetcore",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Lease was acquired",
@@ -204,7 +229,6 @@ func (AttrRoutingMatchStatus) Recommended() {}
                     "root_namespace": "aspnetcore",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Match succeeded",
@@ -335,6 +359,7 @@ func (AttrRoutingMatchStatus) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

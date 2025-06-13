@@ -3,26 +3,34 @@ package exception
 // Indicates that the exception is escaping the scope of the span
 type AttrEscaped string // exception.escaped
 
-func (AttrEscaped) Stable()      {}
-func (AttrEscaped) Recommended() {}
+func (AttrEscaped) Stable()         {}
+func (AttrEscaped) Recommended()    {}
+func (AttrEscaped) Key() string     { return "exception_escaped" }
+func (a AttrEscaped) Value() string { return string(a) }
 
 // The exception message
 type AttrMessage string // exception.message
 
-func (AttrMessage) Stable()      {}
-func (AttrMessage) Recommended() {}
+func (AttrMessage) Stable()         {}
+func (AttrMessage) Recommended()    {}
+func (AttrMessage) Key() string     { return "exception_message" }
+func (a AttrMessage) Value() string { return string(a) }
 
 // A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG
 type AttrStacktrace string // exception.stacktrace
 
-func (AttrStacktrace) Stable()      {}
-func (AttrStacktrace) Recommended() {}
+func (AttrStacktrace) Stable()         {}
+func (AttrStacktrace) Recommended()    {}
+func (AttrStacktrace) Key() string     { return "exception_stacktrace" }
+func (a AttrStacktrace) Value() string { return string(a) }
 
 // The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it
 type AttrType string // exception.type
 
-func (AttrType) Stable()      {}
-func (AttrType) Recommended() {}
+func (AttrType) Stable()         {}
+func (AttrType) Recommended()    {}
+func (AttrType) Key() string     { return "exception_type" }
+func (a AttrType) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -186,6 +194,7 @@ func (AttrType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

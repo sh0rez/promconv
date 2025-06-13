@@ -6,37 +6,32 @@ import (
 
 // The lower limit for the number of replica pods to which the autoscaler can scale down
 type HpaMinPods struct {
-	*prometheus.GaugeVec
-	extra HpaMinPodsExtra
+	prometheus.Gauge
 }
 
 func NewHpaMinPods() HpaMinPods {
-	labels := []string{}
-	return HpaMinPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "hpa_min_pods",
-		Help:      "The lower limit for the number of replica pods to which the autoscaler can scale down",
-	}, labels)}
+	return HpaMinPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_hpa_min_pods",
+		Help: "The lower limit for the number of replica pods to which the autoscaler can scale down",
+	})}
 }
 
-func (m HpaMinPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m HpaMinPods) Register(regs ...prometheus.Registerer) HpaMinPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type HpaMinPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "HpaMinPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "hpa.min_pods",
         "Type": "HpaMinPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The lower limit for the number of replica pods to which the autoscaler can scale down",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

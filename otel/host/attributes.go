@@ -3,38 +3,59 @@ package host
 // The CPU architecture the host system is running on
 type AttrArch string // host.arch
 
-func (AttrArch) Development() {}
-func (AttrArch) Recommended() {}
+func (AttrArch) Development()    {}
+func (AttrArch) Recommended()    {}
+func (AttrArch) Key() string     { return "host_arch" }
+func (a AttrArch) Value() string { return string(a) }
+
+const ArchAmd64 AttrArch = "amd64"
+const ArchArm32 AttrArch = "arm32"
+const ArchArm64 AttrArch = "arm64"
+const ArchIa64 AttrArch = "ia64"
+const ArchPpc32 AttrArch = "ppc32"
+const ArchPpc64 AttrArch = "ppc64"
+const ArchS390x AttrArch = "s390x"
+const ArchX86 AttrArch = "x86"
 
 // The amount of level 2 memory cache available to the processor (in Bytes)
 type AttrCpuCacheL2Size string // host.cpu.cache.l2.size
 
-func (AttrCpuCacheL2Size) Development() {}
-func (AttrCpuCacheL2Size) Recommended() {}
+func (AttrCpuCacheL2Size) Development()    {}
+func (AttrCpuCacheL2Size) Recommended()    {}
+func (AttrCpuCacheL2Size) Key() string     { return "host_cpu_cache_l2_size" }
+func (a AttrCpuCacheL2Size) Value() string { return string(a) }
 
 // Family or generation of the CPU
 type AttrCpuFamily string // host.cpu.family
 
-func (AttrCpuFamily) Development() {}
-func (AttrCpuFamily) Recommended() {}
+func (AttrCpuFamily) Development()    {}
+func (AttrCpuFamily) Recommended()    {}
+func (AttrCpuFamily) Key() string     { return "host_cpu_family" }
+func (a AttrCpuFamily) Value() string { return string(a) }
 
 // Model identifier. It provides more granular information about the CPU, distinguishing it from other CPUs within the same family
 type AttrCpuModelId string // host.cpu.model.id
 
-func (AttrCpuModelId) Development() {}
-func (AttrCpuModelId) Recommended() {}
+func (AttrCpuModelId) Development()    {}
+func (AttrCpuModelId) Recommended()    {}
+func (AttrCpuModelId) Key() string     { return "host_cpu_model_id" }
+func (a AttrCpuModelId) Value() string { return string(a) }
 
 // Model designation of the processor
 type AttrCpuModelName string // host.cpu.model.name
 
-func (AttrCpuModelName) Development() {}
-func (AttrCpuModelName) Recommended() {}
+func (AttrCpuModelName) Development()    {}
+func (AttrCpuModelName) Recommended()    {}
+func (AttrCpuModelName) Key() string     { return "host_cpu_model_name" }
+func (a AttrCpuModelName) Value() string { return string(a) }
 
 // Stepping or core revisions
 type AttrCpuStepping string // host.cpu.stepping
 
-func (AttrCpuStepping) Development() {}
-func (AttrCpuStepping) Recommended() {}
+func (AttrCpuStepping) Development()    {}
+func (AttrCpuStepping) Recommended()    {}
+func (AttrCpuStepping) Key() string     { return "host_cpu_stepping" }
+func (a AttrCpuStepping) Value() string { return string(a) }
 
 // Processor manufacturer identifier. A maximum 12-character string.
 //
@@ -43,34 +64,44 @@ func (AttrCpuStepping) Recommended() {}
 // [CPUID]: https://wiki.osdev.org/CPUID
 type AttrCpuVendorId string // host.cpu.vendor.id
 
-func (AttrCpuVendorId) Development() {}
-func (AttrCpuVendorId) Recommended() {}
+func (AttrCpuVendorId) Development()    {}
+func (AttrCpuVendorId) Recommended()    {}
+func (AttrCpuVendorId) Key() string     { return "host_cpu_vendor_id" }
+func (a AttrCpuVendorId) Value() string { return string(a) }
 
 // Unique host ID. For Cloud, this must be the instance_id assigned by the cloud provider. For non-containerized systems, this should be the `machine-id`. See the table below for the sources to use to determine the `machine-id` based on operating system
 type AttrId string // host.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "host_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // VM image ID or host OS image ID. For Cloud, this value is from the provider
 type AttrImageId string // host.image.id
 
-func (AttrImageId) Development() {}
-func (AttrImageId) Recommended() {}
+func (AttrImageId) Development()    {}
+func (AttrImageId) Recommended()    {}
+func (AttrImageId) Key() string     { return "host_image_id" }
+func (a AttrImageId) Value() string { return string(a) }
 
 // Name of the VM image or OS install the host was instantiated from
 type AttrImageName string // host.image.name
 
-func (AttrImageName) Development() {}
-func (AttrImageName) Recommended() {}
+func (AttrImageName) Development()    {}
+func (AttrImageName) Recommended()    {}
+func (AttrImageName) Key() string     { return "host_image_name" }
+func (a AttrImageName) Value() string { return string(a) }
 
 // The version string of the VM image or host OS as defined in [Version Attributes]
 //
 // [Version Attributes]: /docs/resource/README.md#version-attributes
 type AttrImageVersion string // host.image.version
 
-func (AttrImageVersion) Development() {}
-func (AttrImageVersion) Recommended() {}
+func (AttrImageVersion) Development()    {}
+func (AttrImageVersion) Recommended()    {}
+func (AttrImageVersion) Key() string     { return "host_image_version" }
+func (a AttrImageVersion) Value() string { return string(a) }
 
 // Available IP addresses of the host, excluding loopback interfaces.
 //
@@ -79,8 +110,10 @@ func (AttrImageVersion) Recommended() {}
 // [RFC 5952]: https://www.rfc-editor.org/rfc/rfc5952.html
 type AttrIp string // host.ip
 
-func (AttrIp) Development() {}
-func (AttrIp) Recommended() {}
+func (AttrIp) Development()    {}
+func (AttrIp) Recommended()    {}
+func (AttrIp) Key() string     { return "host_ip" }
+func (a AttrIp) Value() string { return string(a) }
 
 // Available MAC addresses of the host, excluding loopback interfaces.
 //
@@ -89,20 +122,26 @@ func (AttrIp) Recommended() {}
 // [IEEE RA hexadecimal form]: https://standards.ieee.org/wp-content/uploads/import/documents/tutorials/eui.pdf
 type AttrMac string // host.mac
 
-func (AttrMac) Development() {}
-func (AttrMac) Recommended() {}
+func (AttrMac) Development()    {}
+func (AttrMac) Recommended()    {}
+func (AttrMac) Key() string     { return "host_mac" }
+func (a AttrMac) Value() string { return string(a) }
 
 // Name of the host. On Unix systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user
 type AttrName string // host.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "host_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // Type of host. For Cloud, this must be the machine type
 type AttrType string // host.type
 
-func (AttrType) Development() {}
-func (AttrType) Recommended() {}
+func (AttrType) Development()    {}
+func (AttrType) Recommended()    {}
+func (AttrType) Key() string     { return "host_type" }
+func (a AttrType) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -118,7 +157,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "host",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "AMD64",
@@ -464,6 +502,7 @@ func (AttrType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

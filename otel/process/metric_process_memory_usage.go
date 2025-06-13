@@ -6,37 +6,32 @@ import (
 
 // The amount of physical memory in use.
 type MemoryUsage struct {
-	*prometheus.GaugeVec
-	extra MemoryUsageExtra
+	prometheus.Gauge
 }
 
 func NewMemoryUsage() MemoryUsage {
-	labels := []string{}
-	return MemoryUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "process",
-		Name:      "memory_usage",
-		Help:      "The amount of physical memory in use.",
-	}, labels)}
+	return MemoryUsage{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "process_memory_usage",
+		Help: "The amount of physical memory in use.",
+	})}
 }
 
-func (m MemoryUsage) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryUsage) Register(regs ...prometheus.Registerer) MemoryUsage {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MemoryUsageExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "memory.usage",
         "Type": "MemoryUsage",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The amount of physical memory in use.",
@@ -177,6 +171,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -263,7 +258,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

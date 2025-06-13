@@ -15,57 +15,59 @@ type PodNetworkIo struct {
 }
 
 func NewPodNetworkIo() PodNetworkIo {
-	labels := []string{"network_interface_name", "network_io_direction"}
+	labels := []string{network.AttrInterfaceName("").Key(), network.AttrIoDirection("").Key()}
 	return PodNetworkIo{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "k8s",
-		Name:      "pod_network_io",
-		Help:      "Network bytes for the Pod",
+		Name: "k8s_pod_network_io",
+		Help: "Network bytes for the Pod",
 	}, labels)}
 }
 
-func (m PodNetworkIo) With(extra interface {
-	AttrNetworkInterfaceName() network.AttrInterfaceName
-	AttrNetworkIoDirection() network.AttrIoDirection
+func (m PodNetworkIo) With(extras ...interface {
+	NetworkInterfaceName() network.AttrInterfaceName
+	NetworkIoDirection() network.AttrIoDirection
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrNetworkInterfaceName()),
-		string(extra.AttrNetworkIoDirection()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.NetworkInterfaceName().Value(), extra.NetworkIoDirection().Value())
+}
+
+// Deprecated: Use [PodNetworkIo.With] instead
+func (m PodNetworkIo) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 func (a PodNetworkIo) WithNetworkInterfaceName(attr interface {
-	AttrNetworkInterfaceName() network.AttrInterfaceName
+	NetworkInterfaceName() network.AttrInterfaceName
 }) PodNetworkIo {
-	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	a.extra.AttrNetworkInterfaceName = attr.NetworkInterfaceName()
 	return a
 }
 func (a PodNetworkIo) WithNetworkIoDirection(attr interface {
-	AttrNetworkIoDirection() network.AttrIoDirection
+	NetworkIoDirection() network.AttrIoDirection
 }) PodNetworkIo {
-	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	a.extra.AttrNetworkIoDirection = attr.NetworkIoDirection()
 	return a
 }
 
 type PodNetworkIoExtra struct {
-	// The network interface name.
-	NetworkInterfaceName network.AttrInterfaceName `otel:"network.interface.name"`
-	// The network IO operation direction.
-	NetworkIoDirection network.AttrIoDirection `otel:"network.io.direction"`
+	// The network interface name
+	AttrNetworkInterfaceName network.AttrInterfaceName `otel:"network.interface.name"` // The network IO operation direction
+	AttrNetworkIoDirection   network.AttrIoDirection   `otel:"network.io.direction"`
 }
 
-func (a PodNetworkIoExtra) AttrNetworkInterfaceName() network.AttrInterfaceName {
-	return a.NetworkInterfaceName
+func (a PodNetworkIoExtra) NetworkInterfaceName() network.AttrInterfaceName {
+	return a.AttrNetworkInterfaceName
 }
-func (a PodNetworkIoExtra) AttrNetworkIoDirection() network.AttrIoDirection {
-	return a.NetworkIoDirection
+func (a PodNetworkIoExtra) NetworkIoDirection() network.AttrIoDirection {
+	return a.AttrNetworkIoDirection
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -100,7 +102,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -133,7 +134,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -206,6 +206,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -313,6 +315,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -399,7 +402,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

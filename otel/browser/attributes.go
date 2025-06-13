@@ -6,15 +6,19 @@ package browser
 // [UA client hints API]: https://wicg.github.io/ua-client-hints/#interface
 type AttrBrands string // browser.brands
 
-func (AttrBrands) Development() {}
-func (AttrBrands) Recommended() {}
+func (AttrBrands) Development()    {}
+func (AttrBrands) Recommended()    {}
+func (AttrBrands) Key() string     { return "browser_brands" }
+func (a AttrBrands) Value() string { return string(a) }
 
 // Preferred language of the user using the browser
 // This value is intended to be taken from the Navigator API `navigator.language`
 type AttrLanguage string // browser.language
 
-func (AttrLanguage) Development() {}
-func (AttrLanguage) Recommended() {}
+func (AttrLanguage) Development()    {}
+func (AttrLanguage) Recommended()    {}
+func (AttrLanguage) Key() string     { return "browser_language" }
+func (a AttrLanguage) Value() string { return string(a) }
 
 // A boolean that is true if the browser is running on a mobile device
 // This value is intended to be taken from the [UA client hints API] (`navigator.userAgentData.mobile`). If unavailable, this attribute SHOULD be left unset
@@ -22,8 +26,10 @@ func (AttrLanguage) Recommended() {}
 // [UA client hints API]: https://wicg.github.io/ua-client-hints/#interface
 type AttrMobile string // browser.mobile
 
-func (AttrMobile) Development() {}
-func (AttrMobile) Recommended() {}
+func (AttrMobile) Development()    {}
+func (AttrMobile) Recommended()    {}
+func (AttrMobile) Key() string     { return "browser_mobile" }
+func (a AttrMobile) Value() string { return string(a) }
 
 // The platform on which the browser is running
 // This value is intended to be taken from the [UA client hints API] (`navigator.userAgentData.platform`). If unavailable, the legacy `navigator.platform` API SHOULD NOT be used instead and this attribute SHOULD be left unset in order for the values to be consistent.
@@ -34,8 +40,10 @@ func (AttrMobile) Recommended() {}
 // [`os.type` and `os.name` attributes]: ./os.md
 type AttrPlatform string // browser.platform
 
-func (AttrPlatform) Development() {}
-func (AttrPlatform) Recommended() {}
+func (AttrPlatform) Development()    {}
+func (AttrPlatform) Recommended()    {}
+func (AttrPlatform) Key() string     { return "browser_platform" }
+func (a AttrPlatform) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -208,6 +216,7 @@ func (AttrPlatform) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

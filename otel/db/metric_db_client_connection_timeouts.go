@@ -11,22 +11,20 @@ type ClientConnectionTimeouts struct {
 }
 
 func NewClientConnectionTimeouts() ClientConnectionTimeouts {
-	labels := []string{"db_client_connection_pool_name"}
+	labels := []string{AttrClientConnectionPoolName("").Key()}
 	return ClientConnectionTimeouts{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "db",
-		Name:      "client_connection_timeouts",
-		Help:      "The number of connection timeouts that have occurred trying to obtain a connection from the pool",
+		Name: "db_client_connection_timeouts",
+		Help: "The number of connection timeouts that have occurred trying to obtain a connection from the pool",
 	}, labels)}
 }
 
-func (m ClientConnectionTimeouts) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(clientConnectionPoolName),
-	)
+func (m ClientConnectionTimeouts) With(clientConnectionPoolName AttrClientConnectionPoolName, extras ...interface{}) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(clientConnectionPoolName.Value())
+}
+
+// Deprecated: Use [ClientConnectionTimeouts.With] instead
+func (m ClientConnectionTimeouts) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 type ClientConnectionTimeoutsExtra struct {
@@ -34,7 +32,7 @@ type ClientConnectionTimeoutsExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -105,6 +103,8 @@ State {
             "type": "metric",
             "unit": "{timeout}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -212,6 +212,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -298,7 +299,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

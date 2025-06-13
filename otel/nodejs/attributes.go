@@ -3,8 +3,13 @@ package nodejs
 // The state of event loop time
 type AttrEventloopState string // nodejs.eventloop.state
 
-func (AttrEventloopState) Development() {}
-func (AttrEventloopState) Recommended() {}
+func (AttrEventloopState) Development()    {}
+func (AttrEventloopState) Recommended()    {}
+func (AttrEventloopState) Key() string     { return "nodejs_eventloop_state" }
+func (a AttrEventloopState) Value() string { return string(a) }
+
+const EventloopStateActive AttrEventloopState = "active"
+const EventloopStateIdle AttrEventloopState = "idle"
 
 /* State {
     name: "attr.go.j2",
@@ -20,7 +25,6 @@ func (AttrEventloopState) Recommended() {}
                     "root_namespace": "nodejs",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Active time.",
@@ -151,6 +155,7 @@ func (AttrEventloopState) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

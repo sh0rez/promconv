@@ -3,8 +3,13 @@ package golang
 // The type of memory
 type AttrMemoryType string // go.memory.type
 
-func (AttrMemoryType) Development() {}
-func (AttrMemoryType) Recommended() {}
+func (AttrMemoryType) Development()    {}
+func (AttrMemoryType) Recommended()    {}
+func (AttrMemoryType) Key() string     { return "go_memory_type" }
+func (a AttrMemoryType) Value() string { return string(a) }
+
+const MemoryTypeStack AttrMemoryType = "stack"
+const MemoryTypeOther AttrMemoryType = "other"
 
 /* State {
     name: "attr.go.j2",
@@ -24,7 +29,6 @@ func (AttrMemoryType) Recommended() {}
                     "root_namespace": "go",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Memory allocated from the heap that is reserved for stack space, whether or not it is currently in-use.",
@@ -155,6 +159,7 @@ func (AttrMemoryType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

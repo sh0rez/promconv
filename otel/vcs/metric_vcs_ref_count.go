@@ -11,60 +11,58 @@ type RefCount struct {
 }
 
 func NewRefCount() RefCount {
-	labels := []string{"vcs_ref_type", "vcs_repository_url_full", "vcs_owner_name", "vcs_repository_name", "vcs_provider_name"}
+	labels := []string{AttrRefType("").Key(), AttrRepositoryUrlFull("").Key(), AttrOwnerName("").Key(), AttrRepositoryName("").Key(), AttrProviderName("").Key()}
 	return RefCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "vcs",
-		Name:      "ref_count",
-		Help:      "The number of refs of type branch or tag in a repository.",
+		Name: "vcs_ref_count",
+		Help: "The number of refs of type branch or tag in a repository.",
 	}, labels)}
 }
 
-func (m RefCount) With(refType AttrRefType, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
-	AttrVcsOwnerName() AttrOwnerName
-	AttrVcsRepositoryName() AttrRepositoryName
-	AttrVcsProviderName() AttrProviderName
+func (m RefCount) With(refKind AttrRefType, repositoryUrlFull AttrRepositoryUrlFull, extras ...interface {
+	VcsOwnerName() AttrOwnerName
+	VcsRepositoryName() AttrRepositoryName
+	VcsProviderName() AttrProviderName
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(refType),
-		string(repositoryUrlFull),
-		string(extra.AttrVcsOwnerName()),
-		string(extra.AttrVcsRepositoryName()),
-		string(extra.AttrVcsProviderName()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(refKind.Value(), repositoryUrlFull.Value(), extra.VcsOwnerName().Value(), extra.VcsRepositoryName().Value(), extra.VcsProviderName().Value())
 }
 
-func (a RefCount) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) RefCount {
-	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+// Deprecated: Use [RefCount.With] instead
+func (m RefCount) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a RefCount) WithOwnerName(attr interface{ VcsOwnerName() AttrOwnerName }) RefCount {
+	a.extra.AttrOwnerName = attr.VcsOwnerName()
 	return a
 }
-func (a RefCount) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) RefCount {
-	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+func (a RefCount) WithRepositoryName(attr interface{ VcsRepositoryName() AttrRepositoryName }) RefCount {
+	a.extra.AttrRepositoryName = attr.VcsRepositoryName()
 	return a
 }
-func (a RefCount) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) RefCount {
-	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+func (a RefCount) WithProviderName(attr interface{ VcsProviderName() AttrProviderName }) RefCount {
+	a.extra.AttrProviderName = attr.VcsProviderName()
 	return a
 }
 
 type RefCountExtra struct {
-	// The group owner within the version control system.
-	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
-	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
-	VcsRepositoryName AttrRepositoryName `otel:"vcs.repository.name"`
-	// The name of the version control system provider.
-	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
+	// The group owner within the version control system
+	AttrOwnerName      AttrOwnerName      `otel:"vcs.owner.name"`      // The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub
+	AttrRepositoryName AttrRepositoryName `otel:"vcs.repository.name"` // The name of the version control system provider
+	AttrProviderName   AttrProviderName   `otel:"vcs.provider.name"`
 }
 
-func (a RefCountExtra) AttrVcsOwnerName() AttrOwnerName           { return a.VcsOwnerName }
-func (a RefCountExtra) AttrVcsRepositoryName() AttrRepositoryName { return a.VcsRepositoryName }
-func (a RefCountExtra) AttrVcsProviderName() AttrProviderName     { return a.VcsProviderName }
+func (a RefCountExtra) VcsOwnerName() AttrOwnerName           { return a.AttrOwnerName }
+func (a RefCountExtra) VcsRepositoryName() AttrRepositoryName { return a.AttrRepositoryName }
+func (a RefCountExtra) VcsProviderName() AttrProviderName     { return a.AttrProviderName }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -89,7 +87,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "[branch](https://git-scm.com/docs/gitglossary#Documentation/gitglossary.txt-aiddefbranchabranch)",
@@ -158,7 +155,6 @@ State {
                 "requirement_level": "opt_in",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "[GitHub](https://github.com)",
@@ -254,7 +250,6 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[GitHub](https://github.com)",
@@ -309,7 +304,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[branch](https://git-scm.com/docs/gitglossary#Documentation/gitglossary.txt-aiddefbranchabranch)",
@@ -414,6 +408,8 @@ State {
             "type": "metric",
             "unit": "{ref}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -521,6 +517,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -607,7 +604,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

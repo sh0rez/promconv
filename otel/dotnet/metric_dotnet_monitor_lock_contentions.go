@@ -6,37 +6,32 @@ import (
 
 // The number of times there was contention when trying to acquire a monitor lock since the process has started.
 type MonitorLockContentions struct {
-	*prometheus.CounterVec
-	extra MonitorLockContentionsExtra
+	prometheus.Counter
 }
 
 func NewMonitorLockContentions() MonitorLockContentions {
-	labels := []string{}
-	return MonitorLockContentions{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "dotnet",
-		Name:      "monitor_lock_contentions",
-		Help:      "The number of times there was contention when trying to acquire a monitor lock since the process has started.",
-	}, labels)}
+	return MonitorLockContentions{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "dotnet_monitor_lock_contentions",
+		Help: "The number of times there was contention when trying to acquire a monitor lock since the process has started.",
+	})}
 }
 
-func (m MonitorLockContentions) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m MonitorLockContentions) Register(regs ...prometheus.Registerer) MonitorLockContentions {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MonitorLockContentionsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MonitorLockContentionsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "monitor.lock_contentions",
         "Type": "MonitorLockContentions",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of times there was contention when trying to acquire a monitor lock since the process has started.\n",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

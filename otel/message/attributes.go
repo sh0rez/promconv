@@ -3,26 +3,37 @@ package message
 // Deprecated, use `rpc.message.compressed_size` instead
 type AttrCompressedSize string // message.compressed_size
 
-func (AttrCompressedSize) Development() {}
-func (AttrCompressedSize) Recommended() {}
+func (AttrCompressedSize) Development()    {}
+func (AttrCompressedSize) Recommended()    {}
+func (AttrCompressedSize) Key() string     { return "message_compressed_size" }
+func (a AttrCompressedSize) Value() string { return string(a) }
 
 // Deprecated, use `rpc.message.id` instead
 type AttrId string // message.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "message_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // Deprecated, use `rpc.message.type` instead
 type AttrType string // message.type
 
-func (AttrType) Development() {}
-func (AttrType) Recommended() {}
+func (AttrType) Development()    {}
+func (AttrType) Recommended()    {}
+func (AttrType) Key() string     { return "message_type" }
+func (a AttrType) Value() string { return string(a) }
+
+const TypeSent AttrType = "SENT"
+const TypeReceived AttrType = "RECEIVED"
 
 // Deprecated, use `rpc.message.uncompressed_size` instead
 type AttrUncompressedSize string // message.uncompressed_size
 
-func (AttrUncompressedSize) Development() {}
-func (AttrUncompressedSize) Recommended() {}
+func (AttrUncompressedSize) Development()    {}
+func (AttrUncompressedSize) Recommended()    {}
+func (AttrUncompressedSize) Key() string     { return "message_uncompressed_size" }
+func (a AttrUncompressedSize) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -69,7 +80,6 @@ func (AttrUncompressedSize) Recommended() {}
                     "root_namespace": "message",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -213,6 +223,7 @@ func (AttrUncompressedSize) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

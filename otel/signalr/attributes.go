@@ -3,16 +3,28 @@ package signalr
 // SignalR HTTP connection closure status
 type AttrConnectionStatus string // signalr.connection.status
 
-func (AttrConnectionStatus) Stable()      {}
-func (AttrConnectionStatus) Recommended() {}
+func (AttrConnectionStatus) Stable()         {}
+func (AttrConnectionStatus) Recommended()    {}
+func (AttrConnectionStatus) Key() string     { return "signalr_connection_status" }
+func (a AttrConnectionStatus) Value() string { return string(a) }
+
+const ConnectionStatusNormalClosure AttrConnectionStatus = "normal_closure"
+const ConnectionStatusTimeout AttrConnectionStatus = "timeout"
+const ConnectionStatusAppShutdown AttrConnectionStatus = "app_shutdown"
 
 // [SignalR transport type]
 //
 // [SignalR transport type]: https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md
 type AttrTransport string // signalr.transport
 
-func (AttrTransport) Stable()      {}
-func (AttrTransport) Recommended() {}
+func (AttrTransport) Stable()         {}
+func (AttrTransport) Recommended()    {}
+func (AttrTransport) Key() string     { return "signalr_transport" }
+func (a AttrTransport) Value() string { return string(a) }
+
+const TransportServerSentEvents AttrTransport = "server_sent_events"
+const TransportLongPolling AttrTransport = "long_polling"
+const TransportWebSockets AttrTransport = "web_sockets"
 
 /* State {
     name: "attr.go.j2",
@@ -32,7 +44,6 @@ func (AttrTransport) Recommended() {}
                     "root_namespace": "signalr",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The connection was closed normally.",
@@ -72,7 +83,6 @@ func (AttrTransport) Recommended() {}
                     "root_namespace": "signalr",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "ServerSentEvents protocol",
@@ -211,6 +221,7 @@ func (AttrTransport) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

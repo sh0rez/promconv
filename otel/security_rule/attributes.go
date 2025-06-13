@@ -3,52 +3,68 @@ package security_rule
 // A categorization value keyword used by the entity using the rule for detection of this event
 type AttrCategory string // security_rule.category
 
-func (AttrCategory) Development() {}
-func (AttrCategory) Recommended() {}
+func (AttrCategory) Development()    {}
+func (AttrCategory) Recommended()    {}
+func (AttrCategory) Key() string     { return "security_rule_category" }
+func (a AttrCategory) Value() string { return string(a) }
 
 // The description of the rule generating the event
 type AttrDescription string // security_rule.description
 
-func (AttrDescription) Development() {}
-func (AttrDescription) Recommended() {}
+func (AttrDescription) Development()    {}
+func (AttrDescription) Recommended()    {}
+func (AttrDescription) Key() string     { return "security_rule_description" }
+func (a AttrDescription) Value() string { return string(a) }
 
 // Name of the license under which the rule used to generate this event is made available
 type AttrLicense string // security_rule.license
 
-func (AttrLicense) Development() {}
-func (AttrLicense) Recommended() {}
+func (AttrLicense) Development()    {}
+func (AttrLicense) Recommended()    {}
+func (AttrLicense) Key() string     { return "security_rule_license" }
+func (a AttrLicense) Value() string { return string(a) }
 
 // The name of the rule or signature generating the event
 type AttrName string // security_rule.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "security_rule_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // Reference URL to additional information about the rule used to generate this event.
 //
 // The URL can point to the vendor’s documentation about the rule. If that’s not available, it can also be a link to a more general page describing this type of alert
 type AttrReference string // security_rule.reference
 
-func (AttrReference) Development() {}
-func (AttrReference) Recommended() {}
+func (AttrReference) Development()    {}
+func (AttrReference) Recommended()    {}
+func (AttrReference) Key() string     { return "security_rule_reference" }
+func (a AttrReference) Value() string { return string(a) }
 
 // Name of the ruleset, policy, group, or parent category in which the rule used to generate this event is a member
 type AttrRulesetName string // security_rule.ruleset.name
 
-func (AttrRulesetName) Development() {}
-func (AttrRulesetName) Recommended() {}
+func (AttrRulesetName) Development()    {}
+func (AttrRulesetName) Recommended()    {}
+func (AttrRulesetName) Key() string     { return "security_rule_ruleset_name" }
+func (a AttrRulesetName) Value() string { return string(a) }
 
 // A rule ID that is unique within the scope of a set or group of agents, observers, or other entities using the rule for detection of this event
 type AttrUuid string // security_rule.uuid
 
-func (AttrUuid) Development() {}
-func (AttrUuid) Recommended() {}
+func (AttrUuid) Development()    {}
+func (AttrUuid) Recommended()    {}
+func (AttrUuid) Key() string     { return "security_rule_uuid" }
+func (a AttrUuid) Value() string { return string(a) }
 
 // The version / revision of the rule being used for analysis
 type AttrVersion string // security_rule.version
 
-func (AttrVersion) Development() {}
-func (AttrVersion) Recommended() {}
+func (AttrVersion) Development()    {}
+func (AttrVersion) Recommended()    {}
+func (AttrVersion) Key() string     { return "security_rule_version" }
+func (a AttrVersion) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -257,6 +273,7 @@ func (AttrVersion) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

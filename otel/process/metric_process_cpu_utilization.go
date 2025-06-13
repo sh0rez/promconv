@@ -15,40 +15,42 @@ type CpuUtilization struct {
 }
 
 func NewCpuUtilization() CpuUtilization {
-	labels := []string{"cpu_mode"}
+	labels := []string{cpu.AttrMode("").Key()}
 	return CpuUtilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "process",
-		Name:      "cpu_utilization",
-		Help:      "Difference in process.cpu.time since the last measurement, divided by the elapsed time and number of CPUs available to the process.",
+		Name: "process_cpu_utilization",
+		Help: "Difference in process.cpu.time since the last measurement, divided by the elapsed time and number of CPUs available to the process.",
 	}, labels)}
 }
 
-func (m CpuUtilization) With(extra interface {
-	AttrCpuMode() cpu.AttrMode
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m CpuUtilization) With(extras ...interface{ CpuMode() cpu.AttrMode }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrCpuMode()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.CpuMode().Value())
 }
 
-func (a CpuUtilization) WithCpuMode(attr interface{ AttrCpuMode() cpu.AttrMode }) CpuUtilization {
-	a.extra.CpuMode = attr.AttrCpuMode()
+// Deprecated: Use [CpuUtilization.With] instead
+func (m CpuUtilization) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a CpuUtilization) WithCpuMode(attr interface{ CpuMode() cpu.AttrMode }) CpuUtilization {
+	a.extra.AttrCpuMode = attr.CpuMode()
 	return a
 }
 
 type CpuUtilizationExtra struct {
-	// A process SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
-	CpuMode cpu.AttrMode `otel:"cpu.mode"`
+	// A process SHOULD be characterized *either* by data points with no `mode` labels, *or only* data points with `mode` labels
+	AttrCpuMode cpu.AttrMode `otel:"cpu.mode"`
 }
 
-func (a CpuUtilizationExtra) AttrCpuMode() cpu.AttrMode { return a.CpuMode }
+func (a CpuUtilizationExtra) CpuMode() cpu.AttrMode { return a.AttrCpuMode }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -74,7 +76,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -157,7 +158,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -262,6 +262,8 @@ State {
             "type": "metric",
             "unit": "1",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -369,6 +371,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -455,7 +458,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

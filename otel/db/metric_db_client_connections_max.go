@@ -11,22 +11,20 @@ type ClientConnectionsMax struct {
 }
 
 func NewClientConnectionsMax() ClientConnectionsMax {
-	labels := []string{"db_client_connections_pool_name"}
+	labels := []string{AttrClientConnectionsPoolName("").Key()}
 	return ClientConnectionsMax{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "db",
-		Name:      "client_connections_max",
-		Help:      "Deprecated, use `db.client.connection.max` instead.",
+		Name: "db_client_connections_max",
+		Help: "Deprecated, use `db.client.connection.max` instead.",
 	}, labels)}
 }
 
-func (m ClientConnectionsMax) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(clientConnectionsPoolName),
-	)
+func (m ClientConnectionsMax) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(clientConnectionsPoolName.Value())
+}
+
+// Deprecated: Use [ClientConnectionsMax.With] instead
+func (m ClientConnectionsMax) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type ClientConnectionsMaxExtra struct {
@@ -34,7 +32,7 @@ type ClientConnectionsMaxExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -121,6 +119,8 @@ State {
             "type": "metric",
             "unit": "{connection}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -228,6 +228,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -314,7 +315,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

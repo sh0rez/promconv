@@ -6,37 +6,32 @@ import (
 
 // The number of logs submitted to enabled SDK Loggers
 type SdkLogCreated struct {
-	*prometheus.CounterVec
-	extra SdkLogCreatedExtra
+	prometheus.Counter
 }
 
 func NewSdkLogCreated() SdkLogCreated {
-	labels := []string{}
-	return SdkLogCreated{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "otel",
-		Name:      "sdk_log_created",
-		Help:      "The number of logs submitted to enabled SDK Loggers",
-	}, labels)}
+	return SdkLogCreated{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "otel_sdk_log_created",
+		Help: "The number of logs submitted to enabled SDK Loggers",
+	})}
 }
 
-func (m SdkLogCreated) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m SdkLogCreated) Register(regs ...prometheus.Registerer) SdkLogCreated {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type SdkLogCreatedExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkLogCreatedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "sdk.log.created",
         "Type": "SdkLogCreated",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of logs submitted to enabled SDK Loggers",
@@ -174,6 +168,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -260,7 +255,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

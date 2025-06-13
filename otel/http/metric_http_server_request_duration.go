@@ -19,119 +19,111 @@ type ServerRequestDuration struct {
 }
 
 func NewServerRequestDuration() ServerRequestDuration {
-	labels := []string{"http_request_method", "url_scheme", "error_type", "http_response_status_code", "http_route", "network_protocol_name", "network_protocol_version", "server_address", "server_port", "user_agent_synthetic_type"}
+	labels := []string{AttrRequestMethod("").Key(), url.AttrScheme("").Key(), error.AttrType("").Key(), AttrResponseStatusCode("").Key(), AttrRoute("").Key(), network.AttrProtocolName("").Key(), network.AttrProtocolVersion("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key(), user_agent.AttrSyntheticType("").Key()}
 	return ServerRequestDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "http",
-		Name:      "server_request_duration",
-		Help:      "Duration of HTTP server requests.",
+		Name: "http_server_request_duration",
+		Help: "Duration of HTTP server requests.",
 	}, labels)}
 }
 
-func (m ServerRequestDuration) With(requestMethod AttrRequestMethod, scheme url.AttrScheme, extra interface {
-	AttrErrorType() error.AttrType
-	AttrHttpResponseStatusCode() AttrResponseStatusCode
-	AttrHttpRoute() AttrRoute
-	AttrNetworkProtocolName() network.AttrProtocolName
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
-	AttrServerAddress() server.AttrAddress
-	AttrServerPort() server.AttrPort
-	AttrUserAgentSyntheticType() user_agent.AttrSyntheticType
+func (m ServerRequestDuration) With(requestMethod AttrRequestMethod, scheme url.AttrScheme, extras ...interface {
+	ErrorType() error.AttrType
+	HttpResponseStatusCode() AttrResponseStatusCode
+	HttpRoute() AttrRoute
+	NetworkProtocolName() network.AttrProtocolName
+	NetworkProtocolVersion() network.AttrProtocolVersion
+	ServerAddress() server.AttrAddress
+	ServerPort() server.AttrPort
+	UserAgentSyntheticType() user_agent.AttrSyntheticType
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(requestMethod),
-		string(scheme),
-		string(extra.AttrErrorType()),
-		string(extra.AttrHttpResponseStatusCode()),
-		string(extra.AttrHttpRoute()),
-		string(extra.AttrNetworkProtocolName()),
-		string(extra.AttrNetworkProtocolVersion()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrServerPort()),
-		string(extra.AttrUserAgentSyntheticType()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(requestMethod.Value(), scheme.Value(), extra.ErrorType().Value(), extra.HttpResponseStatusCode().Value(), extra.HttpRoute().Value(), extra.NetworkProtocolName().Value(), extra.NetworkProtocolVersion().Value(), extra.ServerAddress().Value(), extra.ServerPort().Value(), extra.UserAgentSyntheticType().Value())
 }
 
-func (a ServerRequestDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ServerRequestDuration {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [ServerRequestDuration.With] instead
+func (m ServerRequestDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a ServerRequestDuration) WithErrorType(attr interface{ ErrorType() error.AttrType }) ServerRequestDuration {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a ServerRequestDuration) WithHttpResponseStatusCode(attr interface{ AttrHttpResponseStatusCode() AttrResponseStatusCode }) ServerRequestDuration {
-	a.extra.HttpResponseStatusCode = attr.AttrHttpResponseStatusCode()
+func (a ServerRequestDuration) WithResponseStatusCode(attr interface{ HttpResponseStatusCode() AttrResponseStatusCode }) ServerRequestDuration {
+	a.extra.AttrResponseStatusCode = attr.HttpResponseStatusCode()
 	return a
 }
-func (a ServerRequestDuration) WithHttpRoute(attr interface{ AttrHttpRoute() AttrRoute }) ServerRequestDuration {
-	a.extra.HttpRoute = attr.AttrHttpRoute()
+func (a ServerRequestDuration) WithRoute(attr interface{ HttpRoute() AttrRoute }) ServerRequestDuration {
+	a.extra.AttrRoute = attr.HttpRoute()
 	return a
 }
 func (a ServerRequestDuration) WithNetworkProtocolName(attr interface {
-	AttrNetworkProtocolName() network.AttrProtocolName
+	NetworkProtocolName() network.AttrProtocolName
 }) ServerRequestDuration {
-	a.extra.NetworkProtocolName = attr.AttrNetworkProtocolName()
+	a.extra.AttrNetworkProtocolName = attr.NetworkProtocolName()
 	return a
 }
 func (a ServerRequestDuration) WithNetworkProtocolVersion(attr interface {
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	NetworkProtocolVersion() network.AttrProtocolVersion
 }) ServerRequestDuration {
-	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	a.extra.AttrNetworkProtocolVersion = attr.NetworkProtocolVersion()
 	return a
 }
-func (a ServerRequestDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ServerRequestDuration {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ServerRequestDuration) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ServerRequestDuration {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ServerRequestDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ServerRequestDuration {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ServerRequestDuration) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ServerRequestDuration {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 func (a ServerRequestDuration) WithUserAgentSyntheticType(attr interface {
-	AttrUserAgentSyntheticType() user_agent.AttrSyntheticType
+	UserAgentSyntheticType() user_agent.AttrSyntheticType
 }) ServerRequestDuration {
-	a.extra.UserAgentSyntheticType = attr.AttrUserAgentSyntheticType()
+	a.extra.AttrUserAgentSyntheticType = attr.UserAgentSyntheticType()
 	return a
 }
 
 type ServerRequestDurationExtra struct {
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// [HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).
-	HttpResponseStatusCode AttrResponseStatusCode `otel:"http.response.status_code"`
-	// The matched route, that is, the path template in the format used by the respective server framework.
-	HttpRoute AttrRoute `otel:"http.route"`
-	// [OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.
-	NetworkProtocolName network.AttrProtocolName `otel:"network.protocol.name"`
-	// The actual version of the protocol used for network communication.
-	NetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"`
-	// Name of the local HTTP server that received the request.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// Port of the local HTTP server that received the request.
-	ServerPort server.AttrPort `otel:"server.port"`
-	// Specifies the category of synthetic traffic, such as tests or bots.
-	UserAgentSyntheticType user_agent.AttrSyntheticType `otel:"user_agent.synthetic.type"`
+	// Describes a class of error the operation ended with
+	AttrErrorType error.AttrType `otel:"error.type"` // [HTTP response status code]
+	//
+	// [HTTP response status code]: https://tools.ietf.org/html/rfc7231#section-6
+	AttrResponseStatusCode AttrResponseStatusCode `otel:"http.response.status_code"` // The matched route, that is, the path template in the format used by the respective server framework
+	AttrRoute              AttrRoute              `otel:"http.route"`                // [OSI application layer] or non-OSI equivalent
+	//
+	// [OSI application layer]: https://wikipedia.org/wiki/Application_layer
+	AttrNetworkProtocolName    network.AttrProtocolName     `otel:"network.protocol.name"`    // The actual version of the protocol used for network communication
+	AttrNetworkProtocolVersion network.AttrProtocolVersion  `otel:"network.protocol.version"` // Name of the local HTTP server that received the request
+	AttrServerAddress          server.AttrAddress           `otel:"server.address"`           // Port of the local HTTP server that received the request
+	AttrServerPort             server.AttrPort              `otel:"server.port"`              // Specifies the category of synthetic traffic, such as tests or bots
+	AttrUserAgentSyntheticType user_agent.AttrSyntheticType `otel:"user_agent.synthetic.type"`
 }
 
-func (a ServerRequestDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a ServerRequestDurationExtra) AttrHttpResponseStatusCode() AttrResponseStatusCode {
-	return a.HttpResponseStatusCode
+func (a ServerRequestDurationExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a ServerRequestDurationExtra) HttpResponseStatusCode() AttrResponseStatusCode {
+	return a.AttrResponseStatusCode
 }
-func (a ServerRequestDurationExtra) AttrHttpRoute() AttrRoute { return a.HttpRoute }
-func (a ServerRequestDurationExtra) AttrNetworkProtocolName() network.AttrProtocolName {
-	return a.NetworkProtocolName
+func (a ServerRequestDurationExtra) HttpRoute() AttrRoute { return a.AttrRoute }
+func (a ServerRequestDurationExtra) NetworkProtocolName() network.AttrProtocolName {
+	return a.AttrNetworkProtocolName
 }
-func (a ServerRequestDurationExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
-	return a.NetworkProtocolVersion
+func (a ServerRequestDurationExtra) NetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.AttrNetworkProtocolVersion
 }
-func (a ServerRequestDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a ServerRequestDurationExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
-func (a ServerRequestDurationExtra) AttrUserAgentSyntheticType() user_agent.AttrSyntheticType {
-	return a.UserAgentSyntheticType
+func (a ServerRequestDurationExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a ServerRequestDurationExtra) ServerPort() server.AttrPort       { return a.AttrServerPort }
+func (a ServerRequestDurationExtra) UserAgentSyntheticType() user_agent.AttrSyntheticType {
+	return a.AttrUserAgentSyntheticType
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -158,7 +150,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "CONNECT method.",
@@ -270,7 +261,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -370,7 +360,6 @@ State {
                 "requirement_level": "opt_in",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Bot source.",
@@ -395,6 +384,33 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "timeout",
+                        "java.net.UnknownHostException",
+                        "server_certificate_invalid",
+                        "500",
+                    ],
+                    "name": "error.type",
+                    "note": "If the request fails with an error before response status code was sent or received,\n`error.type` SHOULD be set to exception type (its fully-qualified class name, if applicable)\nor a component-specific low cardinality error identifier.\n\nIf response status code was sent or received and status indicates an error according to [HTTP span status definition](/docs/http/http-spans.md),\n`error.type` SHOULD be set to the status code number (represented as a string), an exception type (if thrown) or a component-specific error identifier.\n\nThe `error.type` value SHOULD be predictable and SHOULD have low cardinality.\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low, but\ntelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time, when no\nadditional filters are applied.\n\nIf the request has completed successfully, instrumentations SHOULD NOT set `error.type`.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If request has ended with an error.",
+                    },
+                    "stability": "stable",
+                    "type": {
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
                     "brief": "[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).",
                     "examples": [
                         200,
@@ -405,6 +421,34 @@ State {
                     },
                     "stability": "stable",
                     "type": "int",
+                },
+                {
+                    "brief": "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.",
+                    "examples": [
+                        "http",
+                        "spdy",
+                    ],
+                    "name": "network.protocol.name",
+                    "note": "The value SHOULD be normalized to lowercase.",
+                    "requirement_level": {
+                        "conditionally_required": "If not `http` and `network.protocol.version` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The actual version of the protocol used for network communication.",
+                    "examples": [
+                        "1.0",
+                        "1.1",
+                        "2",
+                        "3",
+                    ],
+                    "name": "network.protocol.version",
+                    "note": "If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
                 },
                 {
                     "brief": "The matched route, that is, the path template in the format used by the respective server framework.\n",
@@ -421,34 +465,6 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "timeout",
-                        "java.net.UnknownHostException",
-                        "server_certificate_invalid",
-                        "500",
-                    ],
-                    "name": "error.type",
-                    "note": "If the request fails with an error before response status code was sent or received,\n`error.type` SHOULD be set to exception type (its fully-qualified class name, if applicable)\nor a component-specific low cardinality error identifier.\n\nIf response status code was sent or received and status indicates an error according to [HTTP span status definition](/docs/http/http-spans.md),\n`error.type` SHOULD be set to the status code number (represented as a string), an exception type (if thrown) or a component-specific error identifier.\n\nThe `error.type` value SHOULD be predictable and SHOULD have low cardinality.\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low, but\ntelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time, when no\nadditional filters are applied.\n\nIf the request has completed successfully, instrumentations SHOULD NOT set `error.type`.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If request has ended with an error.",
-                    },
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
-                },
-                {
                     "brief": "HTTP request method.",
                     "examples": [
                         "GET",
@@ -460,7 +476,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "CONNECT method.",
@@ -546,13 +561,24 @@ State {
                     },
                 },
                 {
+                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
+                    "examples": [
+                        "http",
+                        "https",
+                    ],
+                    "name": "url.scheme",
+                    "note": "The scheme of the original client request, if known (e.g. from [Forwarded#proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/Forwarded#proto), [X-Forwarded-Proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/X-Forwarded-Proto), or a similar header). Otherwise, the scheme of the immediate peer request.\n",
+                    "requirement_level": "required",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "Specifies the category of synthetic traffic, such as tests or bots.\n",
                     "name": "user_agent.synthetic.type",
                     "note": "This attribute MAY be derived from the contents of the `user_agent.original` attribute. Components that populate the attribute are responsible for determining what they consider to be synthetic bot or test traffic. This attribute can either be set for self-identification purposes, or on telemetry detected to be generated as a result of a synthetic request. This attribute is useful for distinguishing between genuine client traffic and synthetic traffic generated by bots or tests.\n",
                     "requirement_level": "opt_in",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Bot source.",
@@ -572,34 +598,6 @@ State {
                             },
                         ],
                     },
-                },
-                {
-                    "brief": "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.",
-                    "examples": [
-                        "http",
-                        "spdy",
-                    ],
-                    "name": "network.protocol.name",
-                    "note": "The value SHOULD be normalized to lowercase.",
-                    "requirement_level": {
-                        "conditionally_required": "If not `http` and `network.protocol.version` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The actual version of the protocol used for network communication.",
-                    "examples": [
-                        "1.0",
-                        "1.1",
-                        "2",
-                        "3",
-                    ],
-                    "name": "network.protocol.version",
-                    "note": "If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
                 },
                 {
                     "brief": "Name of the local HTTP server that received the request.\n",
@@ -626,18 +624,6 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
-                    "examples": [
-                        "http",
-                        "https",
-                    ],
-                    "name": "url.scheme",
-                    "note": "The scheme of the original client request, if known (e.g. from [Forwarded#proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/Forwarded#proto), [X-Forwarded-Proto](https://developer.mozilla.org/docs/Web/HTTP/Headers/X-Forwarded-Proto), or a similar header). Otherwise, the scheme of the immediate peer request.\n",
-                    "requirement_level": "required",
-                    "stability": "stable",
-                    "type": "string",
                 },
             ],
             "brief": "Duration of HTTP server requests.",
@@ -779,6 +765,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -886,6 +874,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -972,7 +961,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

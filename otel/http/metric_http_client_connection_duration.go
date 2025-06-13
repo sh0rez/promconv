@@ -17,68 +17,68 @@ type ClientConnectionDuration struct {
 }
 
 func NewClientConnectionDuration() ClientConnectionDuration {
-	labels := []string{"server_address", "server_port", "network_peer_address", "network_protocol_version", "url_scheme"}
+	labels := []string{server.AttrAddress("").Key(), server.AttrPort("").Key(), network.AttrPeerAddress("").Key(), network.AttrProtocolVersion("").Key(), url.AttrScheme("").Key()}
 	return ClientConnectionDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "http",
-		Name:      "client_connection_duration",
-		Help:      "The duration of the successfully established outbound HTTP connections.",
+		Name: "http_client_connection_duration",
+		Help: "The duration of the successfully established outbound HTTP connections.",
 	}, labels)}
 }
 
-func (m ClientConnectionDuration) With(address server.AttrAddress, port server.AttrPort, extra interface {
-	AttrNetworkPeerAddress() network.AttrPeerAddress
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
-	AttrUrlScheme() url.AttrScheme
+func (m ClientConnectionDuration) With(address server.AttrAddress, port server.AttrPort, extras ...interface {
+	NetworkPeerAddress() network.AttrPeerAddress
+	NetworkProtocolVersion() network.AttrProtocolVersion
+	UrlScheme() url.AttrScheme
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(address),
-		string(port),
-		string(extra.AttrNetworkPeerAddress()),
-		string(extra.AttrNetworkProtocolVersion()),
-		string(extra.AttrUrlScheme()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(address.Value(), port.Value(), extra.NetworkPeerAddress().Value(), extra.NetworkProtocolVersion().Value(), extra.UrlScheme().Value())
+}
+
+// Deprecated: Use [ClientConnectionDuration.With] instead
+func (m ClientConnectionDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
 }
 
 func (a ClientConnectionDuration) WithNetworkPeerAddress(attr interface {
-	AttrNetworkPeerAddress() network.AttrPeerAddress
+	NetworkPeerAddress() network.AttrPeerAddress
 }) ClientConnectionDuration {
-	a.extra.NetworkPeerAddress = attr.AttrNetworkPeerAddress()
+	a.extra.AttrNetworkPeerAddress = attr.NetworkPeerAddress()
 	return a
 }
 func (a ClientConnectionDuration) WithNetworkProtocolVersion(attr interface {
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	NetworkProtocolVersion() network.AttrProtocolVersion
 }) ClientConnectionDuration {
-	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	a.extra.AttrNetworkProtocolVersion = attr.NetworkProtocolVersion()
 	return a
 }
-func (a ClientConnectionDuration) WithUrlScheme(attr interface{ AttrUrlScheme() url.AttrScheme }) ClientConnectionDuration {
-	a.extra.UrlScheme = attr.AttrUrlScheme()
+func (a ClientConnectionDuration) WithUrlScheme(attr interface{ UrlScheme() url.AttrScheme }) ClientConnectionDuration {
+	a.extra.AttrUrlScheme = attr.UrlScheme()
 	return a
 }
 
 type ClientConnectionDurationExtra struct {
-	// Peer address of the network connection - IP address or Unix domain socket name.
-	NetworkPeerAddress network.AttrPeerAddress `otel:"network.peer.address"`
-	// The actual version of the protocol used for network communication.
-	NetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"`
-	// The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.
-	UrlScheme url.AttrScheme `otel:"url.scheme"`
+	// Peer address of the network connection - IP address or Unix domain socket name
+	AttrNetworkPeerAddress     network.AttrPeerAddress     `otel:"network.peer.address"`     // The actual version of the protocol used for network communication
+	AttrNetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"` // The [URI scheme] component identifying the used protocol
+	//
+	// [URI scheme]: https://www.rfc-editor.org/rfc/rfc3986#section-3.1
+	AttrUrlScheme url.AttrScheme `otel:"url.scheme"`
 }
 
-func (a ClientConnectionDurationExtra) AttrNetworkPeerAddress() network.AttrPeerAddress {
-	return a.NetworkPeerAddress
+func (a ClientConnectionDurationExtra) NetworkPeerAddress() network.AttrPeerAddress {
+	return a.AttrNetworkPeerAddress
 }
-func (a ClientConnectionDurationExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
-	return a.NetworkProtocolVersion
+func (a ClientConnectionDurationExtra) NetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.AttrNetworkProtocolVersion
 }
-func (a ClientConnectionDurationExtra) AttrUrlScheme() url.AttrScheme { return a.UrlScheme }
+func (a ClientConnectionDurationExtra) UrlScheme() url.AttrScheme { return a.AttrUrlScheme }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -297,6 +297,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -404,6 +406,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -490,7 +493,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

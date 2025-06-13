@@ -16,62 +16,62 @@ type ClientActiveRequests struct {
 }
 
 func NewClientActiveRequests() ClientActiveRequests {
-	labels := []string{"server_address", "server_port", "url_template", "http_request_method", "url_scheme"}
+	labels := []string{server.AttrAddress("").Key(), server.AttrPort("").Key(), url.AttrTemplate("").Key(), AttrRequestMethod("").Key(), url.AttrScheme("").Key()}
 	return ClientActiveRequests{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "http",
-		Name:      "client_active_requests",
-		Help:      "Number of active HTTP requests.",
+		Name: "http_client_active_requests",
+		Help: "Number of active HTTP requests.",
 	}, labels)}
 }
 
-func (m ClientActiveRequests) With(address server.AttrAddress, port server.AttrPort, extra interface {
-	AttrUrlTemplate() url.AttrTemplate
-	AttrHttpRequestMethod() AttrRequestMethod
-	AttrUrlScheme() url.AttrScheme
+func (m ClientActiveRequests) With(address server.AttrAddress, port server.AttrPort, extras ...interface {
+	UrlTemplate() url.AttrTemplate
+	HttpRequestMethod() AttrRequestMethod
+	UrlScheme() url.AttrScheme
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(address),
-		string(port),
-		string(extra.AttrUrlTemplate()),
-		string(extra.AttrHttpRequestMethod()),
-		string(extra.AttrUrlScheme()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(address.Value(), port.Value(), extra.UrlTemplate().Value(), extra.HttpRequestMethod().Value(), extra.UrlScheme().Value())
 }
 
-func (a ClientActiveRequests) WithUrlTemplate(attr interface{ AttrUrlTemplate() url.AttrTemplate }) ClientActiveRequests {
-	a.extra.UrlTemplate = attr.AttrUrlTemplate()
+// Deprecated: Use [ClientActiveRequests.With] instead
+func (m ClientActiveRequests) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ClientActiveRequests) WithUrlTemplate(attr interface{ UrlTemplate() url.AttrTemplate }) ClientActiveRequests {
+	a.extra.AttrUrlTemplate = attr.UrlTemplate()
 	return a
 }
-func (a ClientActiveRequests) WithHttpRequestMethod(attr interface{ AttrHttpRequestMethod() AttrRequestMethod }) ClientActiveRequests {
-	a.extra.HttpRequestMethod = attr.AttrHttpRequestMethod()
+func (a ClientActiveRequests) WithRequestMethod(attr interface{ HttpRequestMethod() AttrRequestMethod }) ClientActiveRequests {
+	a.extra.AttrRequestMethod = attr.HttpRequestMethod()
 	return a
 }
-func (a ClientActiveRequests) WithUrlScheme(attr interface{ AttrUrlScheme() url.AttrScheme }) ClientActiveRequests {
-	a.extra.UrlScheme = attr.AttrUrlScheme()
+func (a ClientActiveRequests) WithUrlScheme(attr interface{ UrlScheme() url.AttrScheme }) ClientActiveRequests {
+	a.extra.AttrUrlScheme = attr.UrlScheme()
 	return a
 }
 
 type ClientActiveRequestsExtra struct {
-	// The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).
-	UrlTemplate url.AttrTemplate `otel:"url.template"`
-	// HTTP request method.
-	HttpRequestMethod AttrRequestMethod `otel:"http.request.method"`
-	// The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.
-	UrlScheme url.AttrScheme `otel:"url.scheme"`
+	// The low-cardinality template of an [absolute path reference]
+	//
+	// [absolute path reference]: https://www.rfc-editor.org/rfc/rfc3986#section-4.2
+	AttrUrlTemplate   url.AttrTemplate  `otel:"url.template"`        // HTTP request method
+	AttrRequestMethod AttrRequestMethod `otel:"http.request.method"` // The [URI scheme] component identifying the used protocol
+	//
+	// [URI scheme]: https://www.rfc-editor.org/rfc/rfc3986#section-3.1
+	AttrUrlScheme url.AttrScheme `otel:"url.scheme"`
 }
 
-func (a ClientActiveRequestsExtra) AttrUrlTemplate() url.AttrTemplate { return a.UrlTemplate }
-func (a ClientActiveRequestsExtra) AttrHttpRequestMethod() AttrRequestMethod {
-	return a.HttpRequestMethod
-}
-func (a ClientActiveRequestsExtra) AttrUrlScheme() url.AttrScheme { return a.UrlScheme }
+func (a ClientActiveRequestsExtra) UrlTemplate() url.AttrTemplate        { return a.AttrUrlTemplate }
+func (a ClientActiveRequestsExtra) HttpRequestMethod() AttrRequestMethod { return a.AttrRequestMethod }
+func (a ClientActiveRequestsExtra) UrlScheme() url.AttrScheme            { return a.AttrUrlScheme }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -139,7 +139,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "CONNECT method.",
@@ -250,7 +249,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "CONNECT method.",
@@ -347,19 +345,6 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "Port identifier of the [\"URI origin\"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to.\n",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "required",
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).\n",
                     "examples": [
                         "/users/{id}",
@@ -373,6 +358,19 @@ State {
                     },
                     "stability": "development",
                     "type": "string",
+                },
+                {
+                    "brief": "Port identifier of the [\"URI origin\"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to.\n",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "required",
+                    "stability": "stable",
+                    "type": "int",
                 },
                 {
                     "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
@@ -468,6 +466,8 @@ State {
             "type": "metric",
             "unit": "{request}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -575,6 +575,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -661,7 +662,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

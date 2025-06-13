@@ -15,49 +15,51 @@ type DiskOperationTime struct {
 }
 
 func NewDiskOperationTime() DiskOperationTime {
-	labels := []string{"disk_io_direction", "system_device"}
+	labels := []string{disk.AttrIoDirection("").Key(), AttrDevice("").Key()}
 	return DiskOperationTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "system",
-		Name:      "disk_operation_time",
-		Help:      "Sum of the time each operation took to complete",
+		Name: "system_disk_operation_time",
+		Help: "Sum of the time each operation took to complete",
 	}, labels)}
 }
 
-func (m DiskOperationTime) With(extra interface {
-	AttrDiskIoDirection() disk.AttrIoDirection
-	AttrSystemDevice() AttrDevice
+func (m DiskOperationTime) With(extras ...interface {
+	DiskIoDirection() disk.AttrIoDirection
+	SystemDevice() AttrDevice
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrDiskIoDirection()),
-		string(extra.AttrSystemDevice()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.DiskIoDirection().Value(), extra.SystemDevice().Value())
 }
 
-func (a DiskOperationTime) WithDiskIoDirection(attr interface{ AttrDiskIoDirection() disk.AttrIoDirection }) DiskOperationTime {
-	a.extra.DiskIoDirection = attr.AttrDiskIoDirection()
+// Deprecated: Use [DiskOperationTime.With] instead
+func (m DiskOperationTime) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a DiskOperationTime) WithDiskIoDirection(attr interface{ DiskIoDirection() disk.AttrIoDirection }) DiskOperationTime {
+	a.extra.AttrDiskIoDirection = attr.DiskIoDirection()
 	return a
 }
-func (a DiskOperationTime) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskOperationTime {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+func (a DiskOperationTime) WithDevice(attr interface{ SystemDevice() AttrDevice }) DiskOperationTime {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
 
 type DiskOperationTimeExtra struct {
-	// The disk IO operation direction.
-	DiskIoDirection disk.AttrIoDirection `otel:"disk.io.direction"`
-	// The device identifier
-	SystemDevice AttrDevice `otel:"system.device"`
+	// The disk IO operation direction
+	AttrDiskIoDirection disk.AttrIoDirection `otel:"disk.io.direction"` // The device identifier
+	AttrDevice          AttrDevice           `otel:"system.device"`
 }
 
-func (a DiskOperationTimeExtra) AttrDiskIoDirection() disk.AttrIoDirection { return a.DiskIoDirection }
-func (a DiskOperationTimeExtra) AttrSystemDevice() AttrDevice              { return a.SystemDevice }
+func (a DiskOperationTimeExtra) DiskIoDirection() disk.AttrIoDirection { return a.AttrDiskIoDirection }
+func (a DiskOperationTimeExtra) SystemDevice() AttrDevice              { return a.AttrDevice }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -81,7 +83,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -124,7 +125,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -200,6 +200,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -307,6 +309,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -393,7 +396,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

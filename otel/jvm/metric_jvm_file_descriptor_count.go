@@ -6,37 +6,32 @@ import (
 
 // Number of open file descriptors as reported by the JVM.
 type FileDescriptorCount struct {
-	*prometheus.GaugeVec
-	extra FileDescriptorCountExtra
+	prometheus.Gauge
 }
 
 func NewFileDescriptorCount() FileDescriptorCount {
-	labels := []string{}
-	return FileDescriptorCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "file_descriptor_count",
-		Help:      "Number of open file descriptors as reported by the JVM.",
-	}, labels)}
+	return FileDescriptorCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "jvm_file_descriptor_count",
+		Help: "Number of open file descriptors as reported by the JVM.",
+	})}
 }
 
-func (m FileDescriptorCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m FileDescriptorCount) Register(regs ...prometheus.Registerer) FileDescriptorCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type FileDescriptorCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "FileDescriptorCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "file_descriptor.count",
         "Type": "FileDescriptorCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of open file descriptors as reported by the JVM.",
@@ -174,6 +168,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -260,7 +255,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

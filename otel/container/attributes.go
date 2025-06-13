@@ -5,26 +5,38 @@ package container
 // If using embedded credentials or sensitive data, it is recommended to remove them to prevent potential leakage
 type AttrCommand string // container.command
 
-func (AttrCommand) Development() {}
-func (AttrCommand) Recommended() {}
+func (AttrCommand) Development()    {}
+func (AttrCommand) Recommended()    {}
+func (AttrCommand) Key() string     { return "container_command" }
+func (a AttrCommand) Value() string { return string(a) }
 
 // All the command arguments (including the command/executable itself) run by the container
 type AttrCommandArgs string // container.command_args
 
-func (AttrCommandArgs) Development() {}
-func (AttrCommandArgs) Recommended() {}
+func (AttrCommandArgs) Development()    {}
+func (AttrCommandArgs) Recommended()    {}
+func (AttrCommandArgs) Key() string     { return "container_command_args" }
+func (a AttrCommandArgs) Value() string { return string(a) }
 
 // The full command run by the container as a single string representing the full command
 type AttrCommandLine string // container.command_line
 
-func (AttrCommandLine) Development() {}
-func (AttrCommandLine) Recommended() {}
+func (AttrCommandLine) Development()    {}
+func (AttrCommandLine) Recommended()    {}
+func (AttrCommandLine) Key() string     { return "container_command_line" }
+func (a AttrCommandLine) Value() string { return string(a) }
 
 // Deprecated, use `cpu.mode` instead
 type AttrCpuState string // container.cpu.state
 
-func (AttrCpuState) Development() {}
-func (AttrCpuState) Recommended() {}
+func (AttrCpuState) Development()    {}
+func (AttrCpuState) Recommended()    {}
+func (AttrCpuState) Key() string     { return "container_cpu_state" }
+func (a AttrCpuState) Value() string { return string(a) }
+
+const CpuStateUser AttrCpuState = "user"
+const CpuStateSystem AttrCpuState = "system"
+const CpuStateKernel AttrCpuState = "kernel"
 
 // The name of the CSI ([Container Storage Interface]) plugin used by the volume.
 //
@@ -33,8 +45,10 @@ func (AttrCpuState) Recommended() {}
 // [Container Storage Interface]: https://github.com/container-storage-interface/spec
 type AttrCsiPluginName string // container.csi.plugin.name
 
-func (AttrCsiPluginName) Development() {}
-func (AttrCsiPluginName) Recommended() {}
+func (AttrCsiPluginName) Development()    {}
+func (AttrCsiPluginName) Recommended()    {}
+func (AttrCsiPluginName) Key() string     { return "container_csi_plugin_name" }
+func (a AttrCsiPluginName) Value() string { return string(a) }
 
 // The unique volume ID returned by the CSI ([Container Storage Interface]) plugin.
 //
@@ -43,16 +57,20 @@ func (AttrCsiPluginName) Recommended() {}
 // [Container Storage Interface]: https://github.com/container-storage-interface/spec
 type AttrCsiVolumeId string // container.csi.volume.id
 
-func (AttrCsiVolumeId) Development() {}
-func (AttrCsiVolumeId) Recommended() {}
+func (AttrCsiVolumeId) Development()    {}
+func (AttrCsiVolumeId) Recommended()    {}
+func (AttrCsiVolumeId) Key() string     { return "container_csi_volume_id" }
+func (a AttrCsiVolumeId) Value() string { return string(a) }
 
 // Container ID. Usually a UUID, as for example used to [identify Docker containers]. The UUID might be abbreviated
 //
 // [identify Docker containers]: https://docs.docker.com/engine/containers/run/#container-identification
 type AttrId string // container.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "container_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // Runtime specific image identifier. Usually a hash algorithm followed by a UUID.
 //
@@ -63,14 +81,18 @@ func (AttrId) Recommended() {}
 // [API]: https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerInspect
 type AttrImageId string // container.image.id
 
-func (AttrImageId) Development() {}
-func (AttrImageId) Recommended() {}
+func (AttrImageId) Development()    {}
+func (AttrImageId) Recommended()    {}
+func (AttrImageId) Key() string     { return "container_image_id" }
+func (a AttrImageId) Value() string { return string(a) }
 
 // Name of the image the container was built on
 type AttrImageName string // container.image.name
 
-func (AttrImageName) Development() {}
-func (AttrImageName) Recommended() {}
+func (AttrImageName) Development()    {}
+func (AttrImageName) Recommended()    {}
+func (AttrImageName) Key() string     { return "container_image_name" }
+func (a AttrImageName) Value() string { return string(a) }
 
 // Repo digests of the container image as provided by the container runtime.
 //
@@ -80,42 +102,54 @@ func (AttrImageName) Recommended() {}
 // [CRI]: https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238
 type AttrImageRepoDigests string // container.image.repo_digests
 
-func (AttrImageRepoDigests) Development() {}
-func (AttrImageRepoDigests) Recommended() {}
+func (AttrImageRepoDigests) Development()    {}
+func (AttrImageRepoDigests) Recommended()    {}
+func (AttrImageRepoDigests) Key() string     { return "container_image_repo_digests" }
+func (a AttrImageRepoDigests) Value() string { return string(a) }
 
 // Container image tags. An example can be found in [Docker Image Inspect]. Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`
 //
 // [Docker Image Inspect]: https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect
 type AttrImageTags string // container.image.tags
 
-func (AttrImageTags) Development() {}
-func (AttrImageTags) Recommended() {}
+func (AttrImageTags) Development()    {}
+func (AttrImageTags) Recommended()    {}
+func (AttrImageTags) Key() string     { return "container_image_tags" }
+func (a AttrImageTags) Value() string { return string(a) }
 
 // Container labels, `<key>` being the label name, the value being the label value.
 //
 // For example, a docker container label `app` with value `nginx` SHOULD be recorded as the `container.label.app` attribute with value `"nginx"`
 type AttrLabel string // container.label
 
-func (AttrLabel) Development() {}
-func (AttrLabel) Recommended() {}
+func (AttrLabel) Development()    {}
+func (AttrLabel) Recommended()    {}
+func (AttrLabel) Key() string     { return "container_label" }
+func (a AttrLabel) Value() string { return string(a) }
 
 // Deprecated, use `container.label` instead
 type AttrLabels string // container.labels
 
-func (AttrLabels) Development() {}
-func (AttrLabels) Recommended() {}
+func (AttrLabels) Development()    {}
+func (AttrLabels) Recommended()    {}
+func (AttrLabels) Key() string     { return "container_labels" }
+func (a AttrLabels) Value() string { return string(a) }
 
 // Container name used by container runtime
 type AttrName string // container.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "container_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // The container runtime managing this container
 type AttrRuntime string // container.runtime
 
-func (AttrRuntime) Development() {}
-func (AttrRuntime) Recommended() {}
+func (AttrRuntime) Development()    {}
+func (AttrRuntime) Recommended()    {}
+func (AttrRuntime) Key() string     { return "container_runtime" }
+func (a AttrRuntime) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -178,7 +212,6 @@ func (AttrRuntime) Recommended() {}
                     "root_namespace": "container",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "When tasks of the cgroup are in user mode (Linux). When all container processes are in user mode (Windows).",
@@ -456,6 +489,7 @@ func (AttrRuntime) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

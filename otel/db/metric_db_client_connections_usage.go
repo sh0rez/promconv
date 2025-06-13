@@ -11,23 +11,20 @@ type ClientConnectionsUsage struct {
 }
 
 func NewClientConnectionsUsage() ClientConnectionsUsage {
-	labels := []string{"db_client_connections_pool_name", "db_client_connections_state"}
+	labels := []string{AttrClientConnectionsPoolName("").Key(), AttrClientConnectionsState("").Key()}
 	return ClientConnectionsUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "db",
-		Name:      "client_connections_usage",
-		Help:      "Deprecated, use `db.client.connection.count` instead.",
+		Name: "db_client_connections_usage",
+		Help: "Deprecated, use `db.client.connection.count` instead.",
 	}, labels)}
 }
 
-func (m ClientConnectionsUsage) With(clientConnectionsPoolName AttrClientConnectionsPoolName, clientConnectionsState AttrClientConnectionsState, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(clientConnectionsPoolName),
-		string(clientConnectionsState),
-	)
+func (m ClientConnectionsUsage) With(clientConnectionsPoolName AttrClientConnectionsPoolName, clientConnectionsState AttrClientConnectionsState, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(clientConnectionsPoolName.Value(), clientConnectionsState.Value())
+}
+
+// Deprecated: Use [ClientConnectionsUsage.With] instead
+func (m ClientConnectionsUsage) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type ClientConnectionsUsageExtra struct {
@@ -35,7 +32,7 @@ type ClientConnectionsUsageExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -79,7 +76,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -117,7 +113,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -205,6 +200,8 @@ State {
             "type": "metric",
             "unit": "{connection}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -312,6 +309,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -398,7 +396,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

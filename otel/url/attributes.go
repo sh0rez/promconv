@@ -7,24 +7,30 @@ package url
 // [literal IPv6 address]: https://www.rfc-editor.org/rfc/rfc2732#section-2
 type AttrDomain string // url.domain
 
-func (AttrDomain) Development() {}
-func (AttrDomain) Recommended() {}
+func (AttrDomain) Development()    {}
+func (AttrDomain) Recommended()    {}
+func (AttrDomain) Key() string     { return "url_domain" }
+func (a AttrDomain) Value() string { return string(a) }
 
 // The file extension extracted from the `url.full`, excluding the leading dot.
 //
 // The file extension is only set if it exists, as not every url has a file extension. When the file name has multiple extensions `example.tar.gz`, only the last one should be captured `gz`, not `tar.gz`
 type AttrExtension string // url.extension
 
-func (AttrExtension) Development() {}
-func (AttrExtension) Recommended() {}
+func (AttrExtension) Development()    {}
+func (AttrExtension) Recommended()    {}
+func (AttrExtension) Key() string     { return "url_extension" }
+func (a AttrExtension) Value() string { return string(a) }
 
 // The [URI fragment] component
 //
 // [URI fragment]: https://www.rfc-editor.org/rfc/rfc3986#section-3.5
 type AttrFragment string // url.fragment
 
-func (AttrFragment) Stable()      {}
-func (AttrFragment) Recommended() {}
+func (AttrFragment) Stable()         {}
+func (AttrFragment) Recommended()    {}
+func (AttrFragment) Key() string     { return "url_fragment" }
+func (a AttrFragment) Value() string { return string(a) }
 
 // Absolute URL describing a network resource according to [RFC3986]
 // For network calls, URL usually has `scheme://host[:port][path][?query][#fragment]` format, where the fragment
@@ -57,8 +63,10 @@ func (AttrFragment) Recommended() {}
 // [`X-Goog-Signature`]: https://cloud.google.com/storage/docs/access-control/signed-urls
 type AttrFull string // url.full
 
-func (AttrFull) Stable()      {}
-func (AttrFull) Recommended() {}
+func (AttrFull) Stable()         {}
+func (AttrFull) Recommended()    {}
+func (AttrFull) Key() string     { return "url_full" }
+func (a AttrFull) Value() string { return string(a) }
 
 // Unmodified original URL as seen in the event source.
 //
@@ -66,8 +74,10 @@ func (AttrFull) Recommended() {}
 // `url.original` might contain credentials passed via URL in form of `https://username:password@www.example.com/`. In such case password and username SHOULD NOT be redacted and attribute's value SHOULD remain the same
 type AttrOriginal string // url.original
 
-func (AttrOriginal) Development() {}
-func (AttrOriginal) Recommended() {}
+func (AttrOriginal) Development()    {}
+func (AttrOriginal) Recommended()    {}
+func (AttrOriginal) Key() string     { return "url_original" }
+func (a AttrOriginal) Value() string { return string(a) }
 
 // The [URI path] component
 //
@@ -76,14 +86,18 @@ func (AttrOriginal) Recommended() {}
 // [URI path]: https://www.rfc-editor.org/rfc/rfc3986#section-3.3
 type AttrPath string // url.path
 
-func (AttrPath) Stable()      {}
-func (AttrPath) Recommended() {}
+func (AttrPath) Stable()         {}
+func (AttrPath) Recommended()    {}
+func (AttrPath) Key() string     { return "url_path" }
+func (a AttrPath) Value() string { return string(a) }
 
 // Port extracted from the `url.full`
 type AttrPort string // url.port
 
-func (AttrPort) Development() {}
-func (AttrPort) Recommended() {}
+func (AttrPort) Development()    {}
+func (AttrPort) Recommended()    {}
+func (AttrPort) Key() string     { return "url_port" }
+func (a AttrPort) Value() string { return string(a) }
 
 // The [URI query] component
 //
@@ -108,8 +122,10 @@ func (AttrPort) Recommended() {}
 // [`X-Goog-Signature`]: https://cloud.google.com/storage/docs/access-control/signed-urls
 type AttrQuery string // url.query
 
-func (AttrQuery) Stable()      {}
-func (AttrQuery) Recommended() {}
+func (AttrQuery) Stable()         {}
+func (AttrQuery) Recommended()    {}
+func (AttrQuery) Key() string     { return "url_query" }
+func (a AttrQuery) Value() string { return string(a) }
 
 // The highest registered url domain, stripped of the subdomain.
 //
@@ -118,32 +134,40 @@ func (AttrQuery) Recommended() {}
 // [public suffix list]: https://publicsuffix.org/
 type AttrRegisteredDomain string // url.registered_domain
 
-func (AttrRegisteredDomain) Development() {}
-func (AttrRegisteredDomain) Recommended() {}
+func (AttrRegisteredDomain) Development()    {}
+func (AttrRegisteredDomain) Recommended()    {}
+func (AttrRegisteredDomain) Key() string     { return "url_registered_domain" }
+func (a AttrRegisteredDomain) Value() string { return string(a) }
 
 // The [URI scheme] component identifying the used protocol
 //
 // [URI scheme]: https://www.rfc-editor.org/rfc/rfc3986#section-3.1
 type AttrScheme string // url.scheme
 
-func (AttrScheme) Stable()      {}
-func (AttrScheme) Recommended() {}
+func (AttrScheme) Stable()         {}
+func (AttrScheme) Recommended()    {}
+func (AttrScheme) Key() string     { return "url_scheme" }
+func (a AttrScheme) Value() string { return string(a) }
 
 // The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.
 //
 // The subdomain portion of `www.east.mydomain.co.uk` is `east`. If the domain has multiple levels of subdomain, such as `sub2.sub1.example.com`, the subdomain field should contain `sub2.sub1`, with no trailing period
 type AttrSubdomain string // url.subdomain
 
-func (AttrSubdomain) Development() {}
-func (AttrSubdomain) Recommended() {}
+func (AttrSubdomain) Development()    {}
+func (AttrSubdomain) Recommended()    {}
+func (AttrSubdomain) Key() string     { return "url_subdomain" }
+func (a AttrSubdomain) Value() string { return string(a) }
 
 // The low-cardinality template of an [absolute path reference]
 //
 // [absolute path reference]: https://www.rfc-editor.org/rfc/rfc3986#section-4.2
 type AttrTemplate string // url.template
 
-func (AttrTemplate) Development() {}
-func (AttrTemplate) Recommended() {}
+func (AttrTemplate) Development()    {}
+func (AttrTemplate) Recommended()    {}
+func (AttrTemplate) Key() string     { return "url_template" }
+func (a AttrTemplate) Value() string { return string(a) }
 
 // The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is `com`.
 //
@@ -152,8 +176,10 @@ func (AttrTemplate) Recommended() {}
 // [public suffix list]: https://publicsuffix.org/
 type AttrTopLevelDomain string // url.top_level_domain
 
-func (AttrTopLevelDomain) Development() {}
-func (AttrTopLevelDomain) Recommended() {}
+func (AttrTopLevelDomain) Development()    {}
+func (AttrTopLevelDomain) Recommended()    {}
+func (AttrTopLevelDomain) Key() string     { return "url_top_level_domain" }
+func (a AttrTopLevelDomain) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -437,6 +463,7 @@ func (AttrTopLevelDomain) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

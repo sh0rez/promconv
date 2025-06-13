@@ -15,40 +15,42 @@ type CpuTime struct {
 }
 
 func NewCpuTime() CpuTime {
-	labels := []string{"cpu_mode"}
+	labels := []string{cpu.AttrMode("").Key()}
 	return CpuTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "container",
-		Name:      "cpu_time",
-		Help:      "Total CPU time consumed",
+		Name: "container_cpu_time",
+		Help: "Total CPU time consumed",
 	}, labels)}
 }
 
-func (m CpuTime) With(extra interface {
-	AttrCpuMode() cpu.AttrMode
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m CpuTime) With(extras ...interface{ CpuMode() cpu.AttrMode }) prometheus.Counter {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrCpuMode()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.CpuMode().Value())
 }
 
-func (a CpuTime) WithCpuMode(attr interface{ AttrCpuMode() cpu.AttrMode }) CpuTime {
-	a.extra.CpuMode = attr.AttrCpuMode()
+// Deprecated: Use [CpuTime.With] instead
+func (m CpuTime) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a CpuTime) WithCpuMode(attr interface{ CpuMode() cpu.AttrMode }) CpuTime {
+	a.extra.AttrCpuMode = attr.CpuMode()
 	return a
 }
 
 type CpuTimeExtra struct {
-	// The CPU mode for this data point. A container's CPU metric SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
-	CpuMode cpu.AttrMode `otel:"cpu.mode"`
+	// The CPU mode for this data point. A container's CPU metric SHOULD be characterized *either* by data points with no `mode` labels, *or only* data points with `mode` labels
+	AttrCpuMode cpu.AttrMode `otel:"cpu.mode"`
 }
 
-func (a CpuTimeExtra) AttrCpuMode() cpu.AttrMode { return a.CpuMode }
+func (a CpuTimeExtra) CpuMode() cpu.AttrMode { return a.AttrCpuMode }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -76,7 +78,6 @@ State {
                 },
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -161,7 +162,6 @@ State {
                     },
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -264,6 +264,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -371,6 +373,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -457,7 +460,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

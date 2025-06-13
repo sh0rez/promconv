@@ -6,37 +6,32 @@ import (
 
 // Memory usage of the container.
 type MemoryUsage struct {
-	*prometheus.CounterVec
-	extra MemoryUsageExtra
+	prometheus.Counter
 }
 
 func NewMemoryUsage() MemoryUsage {
-	labels := []string{}
-	return MemoryUsage{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "container",
-		Name:      "memory_usage",
-		Help:      "Memory usage of the container.",
-	}, labels)}
+	return MemoryUsage{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "container_memory_usage",
+		Help: "Memory usage of the container.",
+	})}
 }
 
-func (m MemoryUsage) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryUsage) Register(regs ...prometheus.Registerer) MemoryUsage {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MemoryUsageExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryUsageExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "memory.usage",
         "Type": "MemoryUsage",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Memory usage of the container.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

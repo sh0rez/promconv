@@ -3,92 +3,132 @@ package net
 // Deprecated, use `network.local.address`
 type AttrHostIp string // net.host.ip
 
-func (AttrHostIp) Development() {}
-func (AttrHostIp) Recommended() {}
+func (AttrHostIp) Development()    {}
+func (AttrHostIp) Recommended()    {}
+func (AttrHostIp) Key() string     { return "net_host_ip" }
+func (a AttrHostIp) Value() string { return string(a) }
 
 // Deprecated, use `server.address`
 type AttrHostName string // net.host.name
 
-func (AttrHostName) Development() {}
-func (AttrHostName) Recommended() {}
+func (AttrHostName) Development()    {}
+func (AttrHostName) Recommended()    {}
+func (AttrHostName) Key() string     { return "net_host_name" }
+func (a AttrHostName) Value() string { return string(a) }
 
 // Deprecated, use `server.port`
 type AttrHostPort string // net.host.port
 
-func (AttrHostPort) Development() {}
-func (AttrHostPort) Recommended() {}
+func (AttrHostPort) Development()    {}
+func (AttrHostPort) Recommended()    {}
+func (AttrHostPort) Key() string     { return "net_host_port" }
+func (a AttrHostPort) Value() string { return string(a) }
 
 // Deprecated, use `network.peer.address`
 type AttrPeerIp string // net.peer.ip
 
-func (AttrPeerIp) Development() {}
-func (AttrPeerIp) Recommended() {}
+func (AttrPeerIp) Development()    {}
+func (AttrPeerIp) Recommended()    {}
+func (AttrPeerIp) Key() string     { return "net_peer_ip" }
+func (a AttrPeerIp) Value() string { return string(a) }
 
 // Deprecated, use `server.address` on client spans and `client.address` on server spans
 type AttrPeerName string // net.peer.name
 
-func (AttrPeerName) Development() {}
-func (AttrPeerName) Recommended() {}
+func (AttrPeerName) Development()    {}
+func (AttrPeerName) Recommended()    {}
+func (AttrPeerName) Key() string     { return "net_peer_name" }
+func (a AttrPeerName) Value() string { return string(a) }
 
 // Deprecated, use `server.port` on client spans and `client.port` on server spans
 type AttrPeerPort string // net.peer.port
 
-func (AttrPeerPort) Development() {}
-func (AttrPeerPort) Recommended() {}
+func (AttrPeerPort) Development()    {}
+func (AttrPeerPort) Recommended()    {}
+func (AttrPeerPort) Key() string     { return "net_peer_port" }
+func (a AttrPeerPort) Value() string { return string(a) }
 
 // Deprecated, use `network.protocol.name`
 type AttrProtocolName string // net.protocol.name
 
-func (AttrProtocolName) Development() {}
-func (AttrProtocolName) Recommended() {}
+func (AttrProtocolName) Development()    {}
+func (AttrProtocolName) Recommended()    {}
+func (AttrProtocolName) Key() string     { return "net_protocol_name" }
+func (a AttrProtocolName) Value() string { return string(a) }
 
 // Deprecated, use `network.protocol.version`
 type AttrProtocolVersion string // net.protocol.version
 
-func (AttrProtocolVersion) Development() {}
-func (AttrProtocolVersion) Recommended() {}
+func (AttrProtocolVersion) Development()    {}
+func (AttrProtocolVersion) Recommended()    {}
+func (AttrProtocolVersion) Key() string     { return "net_protocol_version" }
+func (a AttrProtocolVersion) Value() string { return string(a) }
 
 // Deprecated, use `network.transport` and `network.type`
 type AttrSockFamily string // net.sock.family
 
-func (AttrSockFamily) Development() {}
-func (AttrSockFamily) Recommended() {}
+func (AttrSockFamily) Development()    {}
+func (AttrSockFamily) Recommended()    {}
+func (AttrSockFamily) Key() string     { return "net_sock_family" }
+func (a AttrSockFamily) Value() string { return string(a) }
+
+const SockFamilyInet AttrSockFamily = "inet"
+const SockFamilyInet6 AttrSockFamily = "inet6"
+const SockFamilyUnix AttrSockFamily = "unix"
 
 // Deprecated, use `network.local.address`
 type AttrSockHostAddr string // net.sock.host.addr
 
-func (AttrSockHostAddr) Development() {}
-func (AttrSockHostAddr) Recommended() {}
+func (AttrSockHostAddr) Development()    {}
+func (AttrSockHostAddr) Recommended()    {}
+func (AttrSockHostAddr) Key() string     { return "net_sock_host_addr" }
+func (a AttrSockHostAddr) Value() string { return string(a) }
 
 // Deprecated, use `network.local.port`
 type AttrSockHostPort string // net.sock.host.port
 
-func (AttrSockHostPort) Development() {}
-func (AttrSockHostPort) Recommended() {}
+func (AttrSockHostPort) Development()    {}
+func (AttrSockHostPort) Recommended()    {}
+func (AttrSockHostPort) Key() string     { return "net_sock_host_port" }
+func (a AttrSockHostPort) Value() string { return string(a) }
 
 // Deprecated, use `network.peer.address`
 type AttrSockPeerAddr string // net.sock.peer.addr
 
-func (AttrSockPeerAddr) Development() {}
-func (AttrSockPeerAddr) Recommended() {}
+func (AttrSockPeerAddr) Development()    {}
+func (AttrSockPeerAddr) Recommended()    {}
+func (AttrSockPeerAddr) Key() string     { return "net_sock_peer_addr" }
+func (a AttrSockPeerAddr) Value() string { return string(a) }
 
 // Deprecated, no replacement at this time
 type AttrSockPeerName string // net.sock.peer.name
 
-func (AttrSockPeerName) Development() {}
-func (AttrSockPeerName) Recommended() {}
+func (AttrSockPeerName) Development()    {}
+func (AttrSockPeerName) Recommended()    {}
+func (AttrSockPeerName) Key() string     { return "net_sock_peer_name" }
+func (a AttrSockPeerName) Value() string { return string(a) }
 
 // Deprecated, use `network.peer.port`
 type AttrSockPeerPort string // net.sock.peer.port
 
-func (AttrSockPeerPort) Development() {}
-func (AttrSockPeerPort) Recommended() {}
+func (AttrSockPeerPort) Development()    {}
+func (AttrSockPeerPort) Recommended()    {}
+func (AttrSockPeerPort) Key() string     { return "net_sock_peer_port" }
+func (a AttrSockPeerPort) Value() string { return string(a) }
 
 // Deprecated, use `network.transport`
 type AttrTransport string // net.transport
 
-func (AttrTransport) Development() {}
-func (AttrTransport) Recommended() {}
+func (AttrTransport) Development()    {}
+func (AttrTransport) Recommended()    {}
+func (AttrTransport) Key() string     { return "net_transport" }
+func (a AttrTransport) Value() string { return string(a) }
+
+const TransportIpTcp AttrTransport = "ip_tcp"
+const TransportIpUdp AttrTransport = "ip_udp"
+const TransportPipe AttrTransport = "pipe"
+const TransportInproc AttrTransport = "inproc"
+const TransportOther AttrTransport = "other"
 
 /* State {
     name: "attr.go.j2",
@@ -230,7 +270,6 @@ func (AttrTransport) Recommended() {}
                     "root_namespace": "net",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "IPv4 address",
@@ -350,7 +389,6 @@ func (AttrTransport) Recommended() {}
                     "root_namespace": "net",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -505,6 +543,7 @@ func (AttrTransport) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

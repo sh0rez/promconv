@@ -3,34 +3,57 @@ package os
 // Unique identifier for a particular build or compilation of the operating system
 type AttrBuildId string // os.build_id
 
-func (AttrBuildId) Development() {}
-func (AttrBuildId) Recommended() {}
+func (AttrBuildId) Development()    {}
+func (AttrBuildId) Recommended()    {}
+func (AttrBuildId) Key() string     { return "os_build_id" }
+func (a AttrBuildId) Value() string { return string(a) }
 
 // Human readable (not intended to be parsed) OS version information, like e.g. reported by `ver` or `lsb_release -a` commands
 type AttrDescription string // os.description
 
-func (AttrDescription) Development() {}
-func (AttrDescription) Recommended() {}
+func (AttrDescription) Development()    {}
+func (AttrDescription) Recommended()    {}
+func (AttrDescription) Key() string     { return "os_description" }
+func (a AttrDescription) Value() string { return string(a) }
 
 // Human readable operating system name
 type AttrName string // os.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "os_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // The operating system type
 type AttrType string // os.type
 
-func (AttrType) Development() {}
-func (AttrType) Recommended() {}
+func (AttrType) Development()    {}
+func (AttrType) Recommended()    {}
+func (AttrType) Key() string     { return "os_type" }
+func (a AttrType) Value() string { return string(a) }
+
+const TypeWindows AttrType = "windows"
+const TypeLinux AttrType = "linux"
+const TypeDarwin AttrType = "darwin"
+const TypeFreebsd AttrType = "freebsd"
+const TypeNetbsd AttrType = "netbsd"
+const TypeOpenbsd AttrType = "openbsd"
+const TypeDragonflybsd AttrType = "dragonflybsd"
+const TypeHpux AttrType = "hpux"
+const TypeAix AttrType = "aix"
+const TypeSolaris AttrType = "solaris"
+const TypeZOs AttrType = "z_os"
+const TypeZos AttrType = "zos"
 
 // The version string of the operating system as defined in [Version Attributes]
 //
 // [Version Attributes]: /docs/resource/README.md#version-attributes
 type AttrVersion string // os.version
 
-func (AttrVersion) Development() {}
-func (AttrVersion) Recommended() {}
+func (AttrVersion) Development()    {}
+func (AttrVersion) Recommended()    {}
+func (AttrVersion) Key() string     { return "os_version" }
+func (a AttrVersion) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -84,7 +107,6 @@ func (AttrVersion) Recommended() {}
                     "root_namespace": "os",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Microsoft Windows",
@@ -167,12 +189,20 @@ func (AttrVersion) Recommended() {}
                                 "value": "solaris",
                             },
                             {
-                                "brief": "IBM z/OS",
+                                "brief": "Deprecated. Use `zos` instead.",
                                 "deprecated": none,
                                 "id": "z_os",
                                 "note": none,
                                 "stability": "development",
                                 "value": "z_os",
+                            },
+                            {
+                                "brief": "IBM z/OS",
+                                "deprecated": none,
+                                "id": "zos",
+                                "note": none,
+                                "stability": "development",
+                                "value": "zos",
                             },
                         ],
                     },
@@ -299,6 +329,7 @@ func (AttrVersion) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

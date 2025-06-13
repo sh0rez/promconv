@@ -6,37 +6,32 @@ import (
 
 // The number of OS threads that can execute user-level Go code simultaneously.
 type ProcessorLimit struct {
-	*prometheus.GaugeVec
-	extra ProcessorLimitExtra
+	prometheus.Gauge
 }
 
 func NewProcessorLimit() ProcessorLimit {
-	labels := []string{}
-	return ProcessorLimit{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "go",
-		Name:      "processor_limit",
-		Help:      "The number of OS threads that can execute user-level Go code simultaneously.",
-	}, labels)}
+	return ProcessorLimit{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "go_processor_limit",
+		Help: "The number of OS threads that can execute user-level Go code simultaneously.",
+	})}
 }
 
-func (m ProcessorLimit) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ProcessorLimit) Register(regs ...prometheus.Registerer) ProcessorLimit {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ProcessorLimitExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessorLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "processor.limit",
         "Type": "ProcessorLimit",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of OS threads that can execute user-level Go code simultaneously.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

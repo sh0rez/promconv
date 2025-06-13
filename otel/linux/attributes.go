@@ -3,8 +3,13 @@ package linux
 // The Linux Slab memory state
 type AttrMemorySlabState string // linux.memory.slab.state
 
-func (AttrMemorySlabState) Development() {}
-func (AttrMemorySlabState) Recommended() {}
+func (AttrMemorySlabState) Development()    {}
+func (AttrMemorySlabState) Recommended()    {}
+func (AttrMemorySlabState) Key() string     { return "linux_memory_slab_state" }
+func (a AttrMemorySlabState) Value() string { return string(a) }
+
+const MemorySlabStateReclaimable AttrMemorySlabState = "reclaimable"
+const MemorySlabStateUnreclaimable AttrMemorySlabState = "unreclaimable"
 
 /* State {
     name: "attr.go.j2",
@@ -24,7 +29,6 @@ func (AttrMemorySlabState) Recommended() {}
                     "root_namespace": "linux",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -155,6 +159,7 @@ func (AttrMemorySlabState) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

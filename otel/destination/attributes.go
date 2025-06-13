@@ -4,14 +4,18 @@ package destination
 // When observed from the source side, and when communicating through an intermediary, `destination.address` SHOULD represent the destination address behind any intermediaries, for example proxies, if it's available
 type AttrAddress string // destination.address
 
-func (AttrAddress) Development() {}
-func (AttrAddress) Recommended() {}
+func (AttrAddress) Development()    {}
+func (AttrAddress) Recommended()    {}
+func (AttrAddress) Key() string     { return "destination_address" }
+func (a AttrAddress) Value() string { return string(a) }
 
 // Destination port number
 type AttrPort string // destination.port
 
-func (AttrPort) Development() {}
-func (AttrPort) Recommended() {}
+func (AttrPort) Development()    {}
+func (AttrPort) Recommended()    {}
+func (AttrPort) Key() string     { return "destination_port" }
+func (a AttrPort) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -156,6 +160,7 @@ func (AttrPort) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

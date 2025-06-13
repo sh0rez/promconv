@@ -6,37 +6,32 @@ import (
 
 // Event loop utilization.
 type EventloopUtilization struct {
-	*prometheus.GaugeVec
-	extra EventloopUtilizationExtra
+	prometheus.Gauge
 }
 
 func NewEventloopUtilization() EventloopUtilization {
-	labels := []string{}
-	return EventloopUtilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "nodejs",
-		Name:      "eventloop_utilization",
-		Help:      "Event loop utilization.",
-	}, labels)}
+	return EventloopUtilization{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "nodejs_eventloop_utilization",
+		Help: "Event loop utilization.",
+	})}
 }
 
-func (m EventloopUtilization) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m EventloopUtilization) Register(regs ...prometheus.Registerer) EventloopUtilization {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type EventloopUtilizationExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopUtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "eventloop.utilization",
         "Type": "EventloopUtilization",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Event loop utilization.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

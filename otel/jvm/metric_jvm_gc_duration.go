@@ -11,58 +11,58 @@ type GcDuration struct {
 }
 
 func NewGcDuration() GcDuration {
-	labels := []string{"jvm_gc_action", "jvm_gc_name", "jvm_gc_cause"}
+	labels := []string{AttrGcAction("").Key(), AttrGcName("").Key(), AttrGcCause("").Key()}
 	return GcDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "jvm",
-		Name:      "gc_duration",
-		Help:      "Duration of JVM garbage collection actions.",
+		Name: "jvm_gc_duration",
+		Help: "Duration of JVM garbage collection actions.",
 	}, labels)}
 }
 
-func (m GcDuration) With(extra interface {
-	AttrJvmGcAction() AttrGcAction
-	AttrJvmGcName() AttrGcName
-	AttrJvmGcCause() AttrGcCause
+func (m GcDuration) With(extras ...interface {
+	JvmGcAction() AttrGcAction
+	JvmGcName() AttrGcName
+	JvmGcCause() AttrGcCause
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrJvmGcAction()),
-		string(extra.AttrJvmGcName()),
-		string(extra.AttrJvmGcCause()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(extra.JvmGcAction().Value(), extra.JvmGcName().Value(), extra.JvmGcCause().Value())
 }
 
-func (a GcDuration) WithJvmGcAction(attr interface{ AttrJvmGcAction() AttrGcAction }) GcDuration {
-	a.extra.JvmGcAction = attr.AttrJvmGcAction()
+// Deprecated: Use [GcDuration.With] instead
+func (m GcDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a GcDuration) WithGcAction(attr interface{ JvmGcAction() AttrGcAction }) GcDuration {
+	a.extra.AttrGcAction = attr.JvmGcAction()
 	return a
 }
-func (a GcDuration) WithJvmGcName(attr interface{ AttrJvmGcName() AttrGcName }) GcDuration {
-	a.extra.JvmGcName = attr.AttrJvmGcName()
+func (a GcDuration) WithGcName(attr interface{ JvmGcName() AttrGcName }) GcDuration {
+	a.extra.AttrGcName = attr.JvmGcName()
 	return a
 }
-func (a GcDuration) WithJvmGcCause(attr interface{ AttrJvmGcCause() AttrGcCause }) GcDuration {
-	a.extra.JvmGcCause = attr.AttrJvmGcCause()
+func (a GcDuration) WithGcCause(attr interface{ JvmGcCause() AttrGcCause }) GcDuration {
+	a.extra.AttrGcCause = attr.JvmGcCause()
 	return a
 }
 
 type GcDurationExtra struct {
-	// Name of the garbage collector action.
-	JvmGcAction AttrGcAction `otel:"jvm.gc.action"`
-	// Name of the garbage collector.
-	JvmGcName AttrGcName `otel:"jvm.gc.name"`
-	// Name of the garbage collector cause.
-	JvmGcCause AttrGcCause `otel:"jvm.gc.cause"`
+	// Name of the garbage collector action
+	AttrGcAction AttrGcAction `otel:"jvm.gc.action"` // Name of the garbage collector
+	AttrGcName   AttrGcName   `otel:"jvm.gc.name"`   // Name of the garbage collector cause
+	AttrGcCause  AttrGcCause  `otel:"jvm.gc.cause"`
 }
 
-func (a GcDurationExtra) AttrJvmGcAction() AttrGcAction { return a.JvmGcAction }
-func (a GcDurationExtra) AttrJvmGcName() AttrGcName     { return a.JvmGcName }
-func (a GcDurationExtra) AttrJvmGcCause() AttrGcCause   { return a.JvmGcCause }
+func (a GcDurationExtra) JvmGcAction() AttrGcAction { return a.AttrGcAction }
+func (a GcDurationExtra) JvmGcName() AttrGcName     { return a.AttrGcName }
+func (a GcDurationExtra) JvmGcCause() AttrGcCause   { return a.AttrGcCause }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -209,6 +209,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -316,6 +318,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -402,7 +405,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

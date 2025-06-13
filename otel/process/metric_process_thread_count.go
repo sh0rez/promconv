@@ -6,37 +6,32 @@ import (
 
 // Process threads count.
 type ThreadCount struct {
-	*prometheus.GaugeVec
-	extra ThreadCountExtra
+	prometheus.Gauge
 }
 
 func NewThreadCount() ThreadCount {
-	labels := []string{}
-	return ThreadCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "process",
-		Name:      "thread_count",
-		Help:      "Process threads count.",
-	}, labels)}
+	return ThreadCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "process_thread_count",
+		Help: "Process threads count.",
+	})}
 }
 
-func (m ThreadCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ThreadCount) Register(regs ...prometheus.Registerer) ThreadCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ThreadCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ThreadCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "thread.count",
         "Type": "ThreadCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Process threads count.",
@@ -177,6 +171,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -263,7 +258,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

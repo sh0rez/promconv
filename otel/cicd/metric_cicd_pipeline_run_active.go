@@ -11,23 +11,20 @@ type PipelineRunActive struct {
 }
 
 func NewPipelineRunActive() PipelineRunActive {
-	labels := []string{"cicd_pipeline_name", "cicd_pipeline_run_state"}
+	labels := []string{AttrPipelineName("").Key(), AttrPipelineRunState("").Key()}
 	return PipelineRunActive{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "cicd",
-		Name:      "pipeline_run_active",
-		Help:      "The number of pipeline runs currently active in the system by state.",
+		Name: "cicd_pipeline_run_active",
+		Help: "The number of pipeline runs currently active in the system by state.",
 	}, labels)}
 }
 
-func (m PipelineRunActive) With(pipelineName AttrPipelineName, pipelineRunState AttrPipelineRunState, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(pipelineName),
-		string(pipelineRunState),
-	)
+func (m PipelineRunActive) With(pipelineName AttrPipelineName, pipelineRunState AttrPipelineRunState, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(pipelineName.Value(), pipelineRunState.Value())
+}
+
+// Deprecated: Use [PipelineRunActive.With] instead
+func (m PipelineRunActive) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type PipelineRunActiveExtra struct {
@@ -35,7 +32,7 @@ type PipelineRunActiveExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -74,7 +71,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The run pending state spans from the event triggering the pipeline run until the execution of the run starts (eg. time spent in a queue, provisioning agents, creating run resources).\n",
@@ -130,7 +126,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The run pending state spans from the event triggering the pipeline run until the execution of the run starts (eg. time spent in a queue, provisioning agents, creating run resources).\n",
@@ -207,6 +202,8 @@ State {
             "type": "metric",
             "unit": "{run}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -314,6 +311,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -400,7 +398,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

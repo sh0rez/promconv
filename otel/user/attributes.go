@@ -3,40 +3,52 @@ package user
 // User email address
 type AttrEmail string // user.email
 
-func (AttrEmail) Development() {}
-func (AttrEmail) Recommended() {}
+func (AttrEmail) Development()    {}
+func (AttrEmail) Recommended()    {}
+func (AttrEmail) Key() string     { return "user_email" }
+func (a AttrEmail) Value() string { return string(a) }
 
 // User's full name
 type AttrFullName string // user.full_name
 
-func (AttrFullName) Development() {}
-func (AttrFullName) Recommended() {}
+func (AttrFullName) Development()    {}
+func (AttrFullName) Recommended()    {}
+func (AttrFullName) Key() string     { return "user_full_name" }
+func (a AttrFullName) Value() string { return string(a) }
 
 // Unique user hash to correlate information for a user in anonymized form.
 //
 // Useful if `user.id` or `user.name` contain confidential information and cannot be used
 type AttrHash string // user.hash
 
-func (AttrHash) Development() {}
-func (AttrHash) Recommended() {}
+func (AttrHash) Development()    {}
+func (AttrHash) Recommended()    {}
+func (AttrHash) Key() string     { return "user_hash" }
+func (a AttrHash) Value() string { return string(a) }
 
 // Unique identifier of the user
 type AttrId string // user.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "user_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // Short name or login/username of the user
 type AttrName string // user.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "user_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // Array of user roles at the time of the event
 type AttrRoles string // user.roles
 
-func (AttrRoles) Development() {}
-func (AttrRoles) Recommended() {}
+func (AttrRoles) Development()    {}
+func (AttrRoles) Recommended()    {}
+func (AttrRoles) Key() string     { return "user_roles" }
+func (a AttrRoles) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -225,6 +237,7 @@ func (AttrRoles) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

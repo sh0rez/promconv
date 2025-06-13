@@ -6,37 +6,32 @@ import (
 
 // Total number of processes created over uptime of the host
 type ProcessCreated struct {
-	*prometheus.CounterVec
-	extra ProcessCreatedExtra
+	prometheus.Counter
 }
 
 func NewProcessCreated() ProcessCreated {
-	labels := []string{}
-	return ProcessCreated{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "system",
-		Name:      "process_created",
-		Help:      "Total number of processes created over uptime of the host",
-	}, labels)}
+	return ProcessCreated{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "system_process_created",
+		Help: "Total number of processes created over uptime of the host",
+	})}
 }
 
-func (m ProcessCreated) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m ProcessCreated) Register(regs ...prometheus.Registerer) ProcessCreated {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ProcessCreatedExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessCreatedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "process.created",
         "Type": "ProcessCreated",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Total number of processes created over uptime of the host",
@@ -177,6 +171,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -263,7 +258,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

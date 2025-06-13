@@ -4,35 +4,62 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Deprecated. Use `cpu.utilization` instead.
+import (
+	"shorez.de/promconv/otel/cpu"
+)
+
+// For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.
 type CpuUtilization struct {
 	*prometheus.GaugeVec
 	extra CpuUtilizationExtra
 }
 
 func NewCpuUtilization() CpuUtilization {
-	labels := []string{}
+	labels := []string{cpu.AttrLogicalNumber("").Key(), cpu.AttrMode("").Key()}
 	return CpuUtilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "cpu_utilization",
-		Help:      "Deprecated. Use `cpu.utilization` instead.",
+		Name: "system_cpu_utilization",
+		Help: "For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.",
 	}, labels)}
 }
 
-func (m CpuUtilization) With(extra interface {
+func (m CpuUtilization) With(extras ...interface {
+	CpuLogicalNumber() cpu.AttrLogicalNumber
+	CpuMode() cpu.AttrMode
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues()
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.CpuLogicalNumber().Value(), extra.CpuMode().Value())
+}
+
+// Deprecated: Use [CpuUtilization.With] instead
+func (m CpuUtilization) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a CpuUtilization) WithCpuLogicalNumber(attr interface{ CpuLogicalNumber() cpu.AttrLogicalNumber }) CpuUtilization {
+	a.extra.AttrCpuLogicalNumber = attr.CpuLogicalNumber()
+	return a
+}
+func (a CpuUtilization) WithCpuMode(attr interface{ CpuMode() cpu.AttrMode }) CpuUtilization {
+	a.extra.AttrCpuMode = attr.CpuMode()
+	return a
 }
 
 type CpuUtilizationExtra struct {
+	// The logical CPU number [0..n-1]
+	AttrCpuLogicalNumber cpu.AttrLogicalNumber `otel:"cpu.logical_number"` // The mode of the CPU
+	AttrCpuMode          cpu.AttrMode          `otel:"cpu.mode"`
 }
+
+func (a CpuUtilizationExtra) CpuLogicalNumber() cpu.AttrLogicalNumber { return a.AttrCpuLogicalNumber }
+func (a CpuUtilizationExtra) CpuMode() cpu.AttrMode                   { return a.AttrCpuMode }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -46,21 +73,223 @@ State {
         },
         "Name": "cpu.utilization",
         "Type": "CpuUtilization",
-        "attributes": [],
-        "ctx": {
-            "attributes": [],
-            "brief": "Deprecated. Use `cpu.utilization` instead.",
-            "deprecated": {
-                "note": "Replaced by `cpu.utilization`.",
-                "reason": "renamed",
-                "renamed_to": "cpu.utilization",
+        "attributes": [
+            {
+                "brief": "The logical CPU number [0..n-1]",
+                "examples": [
+                    1,
+                ],
+                "name": "cpu.logical_number",
+                "requirement_level": "recommended",
+                "stability": "development",
+                "type": "int",
             },
+            {
+                "brief": "The mode of the CPU",
+                "examples": [
+                    "user",
+                    "system",
+                ],
+                "name": "cpu.mode",
+                "note": "Following modes SHOULD be used: `user`, `system`, `nice`, `idle`, `iowait`, `interrupt`, `steal`",
+                "requirement_level": "recommended",
+                "stability": "development",
+                "type": {
+                    "members": [
+                        {
+                            "brief": none,
+                            "deprecated": none,
+                            "id": "user",
+                            "note": none,
+                            "stability": "development",
+                            "value": "user",
+                        },
+                        {
+                            "brief": none,
+                            "deprecated": none,
+                            "id": "system",
+                            "note": none,
+                            "stability": "development",
+                            "value": "system",
+                        },
+                        {
+                            "brief": none,
+                            "deprecated": none,
+                            "id": "nice",
+                            "note": none,
+                            "stability": "development",
+                            "value": "nice",
+                        },
+                        {
+                            "brief": none,
+                            "deprecated": none,
+                            "id": "idle",
+                            "note": none,
+                            "stability": "development",
+                            "value": "idle",
+                        },
+                        {
+                            "brief": none,
+                            "deprecated": none,
+                            "id": "iowait",
+                            "note": none,
+                            "stability": "development",
+                            "value": "iowait",
+                        },
+                        {
+                            "brief": none,
+                            "deprecated": none,
+                            "id": "interrupt",
+                            "note": none,
+                            "stability": "development",
+                            "value": "interrupt",
+                        },
+                        {
+                            "brief": none,
+                            "deprecated": none,
+                            "id": "steal",
+                            "note": none,
+                            "stability": "development",
+                            "value": "steal",
+                        },
+                        {
+                            "brief": none,
+                            "deprecated": none,
+                            "id": "kernel",
+                            "note": none,
+                            "stability": "development",
+                            "value": "kernel",
+                        },
+                    ],
+                },
+            },
+        ],
+        "ctx": {
+            "attributes": [
+                {
+                    "brief": "The logical CPU number [0..n-1]",
+                    "examples": [
+                        1,
+                    ],
+                    "name": "cpu.logical_number",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "int",
+                },
+                {
+                    "brief": "The mode of the CPU",
+                    "examples": [
+                        "user",
+                        "system",
+                    ],
+                    "name": "cpu.mode",
+                    "note": "Following modes SHOULD be used: `user`, `system`, `nice`, `idle`, `iowait`, `interrupt`, `steal`",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": {
+                        "members": [
+                            {
+                                "brief": none,
+                                "deprecated": none,
+                                "id": "user",
+                                "note": none,
+                                "stability": "development",
+                                "value": "user",
+                            },
+                            {
+                                "brief": none,
+                                "deprecated": none,
+                                "id": "system",
+                                "note": none,
+                                "stability": "development",
+                                "value": "system",
+                            },
+                            {
+                                "brief": none,
+                                "deprecated": none,
+                                "id": "nice",
+                                "note": none,
+                                "stability": "development",
+                                "value": "nice",
+                            },
+                            {
+                                "brief": none,
+                                "deprecated": none,
+                                "id": "idle",
+                                "note": none,
+                                "stability": "development",
+                                "value": "idle",
+                            },
+                            {
+                                "brief": none,
+                                "deprecated": none,
+                                "id": "iowait",
+                                "note": none,
+                                "stability": "development",
+                                "value": "iowait",
+                            },
+                            {
+                                "brief": none,
+                                "deprecated": none,
+                                "id": "interrupt",
+                                "note": none,
+                                "stability": "development",
+                                "value": "interrupt",
+                            },
+                            {
+                                "brief": none,
+                                "deprecated": none,
+                                "id": "steal",
+                                "note": none,
+                                "stability": "development",
+                                "value": "steal",
+                            },
+                            {
+                                "brief": none,
+                                "deprecated": none,
+                                "id": "kernel",
+                                "note": none,
+                                "stability": "development",
+                                "value": "kernel",
+                            },
+                        ],
+                    },
+                },
+            ],
+            "brief": "For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.",
+            "entity_associations": [
+                "host",
+            ],
             "events": [],
             "id": "metric.system.cpu.utilization",
             "instrument": "gauge",
             "lineage": {
+                "attributes": {
+                    "cpu.logical_number": {
+                        "inherited_fields": [
+                            "brief",
+                            "examples",
+                            "note",
+                            "requirement_level",
+                            "stability",
+                        ],
+                        "source_group": "registry.cpu",
+                    },
+                    "cpu.mode": {
+                        "inherited_fields": [
+                            "brief",
+                            "examples",
+                            "requirement_level",
+                            "stability",
+                        ],
+                        "locally_overridden_fields": [
+                            "note",
+                        ],
+                        "source_group": "registry.cpu",
+                    },
+                },
                 "provenance": {
-                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/system/deprecated/metrics-deprecated.yaml",
+                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/system/metrics.yaml",
                     "registry_id": "main",
                 },
             },
@@ -72,6 +301,8 @@ State {
             "type": "metric",
             "unit": "1",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -179,6 +410,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -265,7 +497,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

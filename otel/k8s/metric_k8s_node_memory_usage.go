@@ -6,37 +6,32 @@ import (
 
 // Memory usage of the Node
 type NodeMemoryUsage struct {
-	*prometheus.GaugeVec
-	extra NodeMemoryUsageExtra
+	prometheus.Gauge
 }
 
 func NewNodeMemoryUsage() NodeMemoryUsage {
-	labels := []string{}
-	return NodeMemoryUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "node_memory_usage",
-		Help:      "Memory usage of the Node",
-	}, labels)}
+	return NodeMemoryUsage{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_node_memory_usage",
+		Help: "Memory usage of the Node",
+	})}
 }
 
-func (m NodeMemoryUsage) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m NodeMemoryUsage) Register(regs ...prometheus.Registerer) NodeMemoryUsage {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type NodeMemoryUsageExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeMemoryUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "node.memory.usage",
         "Type": "NodeMemoryUsage",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Memory usage of the Node",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

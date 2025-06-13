@@ -3,88 +3,173 @@ package system
 // Deprecated, use `cpu.logical_number` instead
 type AttrCpuLogicalNumber string // system.cpu.logical_number
 
-func (AttrCpuLogicalNumber) Development() {}
-func (AttrCpuLogicalNumber) Recommended() {}
+func (AttrCpuLogicalNumber) Development()    {}
+func (AttrCpuLogicalNumber) Recommended()    {}
+func (AttrCpuLogicalNumber) Key() string     { return "system_cpu_logical_number" }
+func (a AttrCpuLogicalNumber) Value() string { return string(a) }
 
 // Deprecated, use `cpu.mode` instead
 type AttrCpuState string // system.cpu.state
 
-func (AttrCpuState) Development() {}
-func (AttrCpuState) Recommended() {}
+func (AttrCpuState) Development()    {}
+func (AttrCpuState) Recommended()    {}
+func (AttrCpuState) Key() string     { return "system_cpu_state" }
+func (a AttrCpuState) Value() string { return string(a) }
+
+const CpuStateUser AttrCpuState = "user"
+const CpuStateSystem AttrCpuState = "system"
+const CpuStateNice AttrCpuState = "nice"
+const CpuStateIdle AttrCpuState = "idle"
+const CpuStateIowait AttrCpuState = "iowait"
+const CpuStateInterrupt AttrCpuState = "interrupt"
+const CpuStateSteal AttrCpuState = "steal"
 
 // The device identifier
 type AttrDevice string // system.device
 
-func (AttrDevice) Development() {}
-func (AttrDevice) Recommended() {}
+func (AttrDevice) Development()    {}
+func (AttrDevice) Recommended()    {}
+func (AttrDevice) Key() string     { return "system_device" }
+func (a AttrDevice) Value() string { return string(a) }
 
 // The filesystem mode
 type AttrFilesystemMode string // system.filesystem.mode
 
-func (AttrFilesystemMode) Development() {}
-func (AttrFilesystemMode) Recommended() {}
+func (AttrFilesystemMode) Development()    {}
+func (AttrFilesystemMode) Recommended()    {}
+func (AttrFilesystemMode) Key() string     { return "system_filesystem_mode" }
+func (a AttrFilesystemMode) Value() string { return string(a) }
 
 // The filesystem mount path
 type AttrFilesystemMountpoint string // system.filesystem.mountpoint
 
-func (AttrFilesystemMountpoint) Development() {}
-func (AttrFilesystemMountpoint) Recommended() {}
+func (AttrFilesystemMountpoint) Development()    {}
+func (AttrFilesystemMountpoint) Recommended()    {}
+func (AttrFilesystemMountpoint) Key() string     { return "system_filesystem_mountpoint" }
+func (a AttrFilesystemMountpoint) Value() string { return string(a) }
 
 // The filesystem state
 type AttrFilesystemState string // system.filesystem.state
 
-func (AttrFilesystemState) Development() {}
-func (AttrFilesystemState) Recommended() {}
+func (AttrFilesystemState) Development()    {}
+func (AttrFilesystemState) Recommended()    {}
+func (AttrFilesystemState) Key() string     { return "system_filesystem_state" }
+func (a AttrFilesystemState) Value() string { return string(a) }
+
+const FilesystemStateUsed AttrFilesystemState = "used"
+const FilesystemStateFree AttrFilesystemState = "free"
+const FilesystemStateReserved AttrFilesystemState = "reserved"
 
 // The filesystem type
 type AttrFilesystemType string // system.filesystem.type
 
-func (AttrFilesystemType) Development() {}
-func (AttrFilesystemType) Recommended() {}
+func (AttrFilesystemType) Development()    {}
+func (AttrFilesystemType) Recommended()    {}
+func (AttrFilesystemType) Key() string     { return "system_filesystem_type" }
+func (a AttrFilesystemType) Value() string { return string(a) }
+
+const FilesystemTypeFat32 AttrFilesystemType = "fat32"
+const FilesystemTypeExfat AttrFilesystemType = "exfat"
+const FilesystemTypeNtfs AttrFilesystemType = "ntfs"
+const FilesystemTypeRefs AttrFilesystemType = "refs"
+const FilesystemTypeHfsplus AttrFilesystemType = "hfsplus"
+const FilesystemTypeExt4 AttrFilesystemType = "ext4"
 
 // The memory state
 type AttrMemoryState string // system.memory.state
 
-func (AttrMemoryState) Development() {}
-func (AttrMemoryState) Recommended() {}
+func (AttrMemoryState) Development()    {}
+func (AttrMemoryState) Recommended()    {}
+func (AttrMemoryState) Key() string     { return "system_memory_state" }
+func (a AttrMemoryState) Value() string { return string(a) }
+
+const MemoryStateUsed AttrMemoryState = "used"
+const MemoryStateFree AttrMemoryState = "free"
+const MemoryStateShared AttrMemoryState = "shared"
+const MemoryStateBuffers AttrMemoryState = "buffers"
+const MemoryStateCached AttrMemoryState = "cached"
 
 // Deprecated, use `network.connection.state` instead
 type AttrNetworkState string // system.network.state
 
-func (AttrNetworkState) Development() {}
-func (AttrNetworkState) Recommended() {}
+func (AttrNetworkState) Development()    {}
+func (AttrNetworkState) Recommended()    {}
+func (AttrNetworkState) Key() string     { return "system_network_state" }
+func (a AttrNetworkState) Value() string { return string(a) }
+
+const NetworkStateClose AttrNetworkState = "close"
+const NetworkStateCloseWait AttrNetworkState = "close_wait"
+const NetworkStateClosing AttrNetworkState = "closing"
+const NetworkStateDelete AttrNetworkState = "delete"
+const NetworkStateEstablished AttrNetworkState = "established"
+const NetworkStateFinWait1 AttrNetworkState = "fin_wait_1"
+const NetworkStateFinWait2 AttrNetworkState = "fin_wait_2"
+const NetworkStateLastAck AttrNetworkState = "last_ack"
+const NetworkStateListen AttrNetworkState = "listen"
+const NetworkStateSynRecv AttrNetworkState = "syn_recv"
+const NetworkStateSynSent AttrNetworkState = "syn_sent"
+const NetworkStateTimeWait AttrNetworkState = "time_wait"
 
 // The paging access direction
 type AttrPagingDirection string // system.paging.direction
 
-func (AttrPagingDirection) Development() {}
-func (AttrPagingDirection) Recommended() {}
+func (AttrPagingDirection) Development()    {}
+func (AttrPagingDirection) Recommended()    {}
+func (AttrPagingDirection) Key() string     { return "system_paging_direction" }
+func (a AttrPagingDirection) Value() string { return string(a) }
+
+const PagingDirectionIn AttrPagingDirection = "in"
+const PagingDirectionOut AttrPagingDirection = "out"
 
 // The memory paging state
 type AttrPagingState string // system.paging.state
 
-func (AttrPagingState) Development() {}
-func (AttrPagingState) Recommended() {}
+func (AttrPagingState) Development()    {}
+func (AttrPagingState) Recommended()    {}
+func (AttrPagingState) Key() string     { return "system_paging_state" }
+func (a AttrPagingState) Value() string { return string(a) }
+
+const PagingStateUsed AttrPagingState = "used"
+const PagingStateFree AttrPagingState = "free"
 
 // The memory paging type
 type AttrPagingType string // system.paging.type
 
-func (AttrPagingType) Development() {}
-func (AttrPagingType) Recommended() {}
+func (AttrPagingType) Development()    {}
+func (AttrPagingType) Recommended()    {}
+func (AttrPagingType) Key() string     { return "system_paging_type" }
+func (a AttrPagingType) Value() string { return string(a) }
+
+const PagingTypeMajor AttrPagingType = "major"
+const PagingTypeMinor AttrPagingType = "minor"
 
 // The process state, e.g., [Linux Process State Codes]
 //
 // [Linux Process State Codes]: https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES
 type AttrProcessStatus string // system.process.status
 
-func (AttrProcessStatus) Development() {}
-func (AttrProcessStatus) Recommended() {}
+func (AttrProcessStatus) Development()    {}
+func (AttrProcessStatus) Recommended()    {}
+func (AttrProcessStatus) Key() string     { return "system_process_status" }
+func (a AttrProcessStatus) Value() string { return string(a) }
+
+const ProcessStatusRunning AttrProcessStatus = "running"
+const ProcessStatusSleeping AttrProcessStatus = "sleeping"
+const ProcessStatusStopped AttrProcessStatus = "stopped"
+const ProcessStatusDefunct AttrProcessStatus = "defunct"
 
 // Deprecated, use `system.process.status` instead
 type AttrProcessesStatus string // system.processes.status
 
-func (AttrProcessesStatus) Development() {}
-func (AttrProcessesStatus) Recommended() {}
+func (AttrProcessesStatus) Development()    {}
+func (AttrProcessesStatus) Recommended()    {}
+func (AttrProcessesStatus) Key() string     { return "system_processes_status" }
+func (a AttrProcessesStatus) Value() string { return string(a) }
+
+const ProcessesStatusRunning AttrProcessesStatus = "running"
+const ProcessesStatusSleeping AttrProcessesStatus = "sleeping"
+const ProcessesStatusStopped AttrProcessesStatus = "stopped"
+const ProcessesStatusDefunct AttrProcessesStatus = "defunct"
 
 /* State {
     name: "attr.go.j2",
@@ -120,7 +205,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -224,7 +308,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -263,7 +346,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -327,7 +409,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -387,7 +468,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -498,7 +578,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -529,7 +608,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -560,7 +638,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -591,7 +668,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -643,7 +719,6 @@ func (AttrProcessesStatus) Recommended() {}
                     "root_namespace": "system",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -790,6 +865,7 @@ func (AttrProcessesStatus) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

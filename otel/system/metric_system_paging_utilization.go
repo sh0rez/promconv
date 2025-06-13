@@ -10,49 +10,51 @@ type PagingUtilization struct {
 }
 
 func NewPagingUtilization() PagingUtilization {
-	labels := []string{"system_device", "system_paging_state"}
+	labels := []string{AttrDevice("").Key(), AttrPagingState("").Key()}
 	return PagingUtilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "paging_utilization",
-		Help:      "",
+		Name: "system_paging_utilization",
+		Help: "",
 	}, labels)}
 }
 
-func (m PagingUtilization) With(extra interface {
-	AttrSystemDevice() AttrDevice
-	AttrSystemPagingState() AttrPagingState
+func (m PagingUtilization) With(extras ...interface {
+	SystemDevice() AttrDevice
+	SystemPagingState() AttrPagingState
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemDevice()),
-		string(extra.AttrSystemPagingState()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.SystemDevice().Value(), extra.SystemPagingState().Value())
 }
 
-func (a PagingUtilization) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) PagingUtilization {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+// Deprecated: Use [PagingUtilization.With] instead
+func (m PagingUtilization) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a PagingUtilization) WithDevice(attr interface{ SystemDevice() AttrDevice }) PagingUtilization {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
-func (a PagingUtilization) WithSystemPagingState(attr interface{ AttrSystemPagingState() AttrPagingState }) PagingUtilization {
-	a.extra.SystemPagingState = attr.AttrSystemPagingState()
+func (a PagingUtilization) WithPagingState(attr interface{ SystemPagingState() AttrPagingState }) PagingUtilization {
+	a.extra.AttrPagingState = attr.SystemPagingState()
 	return a
 }
 
 type PagingUtilizationExtra struct {
-	// Unique identifier for the device responsible for managing paging operations.
-	SystemDevice AttrDevice `otel:"system.device"`
-	// The memory paging state
-	SystemPagingState AttrPagingState `otel:"system.paging.state"`
+	// Unique identifier for the device responsible for managing paging operations
+	AttrDevice      AttrDevice      `otel:"system.device"` // The memory paging state
+	AttrPagingState AttrPagingState `otel:"system.paging.state"`
 }
 
-func (a PagingUtilizationExtra) AttrSystemDevice() AttrDevice           { return a.SystemDevice }
-func (a PagingUtilizationExtra) AttrSystemPagingState() AttrPagingState { return a.SystemPagingState }
+func (a PagingUtilizationExtra) SystemDevice() AttrDevice           { return a.AttrDevice }
+func (a PagingUtilizationExtra) SystemPagingState() AttrPagingState { return a.AttrPagingState }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -86,7 +88,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -119,7 +120,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -195,6 +195,8 @@ State {
             "type": "metric",
             "unit": "1",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -302,6 +304,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -388,7 +391,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

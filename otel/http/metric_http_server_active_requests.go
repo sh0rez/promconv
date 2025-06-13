@@ -16,51 +16,51 @@ type ServerActiveRequests struct {
 }
 
 func NewServerActiveRequests() ServerActiveRequests {
-	labels := []string{"http_request_method", "url_scheme", "server_address", "server_port"}
+	labels := []string{AttrRequestMethod("").Key(), url.AttrScheme("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key()}
 	return ServerActiveRequests{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "http",
-		Name:      "server_active_requests",
-		Help:      "Number of active HTTP server requests.",
+		Name: "http_server_active_requests",
+		Help: "Number of active HTTP server requests.",
 	}, labels)}
 }
 
-func (m ServerActiveRequests) With(requestMethod AttrRequestMethod, scheme url.AttrScheme, extra interface {
-	AttrServerAddress() server.AttrAddress
-	AttrServerPort() server.AttrPort
+func (m ServerActiveRequests) With(requestMethod AttrRequestMethod, scheme url.AttrScheme, extras ...interface {
+	ServerAddress() server.AttrAddress
+	ServerPort() server.AttrPort
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(requestMethod),
-		string(scheme),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(requestMethod.Value(), scheme.Value(), extra.ServerAddress().Value(), extra.ServerPort().Value())
 }
 
-func (a ServerActiveRequests) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ServerActiveRequests {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+// Deprecated: Use [ServerActiveRequests.With] instead
+func (m ServerActiveRequests) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ServerActiveRequests) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ServerActiveRequests {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ServerActiveRequests) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ServerActiveRequests {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ServerActiveRequests) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ServerActiveRequests {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type ServerActiveRequestsExtra struct {
-	// Name of the local HTTP server that received the request.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// Port of the local HTTP server that received the request.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// Name of the local HTTP server that received the request
+	AttrServerAddress server.AttrAddress `otel:"server.address"` // Port of the local HTTP server that received the request
+	AttrServerPort    server.AttrPort    `otel:"server.port"`
 }
 
-func (a ServerActiveRequestsExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a ServerActiveRequestsExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+func (a ServerActiveRequestsExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a ServerActiveRequestsExtra) ServerPort() server.AttrPort       { return a.AttrServerPort }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -87,7 +87,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "CONNECT method.",
@@ -224,7 +223,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "CONNECT method.",
@@ -310,6 +308,17 @@ State {
                     },
                 },
                 {
+                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
+                    "examples": [
+                        "http",
+                        "https",
+                    ],
+                    "name": "url.scheme",
+                    "requirement_level": "required",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "Name of the local HTTP server that received the request.\n",
                     "examples": [
                         "example.com",
@@ -334,17 +343,6 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
-                    "examples": [
-                        "http",
-                        "https",
-                    ],
-                    "name": "url.scheme",
-                    "requirement_level": "required",
-                    "stability": "stable",
-                    "type": "string",
                 },
             ],
             "brief": "Number of active HTTP server requests.",
@@ -415,6 +413,8 @@ State {
             "type": "metric",
             "unit": "{request}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -522,6 +522,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -608,7 +609,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

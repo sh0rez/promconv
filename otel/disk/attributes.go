@@ -3,8 +3,13 @@ package disk
 // The disk IO operation direction
 type AttrIoDirection string // disk.io.direction
 
-func (AttrIoDirection) Development() {}
-func (AttrIoDirection) Recommended() {}
+func (AttrIoDirection) Development()    {}
+func (AttrIoDirection) Recommended()    {}
+func (AttrIoDirection) Key() string     { return "disk_io_direction" }
+func (a AttrIoDirection) Value() string { return string(a) }
+
+const IoDirectionRead AttrIoDirection = "read"
+const IoDirectionWrite AttrIoDirection = "write"
 
 /* State {
     name: "attr.go.j2",
@@ -23,7 +28,6 @@ func (AttrIoDirection) Recommended() {}
                     "root_namespace": "disk",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -154,6 +158,7 @@ func (AttrIoDirection) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

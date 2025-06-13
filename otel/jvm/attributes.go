@@ -6,8 +6,10 @@ package jvm
 // [BufferPoolMXBean#getName()]: https://docs.oracle.com/en/java/javase/11/docs/api/java.management/java/lang/management/BufferPoolMXBean.html#getName()
 type AttrBufferPoolName string // jvm.buffer.pool.name
 
-func (AttrBufferPoolName) Development() {}
-func (AttrBufferPoolName) Recommended() {}
+func (AttrBufferPoolName) Development()    {}
+func (AttrBufferPoolName) Recommended()    {}
+func (AttrBufferPoolName) Key() string     { return "jvm_buffer_pool_name" }
+func (a AttrBufferPoolName) Value() string { return string(a) }
 
 // Name of the garbage collector action.
 // Garbage collector action is generally obtained via [GarbageCollectionNotificationInfo#getGcAction()]
@@ -15,8 +17,10 @@ func (AttrBufferPoolName) Recommended() {}
 // [GarbageCollectionNotificationInfo#getGcAction()]: https://docs.oracle.com/en/java/javase/11/docs/api/jdk.management/com/sun/management/GarbageCollectionNotificationInfo.html#getGcAction()
 type AttrGcAction string // jvm.gc.action
 
-func (AttrGcAction) Stable()      {}
-func (AttrGcAction) Recommended() {}
+func (AttrGcAction) Stable()         {}
+func (AttrGcAction) Recommended()    {}
+func (AttrGcAction) Key() string     { return "jvm_gc_action" }
+func (a AttrGcAction) Value() string { return string(a) }
 
 // Name of the garbage collector cause.
 // Garbage collector cause is generally obtained via [GarbageCollectionNotificationInfo#getGcCause()]
@@ -24,8 +28,10 @@ func (AttrGcAction) Recommended() {}
 // [GarbageCollectionNotificationInfo#getGcCause()]: https://docs.oracle.com/en/java/javase/11/docs/api/jdk.management/com/sun/management/GarbageCollectionNotificationInfo.html#getGcCause()
 type AttrGcCause string // jvm.gc.cause
 
-func (AttrGcCause) Development() {}
-func (AttrGcCause) Recommended() {}
+func (AttrGcCause) Development()    {}
+func (AttrGcCause) Recommended()    {}
+func (AttrGcCause) Key() string     { return "jvm_gc_cause" }
+func (a AttrGcCause) Value() string { return string(a) }
 
 // Name of the garbage collector.
 // Garbage collector name is generally obtained via [GarbageCollectionNotificationInfo#getGcName()]
@@ -33,8 +39,10 @@ func (AttrGcCause) Recommended() {}
 // [GarbageCollectionNotificationInfo#getGcName()]: https://docs.oracle.com/en/java/javase/11/docs/api/jdk.management/com/sun/management/GarbageCollectionNotificationInfo.html#getGcName()
 type AttrGcName string // jvm.gc.name
 
-func (AttrGcName) Stable()      {}
-func (AttrGcName) Recommended() {}
+func (AttrGcName) Stable()         {}
+func (AttrGcName) Recommended()    {}
+func (AttrGcName) Key() string     { return "jvm_gc_name" }
+func (a AttrGcName) Value() string { return string(a) }
 
 // Name of the memory pool.
 // Pool names are generally obtained via [MemoryPoolMXBean#getName()]
@@ -42,26 +50,44 @@ func (AttrGcName) Recommended() {}
 // [MemoryPoolMXBean#getName()]: https://docs.oracle.com/en/java/javase/11/docs/api/java.management/java/lang/management/MemoryPoolMXBean.html#getName()
 type AttrMemoryPoolName string // jvm.memory.pool.name
 
-func (AttrMemoryPoolName) Stable()      {}
-func (AttrMemoryPoolName) Recommended() {}
+func (AttrMemoryPoolName) Stable()         {}
+func (AttrMemoryPoolName) Recommended()    {}
+func (AttrMemoryPoolName) Key() string     { return "jvm_memory_pool_name" }
+func (a AttrMemoryPoolName) Value() string { return string(a) }
 
 // The type of memory
 type AttrMemoryType string // jvm.memory.type
 
-func (AttrMemoryType) Stable()      {}
-func (AttrMemoryType) Recommended() {}
+func (AttrMemoryType) Stable()         {}
+func (AttrMemoryType) Recommended()    {}
+func (AttrMemoryType) Key() string     { return "jvm_memory_type" }
+func (a AttrMemoryType) Value() string { return string(a) }
+
+const MemoryTypeHeap AttrMemoryType = "heap"
+const MemoryTypeNonHeap AttrMemoryType = "non_heap"
 
 // Whether the thread is daemon or not
 type AttrThreadDaemon string // jvm.thread.daemon
 
-func (AttrThreadDaemon) Stable()      {}
-func (AttrThreadDaemon) Recommended() {}
+func (AttrThreadDaemon) Stable()         {}
+func (AttrThreadDaemon) Recommended()    {}
+func (AttrThreadDaemon) Key() string     { return "jvm_thread_daemon" }
+func (a AttrThreadDaemon) Value() string { return string(a) }
 
 // State of the thread
 type AttrThreadState string // jvm.thread.state
 
-func (AttrThreadState) Stable()      {}
-func (AttrThreadState) Recommended() {}
+func (AttrThreadState) Stable()         {}
+func (AttrThreadState) Recommended()    {}
+func (AttrThreadState) Key() string     { return "jvm_thread_state" }
+func (a AttrThreadState) Value() string { return string(a) }
+
+const ThreadStateNew AttrThreadState = "new"
+const ThreadStateRunnable AttrThreadState = "runnable"
+const ThreadStateBlocked AttrThreadState = "blocked"
+const ThreadStateWaiting AttrThreadState = "waiting"
+const ThreadStateTimedWaiting AttrThreadState = "timed_waiting"
+const ThreadStateTerminated AttrThreadState = "terminated"
 
 /* State {
     name: "attr.go.j2",
@@ -147,7 +173,6 @@ func (AttrThreadState) Recommended() {}
                     "root_namespace": "jvm",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Heap memory.",
@@ -187,7 +212,6 @@ func (AttrThreadState) Recommended() {}
                     "root_namespace": "jvm",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A thread that has not yet started is in this state.",
@@ -350,6 +374,7 @@ func (AttrThreadState) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

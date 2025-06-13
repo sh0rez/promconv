@@ -11,40 +11,42 @@ type MemoryUsed struct {
 }
 
 func NewMemoryUsed() MemoryUsed {
-	labels := []string{"go_memory_type"}
+	labels := []string{AttrMemoryType("").Key()}
 	return MemoryUsed{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "go",
-		Name:      "memory_used",
-		Help:      "Memory used by the Go runtime.",
+		Name: "go_memory_used",
+		Help: "Memory used by the Go runtime.",
 	}, labels)}
 }
 
-func (m MemoryUsed) With(extra interface {
-	AttrGoMemoryType() AttrMemoryType
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryUsed) With(extras ...interface{ GoMemoryType() AttrMemoryType }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrGoMemoryType()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.GoMemoryType().Value())
 }
 
-func (a MemoryUsed) WithGoMemoryType(attr interface{ AttrGoMemoryType() AttrMemoryType }) MemoryUsed {
-	a.extra.GoMemoryType = attr.AttrGoMemoryType()
+// Deprecated: Use [MemoryUsed.With] instead
+func (m MemoryUsed) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a MemoryUsed) WithMemoryType(attr interface{ GoMemoryType() AttrMemoryType }) MemoryUsed {
+	a.extra.AttrMemoryType = attr.GoMemoryType()
 	return a
 }
 
 type MemoryUsedExtra struct {
-	// The type of memory.
-	GoMemoryType AttrMemoryType `otel:"go.memory.type"`
+	// The type of memory
+	AttrMemoryType AttrMemoryType `otel:"go.memory.type"`
 }
 
-func (a MemoryUsedExtra) AttrGoMemoryType() AttrMemoryType { return a.GoMemoryType }
+func (a MemoryUsedExtra) GoMemoryType() AttrMemoryType { return a.AttrMemoryType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -69,7 +71,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Memory allocated from the heap that is reserved for stack space, whether or not it is currently in-use.",
@@ -103,7 +104,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Memory allocated from the heap that is reserved for stack space, whether or not it is currently in-use.",
@@ -158,6 +158,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -265,6 +267,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -351,7 +354,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

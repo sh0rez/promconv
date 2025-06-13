@@ -11,43 +11,44 @@ type RateLimitingRequestTimeInQueue struct {
 }
 
 func NewRateLimitingRequestTimeInQueue() RateLimitingRequestTimeInQueue {
-	labels := []string{"aspnetcore_rate_limiting_result", "aspnetcore_rate_limiting_policy"}
+	labels := []string{AttrRateLimitingResult("").Key(), AttrRateLimitingPolicy("").Key()}
 	return RateLimitingRequestTimeInQueue{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "aspnetcore",
-		Name:      "rate_limiting_request_time_in_queue",
-		Help:      "The time the request spent in a queue waiting to acquire a rate limiting lease.",
+		Name: "aspnetcore_rate_limiting_request_time_in_queue",
+		Help: "The time the request spent in a queue waiting to acquire a rate limiting lease.",
 	}, labels)}
 }
 
-func (m RateLimitingRequestTimeInQueue) With(rateLimitingResult AttrRateLimitingResult, extra interface {
-	AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+func (m RateLimitingRequestTimeInQueue) With(rateLimitingResult AttrRateLimitingResult, extras ...interface{ AspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) prometheus.Observer {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(rateLimitingResult),
-		string(extra.AttrAspnetcoreRateLimitingPolicy()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(rateLimitingResult.Value(), extra.AspnetcoreRateLimitingPolicy().Value())
 }
 
-func (a RateLimitingRequestTimeInQueue) WithAspnetcoreRateLimitingPolicy(attr interface{ AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) RateLimitingRequestTimeInQueue {
-	a.extra.AspnetcoreRateLimitingPolicy = attr.AttrAspnetcoreRateLimitingPolicy()
+// Deprecated: Use [RateLimitingRequestTimeInQueue.With] instead
+func (m RateLimitingRequestTimeInQueue) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a RateLimitingRequestTimeInQueue) WithRateLimitingPolicy(attr interface{ AspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy }) RateLimitingRequestTimeInQueue {
+	a.extra.AttrRateLimitingPolicy = attr.AspnetcoreRateLimitingPolicy()
 	return a
 }
 
 type RateLimitingRequestTimeInQueueExtra struct {
-	// Rate limiting policy name.
-	AspnetcoreRateLimitingPolicy AttrRateLimitingPolicy `otel:"aspnetcore.rate_limiting.policy"`
+	// Rate limiting policy name
+	AttrRateLimitingPolicy AttrRateLimitingPolicy `otel:"aspnetcore.rate_limiting.policy"`
 }
 
-func (a RateLimitingRequestTimeInQueueExtra) AttrAspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy {
-	return a.AspnetcoreRateLimitingPolicy
+func (a RateLimitingRequestTimeInQueueExtra) AspnetcoreRateLimitingPolicy() AttrRateLimitingPolicy {
+	return a.AttrRateLimitingPolicy
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -72,7 +73,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Lease was acquired",
@@ -150,7 +150,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Lease was acquired",
@@ -233,6 +232,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -340,6 +341,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -426,7 +428,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

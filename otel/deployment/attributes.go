@@ -3,8 +3,10 @@ package deployment
 // 'Deprecated, use `deployment.environment.name` instead.'
 type AttrEnvironment string // deployment.environment
 
-func (AttrEnvironment) Development() {}
-func (AttrEnvironment) Recommended() {}
+func (AttrEnvironment) Development()    {}
+func (AttrEnvironment) Recommended()    {}
+func (AttrEnvironment) Key() string     { return "deployment_environment" }
+func (a AttrEnvironment) Value() string { return string(a) }
 
 // Name of the [deployment environment] (aka deployment tier).
 //
@@ -19,26 +21,37 @@ func (AttrEnvironment) Recommended() {}
 // [deployment environment]: https://wikipedia.org/wiki/Deployment_environment
 type AttrEnvironmentName string // deployment.environment.name
 
-func (AttrEnvironmentName) Development() {}
-func (AttrEnvironmentName) Recommended() {}
+func (AttrEnvironmentName) Development()    {}
+func (AttrEnvironmentName) Recommended()    {}
+func (AttrEnvironmentName) Key() string     { return "deployment_environment_name" }
+func (a AttrEnvironmentName) Value() string { return string(a) }
 
 // The id of the deployment
 type AttrId string // deployment.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "deployment_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // The name of the deployment
 type AttrName string // deployment.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "deployment_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // The status of the deployment
 type AttrStatus string // deployment.status
 
-func (AttrStatus) Development() {}
-func (AttrStatus) Recommended() {}
+func (AttrStatus) Development()    {}
+func (AttrStatus) Recommended()    {}
+func (AttrStatus) Key() string     { return "deployment_status" }
+func (a AttrStatus) Value() string { return string(a) }
+
+const StatusFailed AttrStatus = "failed"
+const StatusSucceeded AttrStatus = "succeeded"
 
 /* State {
     name: "attr.go.j2",
@@ -107,7 +120,6 @@ func (AttrStatus) Recommended() {}
                     "root_namespace": "deployment",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "failed",
@@ -238,6 +250,7 @@ func (AttrStatus) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

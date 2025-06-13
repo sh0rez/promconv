@@ -6,37 +6,32 @@ import (
 
 // Heap size target percentage configured by the user, otherwise 100.
 type ConfigGogc struct {
-	*prometheus.GaugeVec
-	extra ConfigGogcExtra
+	prometheus.Gauge
 }
 
 func NewConfigGogc() ConfigGogc {
-	labels := []string{}
-	return ConfigGogc{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "go",
-		Name:      "config_gogc",
-		Help:      "Heap size target percentage configured by the user, otherwise 100.",
-	}, labels)}
+	return ConfigGogc{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "go_config_gogc",
+		Help: "Heap size target percentage configured by the user, otherwise 100.",
+	})}
 }
 
-func (m ConfigGogc) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ConfigGogc) Register(regs ...prometheus.Registerer) ConfigGogc {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ConfigGogcExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ConfigGogcExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "config.gogc",
         "Type": "ConfigGogc",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Heap size target percentage configured by the user, otherwise 100.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

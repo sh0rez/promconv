@@ -15,41 +15,42 @@ type LookupDuration struct {
 }
 
 func NewLookupDuration() LookupDuration {
-	labels := []string{"dns_question_name", "error_type"}
+	labels := []string{AttrQuestionName("").Key(), error.AttrType("").Key()}
 	return LookupDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "dns",
-		Name:      "lookup_duration",
-		Help:      "Measures the time taken to perform a DNS lookup.",
+		Name: "dns_lookup_duration",
+		Help: "Measures the time taken to perform a DNS lookup.",
 	}, labels)}
 }
 
-func (m LookupDuration) With(questionName AttrQuestionName, extra interface {
-	AttrErrorType() error.AttrType
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+func (m LookupDuration) With(questionName AttrQuestionName, extras ...interface{ ErrorType() error.AttrType }) prometheus.Observer {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(questionName),
-		string(extra.AttrErrorType()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(questionName.Value(), extra.ErrorType().Value())
 }
 
-func (a LookupDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) LookupDuration {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [LookupDuration.With] instead
+func (m LookupDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a LookupDuration) WithErrorType(attr interface{ ErrorType() error.AttrType }) LookupDuration {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
 
 type LookupDurationExtra struct {
-	// Describes the error the DNS lookup failed with.
-	ErrorType error.AttrType `otel:"error.type"`
+	// Describes the error the DNS lookup failed with
+	AttrErrorType error.AttrType `otel:"error.type"`
 }
 
-func (a LookupDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
+func (a LookupDurationExtra) ErrorType() error.AttrType { return a.AttrErrorType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -90,7 +91,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -132,7 +132,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -190,6 +189,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -297,6 +298,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -383,7 +385,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

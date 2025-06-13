@@ -11,22 +11,20 @@ type HeapSpaceAvailableSize struct {
 }
 
 func NewHeapSpaceAvailableSize() HeapSpaceAvailableSize {
-	labels := []string{"v8js_heap_space_name"}
+	labels := []string{AttrHeapSpaceName("").Key()}
 	return HeapSpaceAvailableSize{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "v8js",
-		Name:      "heap_space_available_size",
-		Help:      "Heap space available size.",
+		Name: "v8js_heap_space_available_size",
+		Help: "Heap space available size.",
 	}, labels)}
 }
 
-func (m HeapSpaceAvailableSize) With(heapSpaceName AttrHeapSpaceName, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(heapSpaceName),
-	)
+func (m HeapSpaceAvailableSize) With(heapSpaceName AttrHeapSpaceName, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(heapSpaceName.Value())
+}
+
+// Deprecated: Use [HeapSpaceAvailableSize.With] instead
+func (m HeapSpaceAvailableSize) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type HeapSpaceAvailableSizeExtra struct {
@@ -34,7 +32,7 @@ type HeapSpaceAvailableSizeExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -56,7 +54,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "New memory space.",
@@ -111,7 +108,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "New memory space.",
@@ -189,6 +185,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -296,6 +294,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -382,7 +381,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -18,106 +18,98 @@ type SdkExporterOperationDuration struct {
 }
 
 func NewSdkExporterOperationDuration() SdkExporterOperationDuration {
-	labels := []string{"error_type", "http_response_status_code", "otel_component_name", "otel_component_type", "rpc_grpc_status_code", "server_address", "server_port"}
+	labels := []string{error.AttrType("").Key(), http.AttrResponseStatusCode("").Key(), AttrComponentName("").Key(), AttrComponentType("").Key(), rpc.AttrGrpcStatusCode("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key()}
 	return SdkExporterOperationDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "otel",
-		Name:      "sdk_exporter_operation_duration",
-		Help:      "The duration of exporting a batch of telemetry records.",
+		Name: "otel_sdk_exporter_operation_duration",
+		Help: "The duration of exporting a batch of telemetry records.",
 	}, labels)}
 }
 
-func (m SdkExporterOperationDuration) With(extra interface {
-	AttrErrorType() error.AttrType
-	AttrHttpResponseStatusCode() http.AttrResponseStatusCode
-	AttrOtelComponentName() AttrComponentName
-	AttrOtelComponentType() AttrComponentType
-	AttrRpcGrpcStatusCode() rpc.AttrGrpcStatusCode
-	AttrServerAddress() server.AttrAddress
-	AttrServerPort() server.AttrPort
+func (m SdkExporterOperationDuration) With(extras ...interface {
+	ErrorType() error.AttrType
+	HttpResponseStatusCode() http.AttrResponseStatusCode
+	OtelComponentName() AttrComponentName
+	OtelComponentType() AttrComponentType
+	RpcGrpcStatusCode() rpc.AttrGrpcStatusCode
+	ServerAddress() server.AttrAddress
+	ServerPort() server.AttrPort
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrErrorType()),
-		string(extra.AttrHttpResponseStatusCode()),
-		string(extra.AttrOtelComponentName()),
-		string(extra.AttrOtelComponentType()),
-		string(extra.AttrRpcGrpcStatusCode()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(extra.ErrorType().Value(), extra.HttpResponseStatusCode().Value(), extra.OtelComponentName().Value(), extra.OtelComponentType().Value(), extra.RpcGrpcStatusCode().Value(), extra.ServerAddress().Value(), extra.ServerPort().Value())
 }
 
-func (a SdkExporterOperationDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) SdkExporterOperationDuration {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [SdkExporterOperationDuration.With] instead
+func (m SdkExporterOperationDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a SdkExporterOperationDuration) WithErrorType(attr interface{ ErrorType() error.AttrType }) SdkExporterOperationDuration {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
 func (a SdkExporterOperationDuration) WithHttpResponseStatusCode(attr interface {
-	AttrHttpResponseStatusCode() http.AttrResponseStatusCode
+	HttpResponseStatusCode() http.AttrResponseStatusCode
 }) SdkExporterOperationDuration {
-	a.extra.HttpResponseStatusCode = attr.AttrHttpResponseStatusCode()
+	a.extra.AttrHttpResponseStatusCode = attr.HttpResponseStatusCode()
 	return a
 }
-func (a SdkExporterOperationDuration) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkExporterOperationDuration {
-	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+func (a SdkExporterOperationDuration) WithComponentName(attr interface{ OtelComponentName() AttrComponentName }) SdkExporterOperationDuration {
+	a.extra.AttrComponentName = attr.OtelComponentName()
 	return a
 }
-func (a SdkExporterOperationDuration) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkExporterOperationDuration {
-	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+func (a SdkExporterOperationDuration) WithComponentType(attr interface{ OtelComponentType() AttrComponentType }) SdkExporterOperationDuration {
+	a.extra.AttrComponentType = attr.OtelComponentType()
 	return a
 }
-func (a SdkExporterOperationDuration) WithRpcGrpcStatusCode(attr interface{ AttrRpcGrpcStatusCode() rpc.AttrGrpcStatusCode }) SdkExporterOperationDuration {
-	a.extra.RpcGrpcStatusCode = attr.AttrRpcGrpcStatusCode()
+func (a SdkExporterOperationDuration) WithRpcGrpcStatusCode(attr interface{ RpcGrpcStatusCode() rpc.AttrGrpcStatusCode }) SdkExporterOperationDuration {
+	a.extra.AttrRpcGrpcStatusCode = attr.RpcGrpcStatusCode()
 	return a
 }
-func (a SdkExporterOperationDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) SdkExporterOperationDuration {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a SdkExporterOperationDuration) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) SdkExporterOperationDuration {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a SdkExporterOperationDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) SdkExporterOperationDuration {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a SdkExporterOperationDuration) WithServerPort(attr interface{ ServerPort() server.AttrPort }) SdkExporterOperationDuration {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type SdkExporterOperationDurationExtra struct {
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// The HTTP status code of the last HTTP request performed in scope of this export call.
-	HttpResponseStatusCode http.AttrResponseStatusCode `otel:"http.response.status_code"`
-	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
-	OtelComponentName AttrComponentName `otel:"otel.component.name"`
-	// A name identifying the type of the OpenTelemetry component.
-	OtelComponentType AttrComponentType `otel:"otel.component.type"`
-	// The gRPC status code of the last gRPC requests performed in scope of this export call.
-	RpcGrpcStatusCode rpc.AttrGrpcStatusCode `otel:"rpc.grpc.status_code"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// Describes a class of error the operation ended with
+	AttrErrorType              error.AttrType              `otel:"error.type"`                // The HTTP status code of the last HTTP request performed in scope of this export call
+	AttrHttpResponseStatusCode http.AttrResponseStatusCode `otel:"http.response.status_code"` // A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance
+	AttrComponentName          AttrComponentName           `otel:"otel.component.name"`       // A name identifying the type of the OpenTelemetry component
+	AttrComponentType          AttrComponentType           `otel:"otel.component.type"`       // The gRPC status code of the last gRPC requests performed in scope of this export call
+	AttrRpcGrpcStatusCode      rpc.AttrGrpcStatusCode      `otel:"rpc.grpc.status_code"`      // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress          server.AttrAddress          `otel:"server.address"`            // Server port number
+	AttrServerPort             server.AttrPort             `otel:"server.port"`
 }
 
-func (a SdkExporterOperationDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a SdkExporterOperationDurationExtra) AttrHttpResponseStatusCode() http.AttrResponseStatusCode {
-	return a.HttpResponseStatusCode
+func (a SdkExporterOperationDurationExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a SdkExporterOperationDurationExtra) HttpResponseStatusCode() http.AttrResponseStatusCode {
+	return a.AttrHttpResponseStatusCode
 }
-func (a SdkExporterOperationDurationExtra) AttrOtelComponentName() AttrComponentName {
-	return a.OtelComponentName
+func (a SdkExporterOperationDurationExtra) OtelComponentName() AttrComponentName {
+	return a.AttrComponentName
 }
-func (a SdkExporterOperationDurationExtra) AttrOtelComponentType() AttrComponentType {
-	return a.OtelComponentType
+func (a SdkExporterOperationDurationExtra) OtelComponentType() AttrComponentType {
+	return a.AttrComponentType
 }
-func (a SdkExporterOperationDurationExtra) AttrRpcGrpcStatusCode() rpc.AttrGrpcStatusCode {
-	return a.RpcGrpcStatusCode
+func (a SdkExporterOperationDurationExtra) RpcGrpcStatusCode() rpc.AttrGrpcStatusCode {
+	return a.AttrRpcGrpcStatusCode
 }
-func (a SdkExporterOperationDurationExtra) AttrServerAddress() server.AttrAddress {
-	return a.ServerAddress
+func (a SdkExporterOperationDurationExtra) ServerAddress() server.AttrAddress {
+	return a.AttrServerAddress
 }
-func (a SdkExporterOperationDurationExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+func (a SdkExporterOperationDurationExtra) ServerPort() server.AttrPort { return a.AttrServerPort }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -147,7 +139,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -195,7 +186,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The builtin SDK batching span processor\n",
@@ -320,7 +310,6 @@ State {
                 },
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "OK",
@@ -495,46 +484,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "rejected",
-                        "timeout",
-                        "500",
-                        "java.net.UnknownHostException",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If operation has ended with an error",
-                    },
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
-                },
-                {
-                    "brief": "The HTTP status code of the last HTTP request performed in scope of this export call.",
-                    "examples": [
-                        200,
-                    ],
-                    "name": "http.response.status_code",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.\n",
                     "examples": [
                         "otlp_grpc_span_exporter/0",
@@ -547,36 +496,6 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "recommended": "when applicable",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
                     "examples": [
                         "otlp_grpc_span_exporter",
@@ -587,7 +506,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The builtin SDK batching span processor\n",
@@ -705,6 +623,75 @@ State {
                     },
                 },
                 {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "rejected",
+                        "timeout",
+                        "500",
+                        "java.net.UnknownHostException",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If operation has ended with an error",
+                    },
+                    "stability": "stable",
+                    "type": {
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
+                    "brief": "The HTTP status code of the last HTTP request performed in scope of this export call.",
+                    "examples": [
+                        200,
+                    ],
+                    "name": "http.response.status_code",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "recommended": "when applicable",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
                     "brief": "The gRPC status code of the last gRPC requests performed in scope of this export call.",
                     "name": "rpc.grpc.status_code",
                     "requirement_level": {
@@ -712,7 +699,6 @@ State {
                     },
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "OK",
@@ -956,6 +942,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -1063,6 +1051,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -1149,7 +1138,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

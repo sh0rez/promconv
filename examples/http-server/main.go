@@ -8,6 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
+	"net"
 	"net/http"
 	semhttp "shorez.de/promconv/otel/http"
 	"strings"
@@ -20,9 +21,16 @@ func main() {
 	})
 	mux.Handle("/metrics", promhttp.Handler())
 	handler := semhttp.Instrument(semhttp.Register(prometheus.DefaultRegisterer), mux)
+	done := make(chan struct{})
 	go func() {
-		log.Fatalln(http.ListenAndServe(":4242", handler))
+		l, err := net.Listen("tcp", ":4242")
+		if err != nil {
+			log.Fatalln(err)
+		}
+		close(done)
+		log.Fatalln(http.Serve(l, handler))
 	}()
+	<-done
 	if _, err := http.Get("http://localhost:4242/hello/prometheus"); err != nil {
 		log.Fatalln(err)
 	}
@@ -32,6 +40,12 @@ func main() {
 	}
 	sc := bufio.NewScanner(res.Body)
 	for sc.Scan() {
+		if strings.HasPrefix(sc.Text(), "http_server_request_duration_sum") {
+			if x, _, ok := strings.Cut(sc.Text(), "} "); ok {
+				fmt.Printf("%s} <unstable>\n", x)
+				continue
+			}
+		}
 		if strings.HasPrefix(sc.Text(), "http_") {
 			fmt.Println(sc.Text())
 		}

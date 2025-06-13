@@ -5,46 +5,67 @@ package process
 // This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity
 type AttrArgsCount string // process.args_count
 
-func (AttrArgsCount) Development() {}
-func (AttrArgsCount) Recommended() {}
+func (AttrArgsCount) Development()    {}
+func (AttrArgsCount) Recommended()    {}
+func (AttrArgsCount) Key() string     { return "process_args_count" }
+func (a AttrArgsCount) Value() string { return string(a) }
 
 // The command used to launch the process (i.e. the command name). On Linux based systems, can be set to the zeroth string in `proc/[pid]/cmdline`. On Windows, can be set to the first parameter extracted from `GetCommandLineW`
 type AttrCommand string // process.command
 
-func (AttrCommand) Development() {}
-func (AttrCommand) Recommended() {}
+func (AttrCommand) Development()    {}
+func (AttrCommand) Recommended()    {}
+func (AttrCommand) Key() string     { return "process_command" }
+func (a AttrCommand) Value() string { return string(a) }
 
 // All the command arguments (including the command/executable itself) as received by the process. On Linux-based systems (and some other Unixoid systems supporting procfs), can be set according to the list of null-delimited strings extracted from `proc/[pid]/cmdline`. For libc-based executables, this would be the full argv vector passed to `main`. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data
 type AttrCommandArgs string // process.command_args
 
-func (AttrCommandArgs) Development() {}
-func (AttrCommandArgs) Recommended() {}
+func (AttrCommandArgs) Development()    {}
+func (AttrCommandArgs) Recommended()    {}
+func (AttrCommandArgs) Key() string     { return "process_command_args" }
+func (a AttrCommandArgs) Value() string { return string(a) }
 
 // The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data
 type AttrCommandLine string // process.command_line
 
-func (AttrCommandLine) Development() {}
-func (AttrCommandLine) Recommended() {}
+func (AttrCommandLine) Development()    {}
+func (AttrCommandLine) Recommended()    {}
+func (AttrCommandLine) Key() string     { return "process_command_line" }
+func (a AttrCommandLine) Value() string { return string(a) }
 
 // Specifies whether the context switches for this data point were voluntary or involuntary
 type AttrContextSwitchType string // process.context_switch_type
 
-func (AttrContextSwitchType) Development() {}
-func (AttrContextSwitchType) Recommended() {}
+func (AttrContextSwitchType) Development()    {}
+func (AttrContextSwitchType) Recommended()    {}
+func (AttrContextSwitchType) Key() string     { return "process_context_switch_type" }
+func (a AttrContextSwitchType) Value() string { return string(a) }
+
+const ContextSwitchTypeVoluntary AttrContextSwitchType = "voluntary"
+const ContextSwitchTypeInvoluntary AttrContextSwitchType = "involuntary"
 
 // Deprecated, use `cpu.mode` instead
 type AttrCpuState string // process.cpu.state
 
-func (AttrCpuState) Development() {}
-func (AttrCpuState) Recommended() {}
+func (AttrCpuState) Development()    {}
+func (AttrCpuState) Recommended()    {}
+func (AttrCpuState) Key() string     { return "process_cpu_state" }
+func (a AttrCpuState) Value() string { return string(a) }
+
+const CpuStateSystem AttrCpuState = "system"
+const CpuStateUser AttrCpuState = "user"
+const CpuStateWait AttrCpuState = "wait"
 
 // The date and time the process was created, in ISO 8601 format
 type AttrCreationTime string // process.creation.time
 
-func (AttrCreationTime) Development() {}
-func (AttrCreationTime) Recommended() {}
+func (AttrCreationTime) Development()    {}
+func (AttrCreationTime) Recommended()    {}
+func (AttrCreationTime) Key() string     { return "process_creation_time" }
+func (a AttrCreationTime) Value() string { return string(a) }
 
-// Process environment variables, <key> being the environment variable name, the value being the environment variable value.
+// Process environment variables, `<key>` being the environment variable name, the value being the environment variable value.
 //
 // Examples:
 //
@@ -55,68 +76,90 @@ func (AttrCreationTime) Recommended() {}
 //     with value `"/usr/local/bin:/usr/bin"`
 type AttrEnvironmentVariable string // process.environment_variable
 
-func (AttrEnvironmentVariable) Development() {}
-func (AttrEnvironmentVariable) Recommended() {}
+func (AttrEnvironmentVariable) Development()    {}
+func (AttrEnvironmentVariable) Recommended()    {}
+func (AttrEnvironmentVariable) Key() string     { return "process_environment_variable" }
+func (a AttrEnvironmentVariable) Value() string { return string(a) }
 
 // The GNU build ID as found in the `.note.gnu.build-id` ELF section (hex string)
 type AttrExecutableBuildIdGnu string // process.executable.build_id.gnu
 
-func (AttrExecutableBuildIdGnu) Development() {}
-func (AttrExecutableBuildIdGnu) Recommended() {}
+func (AttrExecutableBuildIdGnu) Development()    {}
+func (AttrExecutableBuildIdGnu) Recommended()    {}
+func (AttrExecutableBuildIdGnu) Key() string     { return "process_executable_build_id_gnu" }
+func (a AttrExecutableBuildIdGnu) Value() string { return string(a) }
 
 // The Go build ID as retrieved by `go tool buildid <go executable>`
 type AttrExecutableBuildIdGo string // process.executable.build_id.go
 
-func (AttrExecutableBuildIdGo) Development() {}
-func (AttrExecutableBuildIdGo) Recommended() {}
+func (AttrExecutableBuildIdGo) Development()    {}
+func (AttrExecutableBuildIdGo) Recommended()    {}
+func (AttrExecutableBuildIdGo) Key() string     { return "process_executable_build_id_go" }
+func (a AttrExecutableBuildIdGo) Value() string { return string(a) }
 
 // Profiling specific build ID for executables. See the OTel specification for Profiles for more information
 type AttrExecutableBuildIdHtlhash string // process.executable.build_id.htlhash
 
-func (AttrExecutableBuildIdHtlhash) Development() {}
-func (AttrExecutableBuildIdHtlhash) Recommended() {}
+func (AttrExecutableBuildIdHtlhash) Development()    {}
+func (AttrExecutableBuildIdHtlhash) Recommended()    {}
+func (AttrExecutableBuildIdHtlhash) Key() string     { return "process_executable_build_id_htlhash" }
+func (a AttrExecutableBuildIdHtlhash) Value() string { return string(a) }
 
 // "Deprecated, use `process.executable.build_id.htlhash` instead."
 type AttrExecutableBuildIdProfiling string // process.executable.build_id.profiling
 
-func (AttrExecutableBuildIdProfiling) Development() {}
-func (AttrExecutableBuildIdProfiling) Recommended() {}
+func (AttrExecutableBuildIdProfiling) Development()    {}
+func (AttrExecutableBuildIdProfiling) Recommended()    {}
+func (AttrExecutableBuildIdProfiling) Key() string     { return "process_executable_build_id_profiling" }
+func (a AttrExecutableBuildIdProfiling) Value() string { return string(a) }
 
 // The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`
 type AttrExecutableName string // process.executable.name
 
-func (AttrExecutableName) Development() {}
-func (AttrExecutableName) Recommended() {}
+func (AttrExecutableName) Development()    {}
+func (AttrExecutableName) Recommended()    {}
+func (AttrExecutableName) Key() string     { return "process_executable_name" }
+func (a AttrExecutableName) Value() string { return string(a) }
 
 // The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`
 type AttrExecutablePath string // process.executable.path
 
-func (AttrExecutablePath) Development() {}
-func (AttrExecutablePath) Recommended() {}
+func (AttrExecutablePath) Development()    {}
+func (AttrExecutablePath) Recommended()    {}
+func (AttrExecutablePath) Key() string     { return "process_executable_path" }
+func (a AttrExecutablePath) Value() string { return string(a) }
 
 // The exit code of the process
 type AttrExitCode string // process.exit.code
 
-func (AttrExitCode) Development() {}
-func (AttrExitCode) Recommended() {}
+func (AttrExitCode) Development()    {}
+func (AttrExitCode) Recommended()    {}
+func (AttrExitCode) Key() string     { return "process_exit_code" }
+func (a AttrExitCode) Value() string { return string(a) }
 
 // The date and time the process exited, in ISO 8601 format
 type AttrExitTime string // process.exit.time
 
-func (AttrExitTime) Development() {}
-func (AttrExitTime) Recommended() {}
+func (AttrExitTime) Development()    {}
+func (AttrExitTime) Recommended()    {}
+func (AttrExitTime) Key() string     { return "process_exit_time" }
+func (a AttrExitTime) Value() string { return string(a) }
 
 // The PID of the process's group leader. This is also the process group ID (PGID) of the process
 type AttrGroupLeaderPid string // process.group_leader.pid
 
-func (AttrGroupLeaderPid) Development() {}
-func (AttrGroupLeaderPid) Recommended() {}
+func (AttrGroupLeaderPid) Development()    {}
+func (AttrGroupLeaderPid) Recommended()    {}
+func (AttrGroupLeaderPid) Key() string     { return "process_group_leader_pid" }
+func (a AttrGroupLeaderPid) Value() string { return string(a) }
 
 // Whether the process is connected to an interactive shell
 type AttrInteractive string // process.interactive
 
-func (AttrInteractive) Development() {}
-func (AttrInteractive) Recommended() {}
+func (AttrInteractive) Development()    {}
+func (AttrInteractive) Recommended()    {}
+func (AttrInteractive) Key() string     { return "process_interactive" }
+func (a AttrInteractive) Value() string { return string(a) }
 
 // The control group associated with the process.
 // Control groups (cgroups) are a kernel feature used to organize and manage process resources. This attribute provides the path(s) to the cgroup(s) associated with the process, which should match the contents of the [/proc/[PID]/cgroup] file
@@ -124,114 +167,153 @@ func (AttrInteractive) Recommended() {}
 // [/proc/[PID]/cgroup]: https://man7.org/linux/man-pages/man7/cgroups.7.html
 type AttrLinuxCgroup string // process.linux.cgroup
 
-func (AttrLinuxCgroup) Development() {}
-func (AttrLinuxCgroup) Recommended() {}
+func (AttrLinuxCgroup) Development()    {}
+func (AttrLinuxCgroup) Recommended()    {}
+func (AttrLinuxCgroup) Key() string     { return "process_linux_cgroup" }
+func (a AttrLinuxCgroup) Value() string { return string(a) }
 
 // The username of the user that owns the process
 type AttrOwner string // process.owner
 
-func (AttrOwner) Development() {}
-func (AttrOwner) Recommended() {}
+func (AttrOwner) Development()    {}
+func (AttrOwner) Recommended()    {}
+func (AttrOwner) Key() string     { return "process_owner" }
+func (a AttrOwner) Value() string { return string(a) }
 
 // The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults
 type AttrPagingFaultType string // process.paging.fault_type
 
-func (AttrPagingFaultType) Development() {}
-func (AttrPagingFaultType) Recommended() {}
+func (AttrPagingFaultType) Development()    {}
+func (AttrPagingFaultType) Recommended()    {}
+func (AttrPagingFaultType) Key() string     { return "process_paging_fault_type" }
+func (a AttrPagingFaultType) Value() string { return string(a) }
+
+const PagingFaultTypeMajor AttrPagingFaultType = "major"
+const PagingFaultTypeMinor AttrPagingFaultType = "minor"
 
 // Parent Process identifier (PPID)
 type AttrParentPid string // process.parent_pid
 
-func (AttrParentPid) Development() {}
-func (AttrParentPid) Recommended() {}
+func (AttrParentPid) Development()    {}
+func (AttrParentPid) Recommended()    {}
+func (AttrParentPid) Key() string     { return "process_parent_pid" }
+func (a AttrParentPid) Value() string { return string(a) }
 
 // Process identifier (PID)
 type AttrPid string // process.pid
 
-func (AttrPid) Development() {}
-func (AttrPid) Recommended() {}
+func (AttrPid) Development()    {}
+func (AttrPid) Recommended()    {}
+func (AttrPid) Key() string     { return "process_pid" }
+func (a AttrPid) Value() string { return string(a) }
 
 // The real user ID (RUID) of the process
 type AttrRealUserId string // process.real_user.id
 
-func (AttrRealUserId) Development() {}
-func (AttrRealUserId) Recommended() {}
+func (AttrRealUserId) Development()    {}
+func (AttrRealUserId) Recommended()    {}
+func (AttrRealUserId) Key() string     { return "process_real_user_id" }
+func (a AttrRealUserId) Value() string { return string(a) }
 
 // The username of the real user of the process
 type AttrRealUserName string // process.real_user.name
 
-func (AttrRealUserName) Development() {}
-func (AttrRealUserName) Recommended() {}
+func (AttrRealUserName) Development()    {}
+func (AttrRealUserName) Recommended()    {}
+func (AttrRealUserName) Key() string     { return "process_real_user_name" }
+func (a AttrRealUserName) Value() string { return string(a) }
 
 // An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment
 type AttrRuntimeDescription string // process.runtime.description
 
-func (AttrRuntimeDescription) Development() {}
-func (AttrRuntimeDescription) Recommended() {}
+func (AttrRuntimeDescription) Development()    {}
+func (AttrRuntimeDescription) Recommended()    {}
+func (AttrRuntimeDescription) Key() string     { return "process_runtime_description" }
+func (a AttrRuntimeDescription) Value() string { return string(a) }
 
 // The name of the runtime of this process
 type AttrRuntimeName string // process.runtime.name
 
-func (AttrRuntimeName) Development() {}
-func (AttrRuntimeName) Recommended() {}
+func (AttrRuntimeName) Development()    {}
+func (AttrRuntimeName) Recommended()    {}
+func (AttrRuntimeName) Key() string     { return "process_runtime_name" }
+func (a AttrRuntimeName) Value() string { return string(a) }
 
 // The version of the runtime of this process, as returned by the runtime without modification
 type AttrRuntimeVersion string // process.runtime.version
 
-func (AttrRuntimeVersion) Development() {}
-func (AttrRuntimeVersion) Recommended() {}
+func (AttrRuntimeVersion) Development()    {}
+func (AttrRuntimeVersion) Recommended()    {}
+func (AttrRuntimeVersion) Key() string     { return "process_runtime_version" }
+func (a AttrRuntimeVersion) Value() string { return string(a) }
 
 // The saved user ID (SUID) of the process
 type AttrSavedUserId string // process.saved_user.id
 
-func (AttrSavedUserId) Development() {}
-func (AttrSavedUserId) Recommended() {}
+func (AttrSavedUserId) Development()    {}
+func (AttrSavedUserId) Recommended()    {}
+func (AttrSavedUserId) Key() string     { return "process_saved_user_id" }
+func (a AttrSavedUserId) Value() string { return string(a) }
 
 // The username of the saved user
 type AttrSavedUserName string // process.saved_user.name
 
-func (AttrSavedUserName) Development() {}
-func (AttrSavedUserName) Recommended() {}
+func (AttrSavedUserName) Development()    {}
+func (AttrSavedUserName) Recommended()    {}
+func (AttrSavedUserName) Key() string     { return "process_saved_user_name" }
+func (a AttrSavedUserName) Value() string { return string(a) }
 
 // The PID of the process's session leader. This is also the session ID (SID) of the process
 type AttrSessionLeaderPid string // process.session_leader.pid
 
-func (AttrSessionLeaderPid) Development() {}
-func (AttrSessionLeaderPid) Recommended() {}
+func (AttrSessionLeaderPid) Development()    {}
+func (AttrSessionLeaderPid) Recommended()    {}
+func (AttrSessionLeaderPid) Key() string     { return "process_session_leader_pid" }
+func (a AttrSessionLeaderPid) Value() string { return string(a) }
 
 // Process title (proctitle)
 //
 // In many Unix-like systems, process title (proctitle), is the string that represents the name or command line of a running process, displayed by system monitoring tools like ps, top, and htop
 type AttrTitle string // process.title
 
-func (AttrTitle) Development() {}
-func (AttrTitle) Recommended() {}
+func (AttrTitle) Development()    {}
+func (AttrTitle) Recommended()    {}
+func (AttrTitle) Key() string     { return "process_title" }
+func (a AttrTitle) Value() string { return string(a) }
 
 // The effective user ID (EUID) of the process
 type AttrUserId string // process.user.id
 
-func (AttrUserId) Development() {}
-func (AttrUserId) Recommended() {}
+func (AttrUserId) Development()    {}
+func (AttrUserId) Recommended()    {}
+func (AttrUserId) Key() string     { return "process_user_id" }
+func (a AttrUserId) Value() string { return string(a) }
 
 // The username of the effective user of the process
 type AttrUserName string // process.user.name
 
-func (AttrUserName) Development() {}
-func (AttrUserName) Recommended() {}
+func (AttrUserName) Development()    {}
+func (AttrUserName) Recommended()    {}
+func (AttrUserName) Key() string     { return "process_user_name" }
+func (a AttrUserName) Value() string { return string(a) }
 
 // Virtual process identifier.
 //
 // The process ID within a PID namespace. This is not necessarily unique across all processes on the host but it is unique within the process namespace that the process exists within
 type AttrVpid string // process.vpid
 
-func (AttrVpid) Development() {}
-func (AttrVpid) Recommended() {}
+func (AttrVpid) Development()    {}
+func (AttrVpid) Recommended()    {}
+func (AttrVpid) Key() string     { return "process_vpid" }
+func (a AttrVpid) Value() string { return string(a) }
 
 // The working directory of the process
 type AttrWorkingDirectory string // process.working_directory
 
-func (AttrWorkingDirectory) Development() {}
-func (AttrWorkingDirectory) Recommended() {}
+func (AttrWorkingDirectory) Development()    {}
+func (AttrWorkingDirectory) Recommended()    {}
+func (AttrWorkingDirectory) Key() string     { return "process_working_directory" }
+func (a AttrWorkingDirectory) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -295,7 +377,6 @@ func (AttrWorkingDirectory) Recommended() {}
                     "root_namespace": "process",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -328,7 +409,6 @@ func (AttrWorkingDirectory) Recommended() {}
                     "root_namespace": "process",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -369,7 +449,7 @@ func (AttrWorkingDirectory) Recommended() {}
                     "type": "string",
                 },
                 {
-                    "brief": "Process environment variables, <key> being the environment variable name, the value being the environment variable value.\n",
+                    "brief": "Process environment variables, `<key>` being the environment variable name, the value being the environment variable value.\n",
                     "examples": [
                         "ubuntu",
                         "/usr/local/bin:/usr/bin",
@@ -524,7 +604,6 @@ func (AttrWorkingDirectory) Recommended() {}
                     "root_namespace": "process",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -820,6 +899,7 @@ func (AttrWorkingDirectory) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

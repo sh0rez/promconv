@@ -6,37 +6,32 @@ import (
 
 // The upper limit for the number of replica pods to which the autoscaler can scale up
 type HpaMaxPods struct {
-	*prometheus.GaugeVec
-	extra HpaMaxPodsExtra
+	prometheus.Gauge
 }
 
 func NewHpaMaxPods() HpaMaxPods {
-	labels := []string{}
-	return HpaMaxPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "hpa_max_pods",
-		Help:      "The upper limit for the number of replica pods to which the autoscaler can scale up",
-	}, labels)}
+	return HpaMaxPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_hpa_max_pods",
+		Help: "The upper limit for the number of replica pods to which the autoscaler can scale up",
+	})}
 }
 
-func (m HpaMaxPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m HpaMaxPods) Register(regs ...prometheus.Registerer) HpaMaxPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type HpaMaxPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "HpaMaxPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "hpa.max_pods",
         "Type": "HpaMaxPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The upper limit for the number of replica pods to which the autoscaler can scale up",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

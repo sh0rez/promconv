@@ -15,52 +15,53 @@ type RoutingMatchAttempts struct {
 }
 
 func NewRoutingMatchAttempts() RoutingMatchAttempts {
-	labels := []string{"aspnetcore_routing_match_status", "aspnetcore_routing_is_fallback", "http_route"}
+	labels := []string{AttrRoutingMatchStatus("").Key(), AttrRoutingIsFallback("").Key(), http.AttrRoute("").Key()}
 	return RoutingMatchAttempts{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "aspnetcore",
-		Name:      "routing_match_attempts",
-		Help:      "Number of requests that were attempted to be matched to an endpoint.",
+		Name: "aspnetcore_routing_match_attempts",
+		Help: "Number of requests that were attempted to be matched to an endpoint.",
 	}, labels)}
 }
 
-func (m RoutingMatchAttempts) With(routingMatchStatus AttrRoutingMatchStatus, extra interface {
-	AttrAspnetcoreRoutingIsFallback() AttrRoutingIsFallback
-	AttrHttpRoute() http.AttrRoute
+func (m RoutingMatchAttempts) With(routingMatchStatus AttrRoutingMatchStatus, extras ...interface {
+	AspnetcoreRoutingIsFallback() AttrRoutingIsFallback
+	HttpRoute() http.AttrRoute
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(routingMatchStatus),
-		string(extra.AttrAspnetcoreRoutingIsFallback()),
-		string(extra.AttrHttpRoute()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(routingMatchStatus.Value(), extra.AspnetcoreRoutingIsFallback().Value(), extra.HttpRoute().Value())
 }
 
-func (a RoutingMatchAttempts) WithAspnetcoreRoutingIsFallback(attr interface{ AttrAspnetcoreRoutingIsFallback() AttrRoutingIsFallback }) RoutingMatchAttempts {
-	a.extra.AspnetcoreRoutingIsFallback = attr.AttrAspnetcoreRoutingIsFallback()
+// Deprecated: Use [RoutingMatchAttempts.With] instead
+func (m RoutingMatchAttempts) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a RoutingMatchAttempts) WithRoutingIsFallback(attr interface{ AspnetcoreRoutingIsFallback() AttrRoutingIsFallback }) RoutingMatchAttempts {
+	a.extra.AttrRoutingIsFallback = attr.AspnetcoreRoutingIsFallback()
 	return a
 }
-func (a RoutingMatchAttempts) WithHttpRoute(attr interface{ AttrHttpRoute() http.AttrRoute }) RoutingMatchAttempts {
-	a.extra.HttpRoute = attr.AttrHttpRoute()
+func (a RoutingMatchAttempts) WithHttpRoute(attr interface{ HttpRoute() http.AttrRoute }) RoutingMatchAttempts {
+	a.extra.AttrHttpRoute = attr.HttpRoute()
 	return a
 }
 
 type RoutingMatchAttemptsExtra struct {
-	// A value that indicates whether the matched route is a fallback route.
-	AspnetcoreRoutingIsFallback AttrRoutingIsFallback `otel:"aspnetcore.routing.is_fallback"`
-	// The matched route, that is, the path template in the format used by the respective server framework.
-	HttpRoute http.AttrRoute `otel:"http.route"`
+	// A value that indicates whether the matched route is a fallback route
+	AttrRoutingIsFallback AttrRoutingIsFallback `otel:"aspnetcore.routing.is_fallback"` // The matched route, that is, the path template in the format used by the respective server framework
+	AttrHttpRoute         http.AttrRoute        `otel:"http.route"`
 }
 
-func (a RoutingMatchAttemptsExtra) AttrAspnetcoreRoutingIsFallback() AttrRoutingIsFallback {
-	return a.AspnetcoreRoutingIsFallback
+func (a RoutingMatchAttemptsExtra) AspnetcoreRoutingIsFallback() AttrRoutingIsFallback {
+	return a.AttrRoutingIsFallback
 }
-func (a RoutingMatchAttemptsExtra) AttrHttpRoute() http.AttrRoute { return a.HttpRoute }
+func (a RoutingMatchAttemptsExtra) HttpRoute() http.AttrRoute { return a.AttrHttpRoute }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -85,7 +86,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Match succeeded",
@@ -171,7 +171,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Match succeeded",
@@ -250,6 +249,8 @@ State {
             "type": "metric",
             "unit": "{match_attempt}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -357,6 +358,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -443,7 +445,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

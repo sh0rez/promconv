@@ -11,50 +11,51 @@ type HostEnergy struct {
 }
 
 func NewHostEnergy() HostEnergy {
-	labels := []string{"hw_id", "hw_name", "hw_parent"}
+	labels := []string{AttrId("").Key(), AttrName("").Key(), AttrParent("").Key()}
 	return HostEnergy{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "hw",
-		Name:      "host_energy",
-		Help:      "Total energy consumed by the entire physical host, in joules",
+		Name: "hw_host_energy",
+		Help: "Total energy consumed by the entire physical host, in joules",
 	}, labels)}
 }
 
-func (m HostEnergy) With(id AttrId, extra interface {
-	AttrHwName() AttrName
-	AttrHwParent() AttrParent
+func (m HostEnergy) With(id AttrId, extras ...interface {
+	HwName() AttrName
+	HwParent() AttrParent
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(id),
-		string(extra.AttrHwName()),
-		string(extra.AttrHwParent()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(id.Value(), extra.HwName().Value(), extra.HwParent().Value())
 }
 
-func (a HostEnergy) WithHwName(attr interface{ AttrHwName() AttrName }) HostEnergy {
-	a.extra.HwName = attr.AttrHwName()
+// Deprecated: Use [HostEnergy.With] instead
+func (m HostEnergy) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a HostEnergy) WithName(attr interface{ HwName() AttrName }) HostEnergy {
+	a.extra.AttrName = attr.HwName()
 	return a
 }
-func (a HostEnergy) WithHwParent(attr interface{ AttrHwParent() AttrParent }) HostEnergy {
-	a.extra.HwParent = attr.AttrHwParent()
+func (a HostEnergy) WithParent(attr interface{ HwParent() AttrParent }) HostEnergy {
+	a.extra.AttrParent = attr.HwParent()
 	return a
 }
 
 type HostEnergyExtra struct {
 	// An easily-recognizable name for the hardware component
-	HwName AttrName `otel:"hw.name"`
-	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
-	HwParent AttrParent `otel:"hw.parent"`
+	AttrName   AttrName   `otel:"hw.name"` // Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
+	AttrParent AttrParent `otel:"hw.parent"`
 }
 
-func (a HostEnergyExtra) AttrHwName() AttrName     { return a.HwName }
-func (a HostEnergyExtra) AttrHwParent() AttrParent { return a.HwParent }
+func (a HostEnergyExtra) HwName() AttrName     { return a.AttrName }
+func (a HostEnergyExtra) HwParent() AttrParent { return a.AttrParent }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -190,6 +191,8 @@ State {
             "type": "metric",
             "unit": "J",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -297,6 +300,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -383,7 +387,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -3,8 +3,10 @@ package elasticsearch
 // Represents the human-readable identifier of the node/instance to which a request was routed
 type AttrNodeName string // elasticsearch.node.name
 
-func (AttrNodeName) Development() {}
-func (AttrNodeName) Recommended() {}
+func (AttrNodeName) Development()    {}
+func (AttrNodeName) Recommended()    {}
+func (AttrNodeName) Key() string     { return "elasticsearch_node_name" }
+func (a AttrNodeName) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -134,6 +136,7 @@ func (AttrNodeName) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

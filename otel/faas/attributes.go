@@ -3,34 +3,48 @@ package faas
 // A boolean that is true if the serverless function is executed for the first time (aka cold-start)
 type AttrColdstart string // faas.coldstart
 
-func (AttrColdstart) Development() {}
-func (AttrColdstart) Recommended() {}
+func (AttrColdstart) Development()    {}
+func (AttrColdstart) Recommended()    {}
+func (AttrColdstart) Key() string     { return "faas_coldstart" }
+func (a AttrColdstart) Value() string { return string(a) }
 
 // A string containing the schedule period as [Cron Expression]
 //
 // [Cron Expression]: https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm
 type AttrCron string // faas.cron
 
-func (AttrCron) Development() {}
-func (AttrCron) Recommended() {}
+func (AttrCron) Development()    {}
+func (AttrCron) Recommended()    {}
+func (AttrCron) Key() string     { return "faas_cron" }
+func (a AttrCron) Value() string { return string(a) }
 
 // The name of the source on which the triggering operation was performed. For example, in Cloud Storage or S3 corresponds to the bucket name, and in Cosmos DB to the database name
 type AttrDocumentCollection string // faas.document.collection
 
-func (AttrDocumentCollection) Development() {}
-func (AttrDocumentCollection) Recommended() {}
+func (AttrDocumentCollection) Development()    {}
+func (AttrDocumentCollection) Recommended()    {}
+func (AttrDocumentCollection) Key() string     { return "faas_document_collection" }
+func (a AttrDocumentCollection) Value() string { return string(a) }
 
 // The document name/table subjected to the operation. For example, in Cloud Storage or S3 is the name of the file, and in Cosmos DB the table name
 type AttrDocumentName string // faas.document.name
 
-func (AttrDocumentName) Development() {}
-func (AttrDocumentName) Recommended() {}
+func (AttrDocumentName) Development()    {}
+func (AttrDocumentName) Recommended()    {}
+func (AttrDocumentName) Key() string     { return "faas_document_name" }
+func (a AttrDocumentName) Value() string { return string(a) }
 
 // Describes the type of the operation that was performed on the data
 type AttrDocumentOperation string // faas.document.operation
 
-func (AttrDocumentOperation) Development() {}
-func (AttrDocumentOperation) Recommended() {}
+func (AttrDocumentOperation) Development()    {}
+func (AttrDocumentOperation) Recommended()    {}
+func (AttrDocumentOperation) Key() string     { return "faas_document_operation" }
+func (a AttrDocumentOperation) Value() string { return string(a) }
+
+const DocumentOperationInsert AttrDocumentOperation = "insert"
+const DocumentOperationEdit AttrDocumentOperation = "edit"
+const DocumentOperationDelete AttrDocumentOperation = "delete"
 
 // A string containing the time when the data was accessed in the [ISO 8601] format expressed in [UTC]
 //
@@ -38,54 +52,74 @@ func (AttrDocumentOperation) Recommended() {}
 // [UTC]: https://www.w3.org/TR/NOTE-datetime
 type AttrDocumentTime string // faas.document.time
 
-func (AttrDocumentTime) Development() {}
-func (AttrDocumentTime) Recommended() {}
+func (AttrDocumentTime) Development()    {}
+func (AttrDocumentTime) Recommended()    {}
+func (AttrDocumentTime) Key() string     { return "faas_document_time" }
+func (a AttrDocumentTime) Value() string { return string(a) }
 
 // The execution environment ID as a string, that will be potentially reused for other invocations to the same function/function version.
 //
 //   - **AWS Lambda:** Use the (full) log stream name
 type AttrInstance string // faas.instance
 
-func (AttrInstance) Development() {}
-func (AttrInstance) Recommended() {}
+func (AttrInstance) Development()    {}
+func (AttrInstance) Recommended()    {}
+func (AttrInstance) Key() string     { return "faas_instance" }
+func (a AttrInstance) Value() string { return string(a) }
 
 // The invocation ID of the current function invocation
 type AttrInvocationId string // faas.invocation_id
 
-func (AttrInvocationId) Development() {}
-func (AttrInvocationId) Recommended() {}
+func (AttrInvocationId) Development()    {}
+func (AttrInvocationId) Recommended()    {}
+func (AttrInvocationId) Key() string     { return "faas_invocation_id" }
+func (a AttrInvocationId) Value() string { return string(a) }
 
 // The name of the invoked function.
 //
 // SHOULD be equal to the `faas.name` resource attribute of the invoked function
 type AttrInvokedName string // faas.invoked_name
 
-func (AttrInvokedName) Development() {}
-func (AttrInvokedName) Recommended() {}
+func (AttrInvokedName) Development()    {}
+func (AttrInvokedName) Recommended()    {}
+func (AttrInvokedName) Key() string     { return "faas_invoked_name" }
+func (a AttrInvokedName) Value() string { return string(a) }
 
 // The cloud provider of the invoked function.
 //
 // SHOULD be equal to the `cloud.provider` resource attribute of the invoked function
 type AttrInvokedProvider string // faas.invoked_provider
 
-func (AttrInvokedProvider) Development() {}
-func (AttrInvokedProvider) Recommended() {}
+func (AttrInvokedProvider) Development()    {}
+func (AttrInvokedProvider) Recommended()    {}
+func (AttrInvokedProvider) Key() string     { return "faas_invoked_provider" }
+func (a AttrInvokedProvider) Value() string { return string(a) }
+
+const InvokedProviderAlibabaCloud AttrInvokedProvider = "alibaba_cloud"
+const InvokedProviderAws AttrInvokedProvider = "aws"
+const InvokedProviderAzure AttrInvokedProvider = "azure"
+const InvokedProviderGcp AttrInvokedProvider = "gcp"
+const InvokedProviderTencentCloud AttrInvokedProvider = "tencent_cloud"
 
 // The cloud region of the invoked function.
 //
 // SHOULD be equal to the `cloud.region` resource attribute of the invoked function
 type AttrInvokedRegion string // faas.invoked_region
 
-func (AttrInvokedRegion) Development() {}
-func (AttrInvokedRegion) Recommended() {}
+func (AttrInvokedRegion) Development()    {}
+func (AttrInvokedRegion) Recommended()    {}
+func (AttrInvokedRegion) Key() string     { return "faas_invoked_region" }
+func (a AttrInvokedRegion) Value() string { return string(a) }
 
 // The amount of memory available to the serverless function converted to Bytes.
 //
 // It's recommended to set this attribute since e.g. too little memory can easily stop a Java AWS Lambda function from working correctly. On AWS Lambda, the environment variable `AWS_LAMBDA_FUNCTION_MEMORY_SIZE` provides this information (which must be multiplied by 1,048,576)
 type AttrMaxMemory string // faas.max_memory
 
-func (AttrMaxMemory) Development() {}
-func (AttrMaxMemory) Recommended() {}
+func (AttrMaxMemory) Development()    {}
+func (AttrMaxMemory) Recommended()    {}
+func (AttrMaxMemory) Key() string     { return "faas_max_memory" }
+func (a AttrMaxMemory) Value() string { return string(a) }
 
 // The name of the single function that this runtime instance executes.
 //
@@ -109,8 +143,10 @@ func (AttrMaxMemory) Recommended() {}
 // [`code.namespace`/`code.function.name`]: /docs/general/attributes.md#source-code-attributes
 type AttrName string // faas.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "faas_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // A string containing the function invocation time in the [ISO 8601] format expressed in [UTC]
 //
@@ -118,14 +154,24 @@ func (AttrName) Recommended() {}
 // [UTC]: https://www.w3.org/TR/NOTE-datetime
 type AttrTime string // faas.time
 
-func (AttrTime) Development() {}
-func (AttrTime) Recommended() {}
+func (AttrTime) Development()    {}
+func (AttrTime) Recommended()    {}
+func (AttrTime) Key() string     { return "faas_time" }
+func (a AttrTime) Value() string { return string(a) }
 
 // Type of the trigger which caused this function invocation
 type AttrTrigger string // faas.trigger
 
-func (AttrTrigger) Development() {}
-func (AttrTrigger) Recommended() {}
+func (AttrTrigger) Development()    {}
+func (AttrTrigger) Recommended()    {}
+func (AttrTrigger) Key() string     { return "faas_trigger" }
+func (a AttrTrigger) Value() string { return string(a) }
+
+const TriggerDatasource AttrTrigger = "datasource"
+const TriggerHttp AttrTrigger = "http"
+const TriggerPubsub AttrTrigger = "pubsub"
+const TriggerTimer AttrTrigger = "timer"
+const TriggerOther AttrTrigger = "other"
 
 // The immutable version of the function being executed.
 // Depending on the cloud provider and platform, use:
@@ -143,8 +189,10 @@ func (AttrTrigger) Recommended() {}
 // [`K_REVISION` environment variable]: https://cloud.google.com/functions/docs/env-var#runtime_environment_variables_set_automatically
 type AttrVersion string // faas.version
 
-func (AttrVersion) Development() {}
-func (AttrVersion) Recommended() {}
+func (AttrVersion) Development()    {}
+func (AttrVersion) Recommended()    {}
+func (AttrVersion) Key() string     { return "faas_version" }
+func (a AttrVersion) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -201,7 +249,6 @@ func (AttrVersion) Recommended() {}
                     "root_namespace": "faas",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "When a new object is created.",
@@ -278,7 +325,6 @@ func (AttrVersion) Recommended() {}
                     "root_namespace": "faas",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Alibaba Cloud",
@@ -372,7 +418,6 @@ func (AttrVersion) Recommended() {}
                     "root_namespace": "faas",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A response to some data source operation such as a database or filesystem read/write",
@@ -540,6 +585,7 @@ func (AttrVersion) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

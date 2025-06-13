@@ -3,14 +3,18 @@ package session
 // A unique id to identify a session
 type AttrId string // session.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "session_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // The previous `session.id` for this user, when known
 type AttrPreviousId string // session.previous_id
 
-func (AttrPreviousId) Development() {}
-func (AttrPreviousId) Recommended() {}
+func (AttrPreviousId) Development()    {}
+func (AttrPreviousId) Recommended()    {}
+func (AttrPreviousId) Key() string     { return "session_previous_id" }
+func (a AttrPreviousId) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -147,6 +151,7 @@ func (AttrPreviousId) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

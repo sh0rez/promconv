@@ -6,37 +6,32 @@ import (
 
 // The amount of time the JIT compiler has spent compiling methods since the process has started.
 type JitCompilationTime struct {
-	*prometheus.CounterVec
-	extra JitCompilationTimeExtra
+	prometheus.Counter
 }
 
 func NewJitCompilationTime() JitCompilationTime {
-	labels := []string{}
-	return JitCompilationTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "dotnet",
-		Name:      "jit_compilation_time",
-		Help:      "The amount of time the JIT compiler has spent compiling methods since the process has started.",
-	}, labels)}
+	return JitCompilationTime{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "dotnet_jit_compilation_time",
+		Help: "The amount of time the JIT compiler has spent compiling methods since the process has started.",
+	})}
 }
 
-func (m JitCompilationTime) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m JitCompilationTime) Register(regs ...prometheus.Registerer) JitCompilationTime {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type JitCompilationTimeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "JitCompilationTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "jit.compilation.time",
         "Type": "JitCompilationTime",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The amount of time the JIT compiler has spent compiling methods since the process has started.\n",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

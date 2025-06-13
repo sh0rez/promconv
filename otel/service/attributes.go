@@ -34,8 +34,10 @@ package service
 // [`/etc/machine-id`]: https://www.freedesktop.org/software/systemd/man/latest/machine-id.html
 type AttrInstanceId string // service.instance.id
 
-func (AttrInstanceId) Development() {}
-func (AttrInstanceId) Recommended() {}
+func (AttrInstanceId) Development()    {}
+func (AttrInstanceId) Recommended()    {}
+func (AttrInstanceId) Key() string     { return "service_instance_id" }
+func (a AttrInstanceId) Value() string { return string(a) }
 
 // Logical name of the service.
 //
@@ -44,22 +46,28 @@ func (AttrInstanceId) Recommended() {}
 // [`process.executable.name`]: process.md
 type AttrName string // service.name
 
-func (AttrName) Stable()      {}
-func (AttrName) Recommended() {}
+func (AttrName) Stable()         {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "service_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // A namespace for `service.name`.
 //
 // A string value having a meaning that helps to distinguish a group of services, for example the team name that owns a group of services. `service.name` is expected to be unique within the same namespace. If `service.namespace` is not specified in the Resource then `service.name` is expected to be unique for all services that have no explicit namespace defined (so the empty/unspecified namespace is simply one more valid namespace). Zero-length namespace string is assumed equal to unspecified namespace
 type AttrNamespace string // service.namespace
 
-func (AttrNamespace) Development() {}
-func (AttrNamespace) Recommended() {}
+func (AttrNamespace) Development()    {}
+func (AttrNamespace) Recommended()    {}
+func (AttrNamespace) Key() string     { return "service_namespace" }
+func (a AttrNamespace) Value() string { return string(a) }
 
 // The version string of the service API or implementation. The format is not defined by these conventions
 type AttrVersion string // service.version
 
-func (AttrVersion) Stable()      {}
-func (AttrVersion) Recommended() {}
+func (AttrVersion) Stable()         {}
+func (AttrVersion) Recommended()    {}
+func (AttrVersion) Key() string     { return "service_version" }
+func (a AttrVersion) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -226,6 +234,7 @@ func (AttrVersion) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

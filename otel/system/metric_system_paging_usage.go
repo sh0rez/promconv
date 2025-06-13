@@ -11,49 +11,51 @@ type PagingUsage struct {
 }
 
 func NewPagingUsage() PagingUsage {
-	labels := []string{"system_device", "system_paging_state"}
+	labels := []string{AttrDevice("").Key(), AttrPagingState("").Key()}
 	return PagingUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "paging_usage",
-		Help:      "Unix swap or windows pagefile usage",
+		Name: "system_paging_usage",
+		Help: "Unix swap or windows pagefile usage",
 	}, labels)}
 }
 
-func (m PagingUsage) With(extra interface {
-	AttrSystemDevice() AttrDevice
-	AttrSystemPagingState() AttrPagingState
+func (m PagingUsage) With(extras ...interface {
+	SystemDevice() AttrDevice
+	SystemPagingState() AttrPagingState
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemDevice()),
-		string(extra.AttrSystemPagingState()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.SystemDevice().Value(), extra.SystemPagingState().Value())
 }
 
-func (a PagingUsage) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) PagingUsage {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+// Deprecated: Use [PagingUsage.With] instead
+func (m PagingUsage) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a PagingUsage) WithDevice(attr interface{ SystemDevice() AttrDevice }) PagingUsage {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
-func (a PagingUsage) WithSystemPagingState(attr interface{ AttrSystemPagingState() AttrPagingState }) PagingUsage {
-	a.extra.SystemPagingState = attr.AttrSystemPagingState()
+func (a PagingUsage) WithPagingState(attr interface{ SystemPagingState() AttrPagingState }) PagingUsage {
+	a.extra.AttrPagingState = attr.SystemPagingState()
 	return a
 }
 
 type PagingUsageExtra struct {
-	// Unique identifier for the device responsible for managing paging operations.
-	SystemDevice AttrDevice `otel:"system.device"`
-	// The memory paging state
-	SystemPagingState AttrPagingState `otel:"system.paging.state"`
+	// Unique identifier for the device responsible for managing paging operations
+	AttrDevice      AttrDevice      `otel:"system.device"` // The memory paging state
+	AttrPagingState AttrPagingState `otel:"system.paging.state"`
 }
 
-func (a PagingUsageExtra) AttrSystemDevice() AttrDevice           { return a.SystemDevice }
-func (a PagingUsageExtra) AttrSystemPagingState() AttrPagingState { return a.SystemPagingState }
+func (a PagingUsageExtra) SystemDevice() AttrDevice           { return a.AttrDevice }
+func (a PagingUsageExtra) SystemPagingState() AttrPagingState { return a.AttrPagingState }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -87,7 +89,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -120,7 +121,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -197,6 +197,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -304,6 +306,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -390,7 +393,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

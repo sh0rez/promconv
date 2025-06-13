@@ -6,37 +6,32 @@ import (
 
 // Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod)
 type DaemonsetDesiredScheduledNodes struct {
-	*prometheus.GaugeVec
-	extra DaemonsetDesiredScheduledNodesExtra
+	prometheus.Gauge
 }
 
 func NewDaemonsetDesiredScheduledNodes() DaemonsetDesiredScheduledNodes {
-	labels := []string{}
-	return DaemonsetDesiredScheduledNodes{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "daemonset_desired_scheduled_nodes",
-		Help:      "Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod)",
-	}, labels)}
+	return DaemonsetDesiredScheduledNodes{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_daemonset_desired_scheduled_nodes",
+		Help: "Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod)",
+	})}
 }
 
-func (m DaemonsetDesiredScheduledNodes) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m DaemonsetDesiredScheduledNodes) Register(regs ...prometheus.Registerer) DaemonsetDesiredScheduledNodes {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type DaemonsetDesiredScheduledNodesExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "DaemonsetDesiredScheduledNodesExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "daemonset.desired_scheduled_nodes",
         "Type": "DaemonsetDesiredScheduledNodes",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod)",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

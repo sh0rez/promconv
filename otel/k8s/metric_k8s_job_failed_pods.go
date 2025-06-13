@@ -6,37 +6,32 @@ import (
 
 // The number of pods which reached phase Failed for a job
 type JobFailedPods struct {
-	*prometheus.GaugeVec
-	extra JobFailedPodsExtra
+	prometheus.Gauge
 }
 
 func NewJobFailedPods() JobFailedPods {
-	labels := []string{}
-	return JobFailedPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "job_failed_pods",
-		Help:      "The number of pods which reached phase Failed for a job",
-	}, labels)}
+	return JobFailedPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_job_failed_pods",
+		Help: "The number of pods which reached phase Failed for a job",
+	})}
 }
 
-func (m JobFailedPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m JobFailedPods) Register(regs ...prometheus.Registerer) JobFailedPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type JobFailedPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "JobFailedPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "job.failed_pods",
         "Type": "JobFailedPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of pods which reached phase Failed for a job",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

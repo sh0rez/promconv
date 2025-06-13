@@ -18,117 +18,116 @@ type ConnectionDuration struct {
 }
 
 func NewConnectionDuration() ConnectionDuration {
-	labels := []string{"error_type", "network_protocol_name", "network_protocol_version", "network_transport", "network_type", "server_address", "server_port", "tls_protocol_version"}
+	labels := []string{error.AttrType("").Key(), network.AttrProtocolName("").Key(), network.AttrProtocolVersion("").Key(), network.AttrTransport("").Key(), network.AttrType("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key(), tls.AttrProtocolVersion("").Key()}
 	return ConnectionDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "kestrel",
-		Name:      "connection_duration",
-		Help:      "The duration of connections on the server.",
+		Name: "kestrel_connection_duration",
+		Help: "The duration of connections on the server.",
 	}, labels)}
 }
 
-func (m ConnectionDuration) With(extra interface {
-	AttrErrorType() error.AttrType
-	AttrNetworkProtocolName() network.AttrProtocolName
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
-	AttrNetworkTransport() network.AttrTransport
-	AttrNetworkType() network.AttrType
-	AttrServerAddress() server.AttrAddress
-	AttrServerPort() server.AttrPort
-	AttrTlsProtocolVersion() tls.AttrProtocolVersion
+func (m ConnectionDuration) With(extras ...interface {
+	ErrorType() error.AttrType
+	NetworkProtocolName() network.AttrProtocolName
+	NetworkProtocolVersion() network.AttrProtocolVersion
+	NetworkTransport() network.AttrTransport
+	NetworkType() network.AttrType
+	ServerAddress() server.AttrAddress
+	ServerPort() server.AttrPort
+	TlsProtocolVersion() tls.AttrProtocolVersion
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrErrorType()),
-		string(extra.AttrNetworkProtocolName()),
-		string(extra.AttrNetworkProtocolVersion()),
-		string(extra.AttrNetworkTransport()),
-		string(extra.AttrNetworkType()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrServerPort()),
-		string(extra.AttrTlsProtocolVersion()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(extra.ErrorType().Value(), extra.NetworkProtocolName().Value(), extra.NetworkProtocolVersion().Value(), extra.NetworkTransport().Value(), extra.NetworkType().Value(), extra.ServerAddress().Value(), extra.ServerPort().Value(), extra.TlsProtocolVersion().Value())
 }
 
-func (a ConnectionDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ConnectionDuration {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [ConnectionDuration.With] instead
+func (m ConnectionDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a ConnectionDuration) WithErrorType(attr interface{ ErrorType() error.AttrType }) ConnectionDuration {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
 func (a ConnectionDuration) WithNetworkProtocolName(attr interface {
-	AttrNetworkProtocolName() network.AttrProtocolName
+	NetworkProtocolName() network.AttrProtocolName
 }) ConnectionDuration {
-	a.extra.NetworkProtocolName = attr.AttrNetworkProtocolName()
+	a.extra.AttrNetworkProtocolName = attr.NetworkProtocolName()
 	return a
 }
 func (a ConnectionDuration) WithNetworkProtocolVersion(attr interface {
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	NetworkProtocolVersion() network.AttrProtocolVersion
 }) ConnectionDuration {
-	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	a.extra.AttrNetworkProtocolVersion = attr.NetworkProtocolVersion()
 	return a
 }
-func (a ConnectionDuration) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) ConnectionDuration {
-	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+func (a ConnectionDuration) WithNetworkTransport(attr interface{ NetworkTransport() network.AttrTransport }) ConnectionDuration {
+	a.extra.AttrNetworkTransport = attr.NetworkTransport()
 	return a
 }
-func (a ConnectionDuration) WithNetworkType(attr interface{ AttrNetworkType() network.AttrType }) ConnectionDuration {
-	a.extra.NetworkType = attr.AttrNetworkType()
+func (a ConnectionDuration) WithNetworkType(attr interface{ NetworkType() network.AttrType }) ConnectionDuration {
+	a.extra.AttrNetworkType = attr.NetworkType()
 	return a
 }
-func (a ConnectionDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ConnectionDuration {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ConnectionDuration) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ConnectionDuration {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ConnectionDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ConnectionDuration {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ConnectionDuration) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ConnectionDuration {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 func (a ConnectionDuration) WithTlsProtocolVersion(attr interface {
-	AttrTlsProtocolVersion() tls.AttrProtocolVersion
+	TlsProtocolVersion() tls.AttrProtocolVersion
 }) ConnectionDuration {
-	a.extra.TlsProtocolVersion = attr.AttrTlsProtocolVersion()
+	a.extra.AttrTlsProtocolVersion = attr.TlsProtocolVersion()
 	return a
 }
 
 type ConnectionDurationExtra struct {
-	// The full name of exception type.
-	ErrorType error.AttrType `otel:"error.type"`
-	// [OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.
-	NetworkProtocolName network.AttrProtocolName `otel:"network.protocol.name"`
-	// The actual version of the protocol used for network communication.
-	NetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"`
-	// [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
-	NetworkTransport network.AttrTransport `otel:"network.transport"`
-	// [OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.
-	NetworkType network.AttrType `otel:"network.type"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
-	// Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)
-	TlsProtocolVersion tls.AttrProtocolVersion `otel:"tls.protocol.version"`
+	// The full name of exception type
+	AttrErrorType error.AttrType `otel:"error.type"` // [OSI application layer] or non-OSI equivalent
+	//
+	// [OSI application layer]: https://wikipedia.org/wiki/Application_layer
+	AttrNetworkProtocolName    network.AttrProtocolName    `otel:"network.protocol.name"`    // The actual version of the protocol used for network communication
+	AttrNetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"` // [OSI transport layer] or [inter-process communication method]
+	//
+	// [OSI transport layer]: https://wikipedia.org/wiki/Transport_layer
+	// [inter-process communication method]: https://wikipedia.org/wiki/Inter-process_communication
+	AttrNetworkTransport network.AttrTransport `otel:"network.transport"` // [OSI network layer] or non-OSI equivalent
+	//
+	// [OSI network layer]: https://wikipedia.org/wiki/Network_layer
+	AttrNetworkType   network.AttrType   `otel:"network.type"`   // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress server.AttrAddress `otel:"server.address"` // Server port number
+	AttrServerPort    server.AttrPort    `otel:"server.port"`    // Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version]
+	//
+	// [SSL/TLS protocol version]: https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values
+	AttrTlsProtocolVersion tls.AttrProtocolVersion `otel:"tls.protocol.version"`
 }
 
-func (a ConnectionDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a ConnectionDurationExtra) AttrNetworkProtocolName() network.AttrProtocolName {
-	return a.NetworkProtocolName
+func (a ConnectionDurationExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a ConnectionDurationExtra) NetworkProtocolName() network.AttrProtocolName {
+	return a.AttrNetworkProtocolName
 }
-func (a ConnectionDurationExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
-	return a.NetworkProtocolVersion
+func (a ConnectionDurationExtra) NetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.AttrNetworkProtocolVersion
 }
-func (a ConnectionDurationExtra) AttrNetworkTransport() network.AttrTransport {
-	return a.NetworkTransport
+func (a ConnectionDurationExtra) NetworkTransport() network.AttrTransport {
+	return a.AttrNetworkTransport
 }
-func (a ConnectionDurationExtra) AttrNetworkType() network.AttrType     { return a.NetworkType }
-func (a ConnectionDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a ConnectionDurationExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
-func (a ConnectionDurationExtra) AttrTlsProtocolVersion() tls.AttrProtocolVersion {
-	return a.TlsProtocolVersion
+func (a ConnectionDurationExtra) NetworkType() network.AttrType     { return a.AttrNetworkType }
+func (a ConnectionDurationExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a ConnectionDurationExtra) ServerPort() server.AttrPort       { return a.AttrServerPort }
+func (a ConnectionDurationExtra) TlsProtocolVersion() tls.AttrProtocolVersion {
+	return a.AttrTlsProtocolVersion
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -156,7 +155,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -204,7 +202,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "TCP",
@@ -262,7 +259,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "IPv4",
@@ -347,6 +343,32 @@ State {
                     "type": "string",
                 },
                 {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
                     "brief": "[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.",
                     "examples": [
                         "ipv4",
@@ -359,7 +381,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "IPv4",
@@ -391,7 +412,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "TCP",
@@ -449,7 +469,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -473,32 +492,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": "string",
-                },
-                {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
                 },
             ],
             "brief": "The duration of connections on the server.",
@@ -612,6 +605,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -719,6 +714,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -805,7 +801,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

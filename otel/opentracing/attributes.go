@@ -4,8 +4,13 @@ package opentracing
 // The causal relationship between a child Span and a parent Span
 type AttrRefType string // opentracing.ref_type
 
-func (AttrRefType) Development() {}
-func (AttrRefType) Recommended() {}
+func (AttrRefType) Development()    {}
+func (AttrRefType) Recommended()    {}
+func (AttrRefType) Key() string     { return "opentracing_ref_type" }
+func (a AttrRefType) Value() string { return string(a) }
+
+const RefTypeChildOf AttrRefType = "child_of"
+const RefTypeFollowsFrom AttrRefType = "follows_from"
 
 /* State {
     name: "attr.go.j2",
@@ -22,7 +27,6 @@ func (AttrRefType) Recommended() {}
                     "root_namespace": "opentracing",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The parent Span depends on the child Span in some capacity",
@@ -153,6 +157,7 @@ func (AttrRefType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

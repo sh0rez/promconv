@@ -6,37 +6,32 @@ import (
 
 // The number of replica pods created for this statefulset with a Ready Condition
 type StatefulsetReadyPods struct {
-	*prometheus.GaugeVec
-	extra StatefulsetReadyPodsExtra
+	prometheus.Gauge
 }
 
 func NewStatefulsetReadyPods() StatefulsetReadyPods {
-	labels := []string{}
-	return StatefulsetReadyPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "statefulset_ready_pods",
-		Help:      "The number of replica pods created for this statefulset with a Ready Condition",
-	}, labels)}
+	return StatefulsetReadyPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_statefulset_ready_pods",
+		Help: "The number of replica pods created for this statefulset with a Ready Condition",
+	})}
 }
 
-func (m StatefulsetReadyPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m StatefulsetReadyPods) Register(regs ...prometheus.Registerer) StatefulsetReadyPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type StatefulsetReadyPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "StatefulsetReadyPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "statefulset.ready_pods",
         "Type": "StatefulsetReadyPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of replica pods created for this statefulset with a Ready Condition",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

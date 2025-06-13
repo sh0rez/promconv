@@ -3,76 +3,117 @@ package gen_ai
 // Free-form description of the GenAI agent provided by the application
 type AttrAgentDescription string // gen_ai.agent.description
 
-func (AttrAgentDescription) Development() {}
-func (AttrAgentDescription) Recommended() {}
+func (AttrAgentDescription) Development()    {}
+func (AttrAgentDescription) Recommended()    {}
+func (AttrAgentDescription) Key() string     { return "gen_ai_agent_description" }
+func (a AttrAgentDescription) Value() string { return string(a) }
 
 // The unique identifier of the GenAI agent
 type AttrAgentId string // gen_ai.agent.id
 
-func (AttrAgentId) Development() {}
-func (AttrAgentId) Recommended() {}
+func (AttrAgentId) Development()    {}
+func (AttrAgentId) Recommended()    {}
+func (AttrAgentId) Key() string     { return "gen_ai_agent_id" }
+func (a AttrAgentId) Value() string { return string(a) }
 
 // Human-readable name of the GenAI agent provided by the application
 type AttrAgentName string // gen_ai.agent.name
 
-func (AttrAgentName) Development() {}
-func (AttrAgentName) Recommended() {}
+func (AttrAgentName) Development()    {}
+func (AttrAgentName) Recommended()    {}
+func (AttrAgentName) Key() string     { return "gen_ai_agent_name" }
+func (a AttrAgentName) Value() string { return string(a) }
 
 // Deprecated, use Event API to report completions contents
 type AttrCompletion string // gen_ai.completion
 
-func (AttrCompletion) Development() {}
-func (AttrCompletion) Recommended() {}
+func (AttrCompletion) Development()    {}
+func (AttrCompletion) Recommended()    {}
+func (AttrCompletion) Key() string     { return "gen_ai_completion" }
+func (a AttrCompletion) Value() string { return string(a) }
 
 // The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation
 type AttrConversationId string // gen_ai.conversation.id
 
-func (AttrConversationId) Development() {}
-func (AttrConversationId) Recommended() {}
+func (AttrConversationId) Development()    {}
+func (AttrConversationId) Recommended()    {}
+func (AttrConversationId) Key() string     { return "gen_ai_conversation_id" }
+func (a AttrConversationId) Value() string { return string(a) }
 
 // The data source identifier.
 // Data sources are used by AI agents and RAG applications to store grounding data. A data source may be an external database, object store, document collection, website, or any other storage system used by the GenAI agent or application. The `gen_ai.data_source.id` SHOULD match the identifier used by the GenAI system rather than a name specific to the external storage, such as a database or object store. Semantic conventions referencing `gen_ai.data_source.id` MAY also leverage additional attributes, such as `db.*`, to further identify and describe the data source
 type AttrDataSourceId string // gen_ai.data_source.id
 
-func (AttrDataSourceId) Development() {}
-func (AttrDataSourceId) Recommended() {}
+func (AttrDataSourceId) Development()    {}
+func (AttrDataSourceId) Recommended()    {}
+func (AttrDataSourceId) Key() string     { return "gen_ai_data_source_id" }
+func (a AttrDataSourceId) Value() string { return string(a) }
 
 // Deprecated, use `gen_ai.output.type`
 type AttrOpenaiRequestResponseFormat string // gen_ai.openai.request.response_format
 
-func (AttrOpenaiRequestResponseFormat) Development() {}
-func (AttrOpenaiRequestResponseFormat) Recommended() {}
+func (AttrOpenaiRequestResponseFormat) Development()    {}
+func (AttrOpenaiRequestResponseFormat) Recommended()    {}
+func (AttrOpenaiRequestResponseFormat) Key() string     { return "gen_ai_openai_request_response_format" }
+func (a AttrOpenaiRequestResponseFormat) Value() string { return string(a) }
+
+const OpenaiRequestResponseFormatText AttrOpenaiRequestResponseFormat = "text"
+const OpenaiRequestResponseFormatJsonObject AttrOpenaiRequestResponseFormat = "json_object"
+const OpenaiRequestResponseFormatJsonSchema AttrOpenaiRequestResponseFormat = "json_schema"
 
 // Deprecated, use `gen_ai.request.seed`
 type AttrOpenaiRequestSeed string // gen_ai.openai.request.seed
 
-func (AttrOpenaiRequestSeed) Development() {}
-func (AttrOpenaiRequestSeed) Recommended() {}
+func (AttrOpenaiRequestSeed) Development()    {}
+func (AttrOpenaiRequestSeed) Recommended()    {}
+func (AttrOpenaiRequestSeed) Key() string     { return "gen_ai_openai_request_seed" }
+func (a AttrOpenaiRequestSeed) Value() string { return string(a) }
 
 // The service tier requested. May be a specific tier, default, or auto
 type AttrOpenaiRequestServiceTier string // gen_ai.openai.request.service_tier
 
-func (AttrOpenaiRequestServiceTier) Development() {}
-func (AttrOpenaiRequestServiceTier) Recommended() {}
+func (AttrOpenaiRequestServiceTier) Development()    {}
+func (AttrOpenaiRequestServiceTier) Recommended()    {}
+func (AttrOpenaiRequestServiceTier) Key() string     { return "gen_ai_openai_request_service_tier" }
+func (a AttrOpenaiRequestServiceTier) Value() string { return string(a) }
+
+const OpenaiRequestServiceTierAuto AttrOpenaiRequestServiceTier = "auto"
+const OpenaiRequestServiceTierDefault AttrOpenaiRequestServiceTier = "default"
 
 // The service tier used for the response
 type AttrOpenaiResponseServiceTier string // gen_ai.openai.response.service_tier
 
-func (AttrOpenaiResponseServiceTier) Development() {}
-func (AttrOpenaiResponseServiceTier) Recommended() {}
+func (AttrOpenaiResponseServiceTier) Development()    {}
+func (AttrOpenaiResponseServiceTier) Recommended()    {}
+func (AttrOpenaiResponseServiceTier) Key() string     { return "gen_ai_openai_response_service_tier" }
+func (a AttrOpenaiResponseServiceTier) Value() string { return string(a) }
 
 // A fingerprint to track any eventual change in the Generative AI environment
 type AttrOpenaiResponseSystemFingerprint string // gen_ai.openai.response.system_fingerprint
 
 func (AttrOpenaiResponseSystemFingerprint) Development() {}
 func (AttrOpenaiResponseSystemFingerprint) Recommended() {}
+func (AttrOpenaiResponseSystemFingerprint) Key() string {
+	return "gen_ai_openai_response_system_fingerprint"
+}
+func (a AttrOpenaiResponseSystemFingerprint) Value() string { return string(a) }
 
 // The name of the operation being performed.
 // If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value
 type AttrOperationName string // gen_ai.operation.name
 
-func (AttrOperationName) Development() {}
-func (AttrOperationName) Recommended() {}
+func (AttrOperationName) Development()    {}
+func (AttrOperationName) Recommended()    {}
+func (AttrOperationName) Key() string     { return "gen_ai_operation_name" }
+func (a AttrOperationName) Value() string { return string(a) }
+
+const OperationNameChat AttrOperationName = "chat"
+const OperationNameGenerateContent AttrOperationName = "generate_content"
+const OperationNameTextCompletion AttrOperationName = "text_completion"
+const OperationNameEmbeddings AttrOperationName = "embeddings"
+const OperationNameCreateAgent AttrOperationName = "create_agent"
+const OperationNameInvokeAgent AttrOperationName = "invoke_agent"
+const OperationNameExecuteTool AttrOperationName = "execute_tool"
 
 // Represents the content type requested by the client.
 // This attribute SHOULD be used when the client requests output of a specific type. The model may return zero or more outputs of this type.
@@ -80,99 +121,136 @@ func (AttrOperationName) Recommended() {}
 // Additional output format details may be recorded in the future in the `gen_ai.output.{type}.*` attributes
 type AttrOutputType string // gen_ai.output.type
 
-func (AttrOutputType) Development() {}
-func (AttrOutputType) Recommended() {}
+func (AttrOutputType) Development()    {}
+func (AttrOutputType) Recommended()    {}
+func (AttrOutputType) Key() string     { return "gen_ai_output_type" }
+func (a AttrOutputType) Value() string { return string(a) }
+
+const OutputTypeText AttrOutputType = "text"
+const OutputTypeJson AttrOutputType = "json"
+const OutputTypeImage AttrOutputType = "image"
+const OutputTypeSpeech AttrOutputType = "speech"
 
 // Deprecated, use Event API to report prompt contents
 type AttrPrompt string // gen_ai.prompt
 
-func (AttrPrompt) Development() {}
-func (AttrPrompt) Recommended() {}
+func (AttrPrompt) Development()    {}
+func (AttrPrompt) Recommended()    {}
+func (AttrPrompt) Key() string     { return "gen_ai_prompt" }
+func (a AttrPrompt) Value() string { return string(a) }
 
 // The target number of candidate completions to return
 type AttrRequestChoiceCount string // gen_ai.request.choice.count
 
-func (AttrRequestChoiceCount) Development() {}
-func (AttrRequestChoiceCount) Recommended() {}
+func (AttrRequestChoiceCount) Development()    {}
+func (AttrRequestChoiceCount) Recommended()    {}
+func (AttrRequestChoiceCount) Key() string     { return "gen_ai_request_choice_count" }
+func (a AttrRequestChoiceCount) Value() string { return string(a) }
 
 // The encoding formats requested in an embeddings operation, if specified.
 // In some GenAI systems the encoding formats are called embedding types. Also, some GenAI systems only accept a single format per request
 type AttrRequestEncodingFormats string // gen_ai.request.encoding_formats
 
-func (AttrRequestEncodingFormats) Development() {}
-func (AttrRequestEncodingFormats) Recommended() {}
+func (AttrRequestEncodingFormats) Development()    {}
+func (AttrRequestEncodingFormats) Recommended()    {}
+func (AttrRequestEncodingFormats) Key() string     { return "gen_ai_request_encoding_formats" }
+func (a AttrRequestEncodingFormats) Value() string { return string(a) }
 
 // The frequency penalty setting for the GenAI request
 type AttrRequestFrequencyPenalty string // gen_ai.request.frequency_penalty
 
-func (AttrRequestFrequencyPenalty) Development() {}
-func (AttrRequestFrequencyPenalty) Recommended() {}
+func (AttrRequestFrequencyPenalty) Development()    {}
+func (AttrRequestFrequencyPenalty) Recommended()    {}
+func (AttrRequestFrequencyPenalty) Key() string     { return "gen_ai_request_frequency_penalty" }
+func (a AttrRequestFrequencyPenalty) Value() string { return string(a) }
 
 // The maximum number of tokens the model generates for a request
 type AttrRequestMaxTokens string // gen_ai.request.max_tokens
 
-func (AttrRequestMaxTokens) Development() {}
-func (AttrRequestMaxTokens) Recommended() {}
+func (AttrRequestMaxTokens) Development()    {}
+func (AttrRequestMaxTokens) Recommended()    {}
+func (AttrRequestMaxTokens) Key() string     { return "gen_ai_request_max_tokens" }
+func (a AttrRequestMaxTokens) Value() string { return string(a) }
 
 // The name of the GenAI model a request is being made to
 type AttrRequestModel string // gen_ai.request.model
 
-func (AttrRequestModel) Development() {}
-func (AttrRequestModel) Recommended() {}
+func (AttrRequestModel) Development()    {}
+func (AttrRequestModel) Recommended()    {}
+func (AttrRequestModel) Key() string     { return "gen_ai_request_model" }
+func (a AttrRequestModel) Value() string { return string(a) }
 
 // The presence penalty setting for the GenAI request
 type AttrRequestPresencePenalty string // gen_ai.request.presence_penalty
 
-func (AttrRequestPresencePenalty) Development() {}
-func (AttrRequestPresencePenalty) Recommended() {}
+func (AttrRequestPresencePenalty) Development()    {}
+func (AttrRequestPresencePenalty) Recommended()    {}
+func (AttrRequestPresencePenalty) Key() string     { return "gen_ai_request_presence_penalty" }
+func (a AttrRequestPresencePenalty) Value() string { return string(a) }
 
 // Requests with same seed value more likely to return same result
 type AttrRequestSeed string // gen_ai.request.seed
 
-func (AttrRequestSeed) Development() {}
-func (AttrRequestSeed) Recommended() {}
+func (AttrRequestSeed) Development()    {}
+func (AttrRequestSeed) Recommended()    {}
+func (AttrRequestSeed) Key() string     { return "gen_ai_request_seed" }
+func (a AttrRequestSeed) Value() string { return string(a) }
 
 // List of sequences that the model will use to stop generating further tokens
 type AttrRequestStopSequences string // gen_ai.request.stop_sequences
 
-func (AttrRequestStopSequences) Development() {}
-func (AttrRequestStopSequences) Recommended() {}
+func (AttrRequestStopSequences) Development()    {}
+func (AttrRequestStopSequences) Recommended()    {}
+func (AttrRequestStopSequences) Key() string     { return "gen_ai_request_stop_sequences" }
+func (a AttrRequestStopSequences) Value() string { return string(a) }
 
 // The temperature setting for the GenAI request
 type AttrRequestTemperature string // gen_ai.request.temperature
 
-func (AttrRequestTemperature) Development() {}
-func (AttrRequestTemperature) Recommended() {}
+func (AttrRequestTemperature) Development()    {}
+func (AttrRequestTemperature) Recommended()    {}
+func (AttrRequestTemperature) Key() string     { return "gen_ai_request_temperature" }
+func (a AttrRequestTemperature) Value() string { return string(a) }
 
 // The top_k sampling setting for the GenAI request
 type AttrRequestTopK string // gen_ai.request.top_k
 
-func (AttrRequestTopK) Development() {}
-func (AttrRequestTopK) Recommended() {}
+func (AttrRequestTopK) Development()    {}
+func (AttrRequestTopK) Recommended()    {}
+func (AttrRequestTopK) Key() string     { return "gen_ai_request_top_k" }
+func (a AttrRequestTopK) Value() string { return string(a) }
 
 // The top_p sampling setting for the GenAI request
 type AttrRequestTopP string // gen_ai.request.top_p
 
-func (AttrRequestTopP) Development() {}
-func (AttrRequestTopP) Recommended() {}
+func (AttrRequestTopP) Development()    {}
+func (AttrRequestTopP) Recommended()    {}
+func (AttrRequestTopP) Key() string     { return "gen_ai_request_top_p" }
+func (a AttrRequestTopP) Value() string { return string(a) }
 
 // Array of reasons the model stopped generating tokens, corresponding to each generation received
 type AttrResponseFinishReasons string // gen_ai.response.finish_reasons
 
-func (AttrResponseFinishReasons) Development() {}
-func (AttrResponseFinishReasons) Recommended() {}
+func (AttrResponseFinishReasons) Development()    {}
+func (AttrResponseFinishReasons) Recommended()    {}
+func (AttrResponseFinishReasons) Key() string     { return "gen_ai_response_finish_reasons" }
+func (a AttrResponseFinishReasons) Value() string { return string(a) }
 
 // The unique identifier for the completion
 type AttrResponseId string // gen_ai.response.id
 
-func (AttrResponseId) Development() {}
-func (AttrResponseId) Recommended() {}
+func (AttrResponseId) Development()    {}
+func (AttrResponseId) Recommended()    {}
+func (AttrResponseId) Key() string     { return "gen_ai_response_id" }
+func (a AttrResponseId) Value() string { return string(a) }
 
 // The name of the model that generated the response
 type AttrResponseModel string // gen_ai.response.model
 
-func (AttrResponseModel) Development() {}
-func (AttrResponseModel) Recommended() {}
+func (AttrResponseModel) Development()    {}
+func (AttrResponseModel) Recommended()    {}
+func (AttrResponseModel) Key() string     { return "gen_ai_response_model" }
+func (a AttrResponseModel) Value() string { return string(a) }
 
 // The Generative AI product as identified by the client or server instrumentation.
 // The `gen_ai.system` describes a family of GenAI models with specific model identified
@@ -188,32 +266,64 @@ func (AttrResponseModel) Recommended() {}
 // If none of these options apply, the `gen_ai.system` SHOULD be set to `_OTHER`
 type AttrSystem string // gen_ai.system
 
-func (AttrSystem) Development() {}
-func (AttrSystem) Recommended() {}
+func (AttrSystem) Development()    {}
+func (AttrSystem) Recommended()    {}
+func (AttrSystem) Key() string     { return "gen_ai_system" }
+func (a AttrSystem) Value() string { return string(a) }
+
+const SystemOpenai AttrSystem = "openai"
+const SystemGcpGenAi AttrSystem = "gcp.gen_ai"
+const SystemGcpVertexAi AttrSystem = "gcp.vertex_ai"
+const SystemGcpGemini AttrSystem = "gcp.gemini"
+const SystemVertexAi AttrSystem = "vertex_ai"
+const SystemGemini AttrSystem = "gemini"
+const SystemAnthropic AttrSystem = "anthropic"
+const SystemCohere AttrSystem = "cohere"
+const SystemAzAiInference AttrSystem = "az.ai.inference"
+const SystemAzAiOpenai AttrSystem = "az.ai.openai"
+const SystemIbmWatsonxAi AttrSystem = "ibm.watsonx.ai"
+const SystemAwsBedrock AttrSystem = "aws.bedrock"
+const SystemPerplexity AttrSystem = "perplexity"
+const SystemXai AttrSystem = "xai"
+const SystemDeepseek AttrSystem = "deepseek"
+const SystemGroq AttrSystem = "groq"
+const SystemMistralAi AttrSystem = "mistral_ai"
 
 // The type of token being counted
 type AttrTokenType string // gen_ai.token.type
 
-func (AttrTokenType) Development() {}
-func (AttrTokenType) Recommended() {}
+func (AttrTokenType) Development()    {}
+func (AttrTokenType) Recommended()    {}
+func (AttrTokenType) Key() string     { return "gen_ai_token_type" }
+func (a AttrTokenType) Value() string { return string(a) }
+
+const TokenTypeInput AttrTokenType = "input"
+const TokenTypeCompletion AttrTokenType = "output"
+const TokenTypeOutput AttrTokenType = "output"
 
 // The tool call identifier
 type AttrToolCallId string // gen_ai.tool.call.id
 
-func (AttrToolCallId) Development() {}
-func (AttrToolCallId) Recommended() {}
+func (AttrToolCallId) Development()    {}
+func (AttrToolCallId) Recommended()    {}
+func (AttrToolCallId) Key() string     { return "gen_ai_tool_call_id" }
+func (a AttrToolCallId) Value() string { return string(a) }
 
 // The tool description
 type AttrToolDescription string // gen_ai.tool.description
 
-func (AttrToolDescription) Development() {}
-func (AttrToolDescription) Recommended() {}
+func (AttrToolDescription) Development()    {}
+func (AttrToolDescription) Recommended()    {}
+func (AttrToolDescription) Key() string     { return "gen_ai_tool_description" }
+func (a AttrToolDescription) Value() string { return string(a) }
 
 // Name of the tool utilized by the agent
 type AttrToolName string // gen_ai.tool.name
 
-func (AttrToolName) Development() {}
-func (AttrToolName) Recommended() {}
+func (AttrToolName) Development()    {}
+func (AttrToolName) Recommended()    {}
+func (AttrToolName) Key() string     { return "gen_ai_tool_name" }
+func (a AttrToolName) Value() string { return string(a) }
 
 // Type of the tool utilized by the agent
 // Extension: A tool executed on the agent-side to directly call external APIs, bridging the gap between the agent and real-world systems.
@@ -223,32 +333,42 @@ func (AttrToolName) Recommended() {}
 // Datastore: A tool used by the agent to access and query structured or unstructured external data for retrieval-augmented tasks or knowledge updates
 type AttrToolType string // gen_ai.tool.type
 
-func (AttrToolType) Development() {}
-func (AttrToolType) Recommended() {}
+func (AttrToolType) Development()    {}
+func (AttrToolType) Recommended()    {}
+func (AttrToolType) Key() string     { return "gen_ai_tool_type" }
+func (a AttrToolType) Value() string { return string(a) }
 
 // Deprecated, use `gen_ai.usage.output_tokens` instead
 type AttrUsageCompletionTokens string // gen_ai.usage.completion_tokens
 
-func (AttrUsageCompletionTokens) Development() {}
-func (AttrUsageCompletionTokens) Recommended() {}
+func (AttrUsageCompletionTokens) Development()    {}
+func (AttrUsageCompletionTokens) Recommended()    {}
+func (AttrUsageCompletionTokens) Key() string     { return "gen_ai_usage_completion_tokens" }
+func (a AttrUsageCompletionTokens) Value() string { return string(a) }
 
 // The number of tokens used in the GenAI input (prompt)
 type AttrUsageInputTokens string // gen_ai.usage.input_tokens
 
-func (AttrUsageInputTokens) Development() {}
-func (AttrUsageInputTokens) Recommended() {}
+func (AttrUsageInputTokens) Development()    {}
+func (AttrUsageInputTokens) Recommended()    {}
+func (AttrUsageInputTokens) Key() string     { return "gen_ai_usage_input_tokens" }
+func (a AttrUsageInputTokens) Value() string { return string(a) }
 
 // The number of tokens used in the GenAI response (completion)
 type AttrUsageOutputTokens string // gen_ai.usage.output_tokens
 
-func (AttrUsageOutputTokens) Development() {}
-func (AttrUsageOutputTokens) Recommended() {}
+func (AttrUsageOutputTokens) Development()    {}
+func (AttrUsageOutputTokens) Recommended()    {}
+func (AttrUsageOutputTokens) Key() string     { return "gen_ai_usage_output_tokens" }
+func (a AttrUsageOutputTokens) Value() string { return string(a) }
 
 // Deprecated, use `gen_ai.usage.input_tokens` instead
 type AttrUsagePromptTokens string // gen_ai.usage.prompt_tokens
 
-func (AttrUsagePromptTokens) Development() {}
-func (AttrUsagePromptTokens) Recommended() {}
+func (AttrUsagePromptTokens) Development()    {}
+func (AttrUsagePromptTokens) Recommended()    {}
+func (AttrUsagePromptTokens) Key() string     { return "gen_ai_usage_prompt_tokens" }
+func (a AttrUsagePromptTokens) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -342,7 +462,6 @@ func (AttrUsagePromptTokens) Recommended() {}
                     "root_namespace": "gen_ai",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Text response format",
@@ -398,7 +517,6 @@ func (AttrUsagePromptTokens) Recommended() {}
                     "root_namespace": "gen_ai",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The system will utilize scale tier credits until they are exhausted.",
@@ -450,7 +568,6 @@ func (AttrUsagePromptTokens) Recommended() {}
                     "root_namespace": "gen_ai",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)",
@@ -519,7 +636,6 @@ func (AttrUsagePromptTokens) Recommended() {}
                     "root_namespace": "gen_ai",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Plain text",
@@ -748,7 +864,6 @@ func (AttrUsagePromptTokens) Recommended() {}
                     "root_namespace": "gen_ai",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "OpenAI",
@@ -900,7 +1015,6 @@ func (AttrUsagePromptTokens) Recommended() {}
                     "root_namespace": "gen_ai",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Input tokens (prompt, input, etc.)",
@@ -1140,6 +1254,7 @@ func (AttrUsagePromptTokens) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

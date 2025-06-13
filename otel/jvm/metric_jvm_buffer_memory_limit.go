@@ -11,42 +11,42 @@ type BufferMemoryLimit struct {
 }
 
 func NewBufferMemoryLimit() BufferMemoryLimit {
-	labels := []string{"jvm_buffer_pool_name"}
+	labels := []string{AttrBufferPoolName("").Key()}
 	return BufferMemoryLimit{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "buffer_memory_limit",
-		Help:      "Measure of total memory capacity of buffers.",
+		Name: "jvm_buffer_memory_limit",
+		Help: "Measure of total memory capacity of buffers.",
 	}, labels)}
 }
 
-func (m BufferMemoryLimit) With(extra interface {
-	AttrJvmBufferPoolName() AttrBufferPoolName
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m BufferMemoryLimit) With(extras ...interface{ JvmBufferPoolName() AttrBufferPoolName }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrJvmBufferPoolName()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.JvmBufferPoolName().Value())
 }
 
-func (a BufferMemoryLimit) WithJvmBufferPoolName(attr interface{ AttrJvmBufferPoolName() AttrBufferPoolName }) BufferMemoryLimit {
-	a.extra.JvmBufferPoolName = attr.AttrJvmBufferPoolName()
+// Deprecated: Use [BufferMemoryLimit.With] instead
+func (m BufferMemoryLimit) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a BufferMemoryLimit) WithBufferPoolName(attr interface{ JvmBufferPoolName() AttrBufferPoolName }) BufferMemoryLimit {
+	a.extra.AttrBufferPoolName = attr.JvmBufferPoolName()
 	return a
 }
 
 type BufferMemoryLimitExtra struct {
-	// Name of the buffer pool.
-	JvmBufferPoolName AttrBufferPoolName `otel:"jvm.buffer.pool.name"`
+	// Name of the buffer pool
+	AttrBufferPoolName AttrBufferPoolName `otel:"jvm.buffer.pool.name"`
 }
 
-func (a BufferMemoryLimitExtra) AttrJvmBufferPoolName() AttrBufferPoolName {
-	return a.JvmBufferPoolName
-}
+func (a BufferMemoryLimitExtra) JvmBufferPoolName() AttrBufferPoolName { return a.AttrBufferPoolName }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -121,6 +121,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -228,6 +230,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -314,7 +317,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

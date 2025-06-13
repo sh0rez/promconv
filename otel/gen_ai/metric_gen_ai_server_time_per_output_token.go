@@ -15,73 +15,69 @@ type ServerTimePerOutputToken struct {
 }
 
 func NewServerTimePerOutputToken() ServerTimePerOutputToken {
-	labels := []string{"gen_ai_operation_name", "gen_ai_system", "gen_ai_request_model", "server_port", "gen_ai_response_model", "server_address"}
+	labels := []string{AttrOperationName("").Key(), AttrSystem("").Key(), AttrRequestModel("").Key(), server.AttrPort("").Key(), AttrResponseModel("").Key(), server.AttrAddress("").Key()}
 	return ServerTimePerOutputToken{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "gen_ai",
-		Name:      "server_time_per_output_token",
-		Help:      "Time per output token generated after the first token for successful responses",
+		Name: "gen_ai_server_time_per_output_token",
+		Help: "Time per output token generated after the first token for successful responses",
 	}, labels)}
 }
 
-func (m ServerTimePerOutputToken) With(operationName AttrOperationName, system AttrSystem, extra interface {
-	AttrGenAiRequestModel() AttrRequestModel
-	AttrServerPort() server.AttrPort
-	AttrGenAiResponseModel() AttrResponseModel
-	AttrServerAddress() server.AttrAddress
+func (m ServerTimePerOutputToken) With(operationName AttrOperationName, system AttrSystem, extras ...interface {
+	GenAiRequestModel() AttrRequestModel
+	ServerPort() server.AttrPort
+	GenAiResponseModel() AttrResponseModel
+	ServerAddress() server.AttrAddress
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(operationName),
-		string(system),
-		string(extra.AttrGenAiRequestModel()),
-		string(extra.AttrServerPort()),
-		string(extra.AttrGenAiResponseModel()),
-		string(extra.AttrServerAddress()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(operationName.Value(), system.Value(), extra.GenAiRequestModel().Value(), extra.ServerPort().Value(), extra.GenAiResponseModel().Value(), extra.ServerAddress().Value())
 }
 
-func (a ServerTimePerOutputToken) WithGenAiRequestModel(attr interface{ AttrGenAiRequestModel() AttrRequestModel }) ServerTimePerOutputToken {
-	a.extra.GenAiRequestModel = attr.AttrGenAiRequestModel()
+// Deprecated: Use [ServerTimePerOutputToken.With] instead
+func (m ServerTimePerOutputToken) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a ServerTimePerOutputToken) WithRequestModel(attr interface{ GenAiRequestModel() AttrRequestModel }) ServerTimePerOutputToken {
+	a.extra.AttrRequestModel = attr.GenAiRequestModel()
 	return a
 }
-func (a ServerTimePerOutputToken) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ServerTimePerOutputToken {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ServerTimePerOutputToken) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ServerTimePerOutputToken {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
-func (a ServerTimePerOutputToken) WithGenAiResponseModel(attr interface{ AttrGenAiResponseModel() AttrResponseModel }) ServerTimePerOutputToken {
-	a.extra.GenAiResponseModel = attr.AttrGenAiResponseModel()
+func (a ServerTimePerOutputToken) WithResponseModel(attr interface{ GenAiResponseModel() AttrResponseModel }) ServerTimePerOutputToken {
+	a.extra.AttrResponseModel = attr.GenAiResponseModel()
 	return a
 }
-func (a ServerTimePerOutputToken) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ServerTimePerOutputToken {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ServerTimePerOutputToken) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ServerTimePerOutputToken {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
 
 type ServerTimePerOutputTokenExtra struct {
-	// The name of the GenAI model a request is being made to.
-	GenAiRequestModel AttrRequestModel `otel:"gen_ai.request.model"`
-	// GenAI server port.
-	ServerPort server.AttrPort `otel:"server.port"`
-	// The name of the model that generated the response.
-	GenAiResponseModel AttrResponseModel `otel:"gen_ai.response.model"`
-	// GenAI server address.
-	ServerAddress server.AttrAddress `otel:"server.address"`
+	// The name of the GenAI model a request is being made to
+	AttrRequestModel  AttrRequestModel   `otel:"gen_ai.request.model"`  // GenAI server port
+	AttrServerPort    server.AttrPort    `otel:"server.port"`           // The name of the model that generated the response
+	AttrResponseModel AttrResponseModel  `otel:"gen_ai.response.model"` // GenAI server address
+	AttrServerAddress server.AttrAddress `otel:"server.address"`
 }
 
-func (a ServerTimePerOutputTokenExtra) AttrGenAiRequestModel() AttrRequestModel {
-	return a.GenAiRequestModel
+func (a ServerTimePerOutputTokenExtra) GenAiRequestModel() AttrRequestModel {
+	return a.AttrRequestModel
 }
-func (a ServerTimePerOutputTokenExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
-func (a ServerTimePerOutputTokenExtra) AttrGenAiResponseModel() AttrResponseModel {
-	return a.GenAiResponseModel
+func (a ServerTimePerOutputTokenExtra) ServerPort() server.AttrPort { return a.AttrServerPort }
+func (a ServerTimePerOutputTokenExtra) GenAiResponseModel() AttrResponseModel {
+	return a.AttrResponseModel
 }
-func (a ServerTimePerOutputTokenExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
+func (a ServerTimePerOutputTokenExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -103,7 +99,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)",
@@ -172,7 +167,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "OpenAI",
@@ -375,42 +369,71 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "GenAI server address.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "GenAI server port.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If `server.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
-                    "brief": "The name of the GenAI model a request is being made to.",
-                    "examples": "gpt-4",
-                    "name": "gen_ai.request.model",
-                    "requirement_level": {
-                        "conditionally_required": "If available.",
-                    },
+                    "brief": "The name of the operation being performed.",
+                    "name": "gen_ai.operation.name",
+                    "note": "If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.\n",
+                    "requirement_level": "required",
                     "stability": "development",
-                    "type": "string",
+                    "type": {
+                        "members": [
+                            {
+                                "brief": "Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)",
+                                "deprecated": none,
+                                "id": "chat",
+                                "note": none,
+                                "stability": "development",
+                                "value": "chat",
+                            },
+                            {
+                                "brief": "Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)",
+                                "deprecated": none,
+                                "id": "generate_content",
+                                "note": none,
+                                "stability": "development",
+                                "value": "generate_content",
+                            },
+                            {
+                                "brief": "Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)",
+                                "deprecated": none,
+                                "id": "text_completion",
+                                "note": none,
+                                "stability": "development",
+                                "value": "text_completion",
+                            },
+                            {
+                                "brief": "Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)",
+                                "deprecated": none,
+                                "id": "embeddings",
+                                "note": none,
+                                "stability": "development",
+                                "value": "embeddings",
+                            },
+                            {
+                                "brief": "Create GenAI agent",
+                                "deprecated": none,
+                                "id": "create_agent",
+                                "note": none,
+                                "stability": "development",
+                                "value": "create_agent",
+                            },
+                            {
+                                "brief": "Invoke GenAI agent",
+                                "deprecated": none,
+                                "id": "invoke_agent",
+                                "note": none,
+                                "stability": "development",
+                                "value": "invoke_agent",
+                            },
+                            {
+                                "brief": "Execute a tool",
+                                "deprecated": none,
+                                "id": "execute_tool",
+                                "note": none,
+                                "stability": "development",
+                                "value": "execute_tool",
+                            },
+                        ],
+                    },
                 },
                 {
                     "brief": "The Generative AI product as identified by the client or server instrumentation.",
@@ -420,7 +443,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "OpenAI",
@@ -562,72 +584,42 @@ State {
                     },
                 },
                 {
-                    "brief": "The name of the operation being performed.",
-                    "name": "gen_ai.operation.name",
-                    "note": "If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.\n",
-                    "requirement_level": "required",
-                    "stability": "development",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)",
-                                "deprecated": none,
-                                "id": "chat",
-                                "note": none,
-                                "stability": "development",
-                                "value": "chat",
-                            },
-                            {
-                                "brief": "Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)",
-                                "deprecated": none,
-                                "id": "generate_content",
-                                "note": none,
-                                "stability": "development",
-                                "value": "generate_content",
-                            },
-                            {
-                                "brief": "Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)",
-                                "deprecated": none,
-                                "id": "text_completion",
-                                "note": none,
-                                "stability": "development",
-                                "value": "text_completion",
-                            },
-                            {
-                                "brief": "Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)",
-                                "deprecated": none,
-                                "id": "embeddings",
-                                "note": none,
-                                "stability": "development",
-                                "value": "embeddings",
-                            },
-                            {
-                                "brief": "Create GenAI agent",
-                                "deprecated": none,
-                                "id": "create_agent",
-                                "note": none,
-                                "stability": "development",
-                                "value": "create_agent",
-                            },
-                            {
-                                "brief": "Invoke GenAI agent",
-                                "deprecated": none,
-                                "id": "invoke_agent",
-                                "note": none,
-                                "stability": "development",
-                                "value": "invoke_agent",
-                            },
-                            {
-                                "brief": "Execute a tool",
-                                "deprecated": none,
-                                "id": "execute_tool",
-                                "note": none,
-                                "stability": "development",
-                                "value": "execute_tool",
-                            },
-                        ],
+                    "brief": "The name of the GenAI model a request is being made to.",
+                    "examples": "gpt-4",
+                    "name": "gen_ai.request.model",
+                    "requirement_level": {
+                        "conditionally_required": "If available.",
                     },
+                    "stability": "development",
+                    "type": "string",
+                },
+                {
+                    "brief": "GenAI server address.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "GenAI server port.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If `server.address` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
                 },
             ],
             "brief": "Time per output token generated after the first token for successful responses",
@@ -721,6 +713,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -828,6 +822,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -914,7 +909,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

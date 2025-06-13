@@ -11,53 +11,55 @@ type SdkProcessorSpanQueueCapacity struct {
 }
 
 func NewSdkProcessorSpanQueueCapacity() SdkProcessorSpanQueueCapacity {
-	labels := []string{"otel_component_name", "otel_component_type"}
+	labels := []string{AttrComponentName("").Key(), AttrComponentType("").Key()}
 	return SdkProcessorSpanQueueCapacity{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "otel",
-		Name:      "sdk_processor_span_queue_capacity",
-		Help:      "The maximum number of spans the queue of a given instance of an SDK span processor can hold",
+		Name: "otel_sdk_processor_span_queue_capacity",
+		Help: "The maximum number of spans the queue of a given instance of an SDK span processor can hold",
 	}, labels)}
 }
 
-func (m SdkProcessorSpanQueueCapacity) With(extra interface {
-	AttrOtelComponentName() AttrComponentName
-	AttrOtelComponentType() AttrComponentType
+func (m SdkProcessorSpanQueueCapacity) With(extras ...interface {
+	OtelComponentName() AttrComponentName
+	OtelComponentType() AttrComponentType
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrOtelComponentName()),
-		string(extra.AttrOtelComponentType()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.OtelComponentName().Value(), extra.OtelComponentType().Value())
 }
 
-func (a SdkProcessorSpanQueueCapacity) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkProcessorSpanQueueCapacity {
-	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+// Deprecated: Use [SdkProcessorSpanQueueCapacity.With] instead
+func (m SdkProcessorSpanQueueCapacity) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a SdkProcessorSpanQueueCapacity) WithComponentName(attr interface{ OtelComponentName() AttrComponentName }) SdkProcessorSpanQueueCapacity {
+	a.extra.AttrComponentName = attr.OtelComponentName()
 	return a
 }
-func (a SdkProcessorSpanQueueCapacity) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkProcessorSpanQueueCapacity {
-	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+func (a SdkProcessorSpanQueueCapacity) WithComponentType(attr interface{ OtelComponentType() AttrComponentType }) SdkProcessorSpanQueueCapacity {
+	a.extra.AttrComponentType = attr.OtelComponentType()
 	return a
 }
 
 type SdkProcessorSpanQueueCapacityExtra struct {
-	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
-	OtelComponentName AttrComponentName `otel:"otel.component.name"`
-	// A name identifying the type of the OpenTelemetry component.
-	OtelComponentType AttrComponentType `otel:"otel.component.type"`
+	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance
+	AttrComponentName AttrComponentName `otel:"otel.component.name"` // A name identifying the type of the OpenTelemetry component
+	AttrComponentType AttrComponentType `otel:"otel.component.type"`
 }
 
-func (a SdkProcessorSpanQueueCapacityExtra) AttrOtelComponentName() AttrComponentName {
-	return a.OtelComponentName
+func (a SdkProcessorSpanQueueCapacityExtra) OtelComponentName() AttrComponentName {
+	return a.AttrComponentName
 }
-func (a SdkProcessorSpanQueueCapacityExtra) AttrOtelComponentType() AttrComponentType {
-	return a.OtelComponentType
+func (a SdkProcessorSpanQueueCapacityExtra) OtelComponentType() AttrComponentType {
+	return a.AttrComponentType
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -95,7 +97,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The builtin SDK batching span processor\n",
@@ -226,7 +227,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The builtin SDK batching span processor\n",
@@ -397,6 +397,8 @@ State {
             "type": "metric",
             "unit": "{span}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -504,6 +506,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -590,7 +593,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

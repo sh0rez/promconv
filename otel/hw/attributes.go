@@ -3,34 +3,63 @@ package hw
 // An identifier for the hardware component, unique within the monitored host
 type AttrId string // hw.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "hw_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // An easily-recognizable name for the hardware component
 type AttrName string // hw.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "hw_name" }
+func (a AttrName) Value() string { return string(a) }
 
 // Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
 type AttrParent string // hw.parent
 
-func (AttrParent) Development() {}
-func (AttrParent) Recommended() {}
+func (AttrParent) Development()    {}
+func (AttrParent) Recommended()    {}
+func (AttrParent) Key() string     { return "hw_parent" }
+func (a AttrParent) Value() string { return string(a) }
 
 // The current state of the component
 type AttrState string // hw.state
 
-func (AttrState) Development() {}
-func (AttrState) Recommended() {}
+func (AttrState) Development()    {}
+func (AttrState) Recommended()    {}
+func (AttrState) Key() string     { return "hw_state" }
+func (a AttrState) Value() string { return string(a) }
+
+const StateOk AttrState = "ok"
+const StateDegraded AttrState = "degraded"
+const StateFailed AttrState = "failed"
 
 // Type of the component
 //
 // Describes the category of the hardware component for which `hw.state` is being reported. For example, `hw.type=temperature` along with `hw.state=degraded` would indicate that the temperature of the hardware component has been reported as `degraded`
 type AttrType string // hw.type
 
-func (AttrType) Development() {}
-func (AttrType) Recommended() {}
+func (AttrType) Development()    {}
+func (AttrType) Recommended()    {}
+func (AttrType) Key() string     { return "hw_type" }
+func (a AttrType) Value() string { return string(a) }
+
+const TypeBattery AttrType = "battery"
+const TypeCpu AttrType = "cpu"
+const TypeDiskController AttrType = "disk_controller"
+const TypeEnclosure AttrType = "enclosure"
+const TypeFan AttrType = "fan"
+const TypeGpu AttrType = "gpu"
+const TypeLogicalDisk AttrType = "logical_disk"
+const TypeMemory AttrType = "memory"
+const TypeNetwork AttrType = "network"
+const TypePhysicalDisk AttrType = "physical_disk"
+const TypePowerSupply AttrType = "power_supply"
+const TypeTapeDrive AttrType = "tape_drive"
+const TypeTemperature AttrType = "temperature"
+const TypeVoltage AttrType = "voltage"
 
 /* State {
     name: "attr.go.j2",
@@ -79,7 +108,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "hw",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Ok",
@@ -116,7 +144,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "hw",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Battery",
@@ -343,6 +370,7 @@ func (AttrType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

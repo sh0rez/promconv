@@ -3,8 +3,10 @@ package event
 // Identifies the class / type of event
 type AttrName string // event.name
 
-func (AttrName) Development() {}
-func (AttrName) Recommended() {}
+func (AttrName) Development()    {}
+func (AttrName) Recommended()    {}
+func (AttrName) Key() string     { return "event_name" }
+func (a AttrName) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -139,6 +141,7 @@ func (AttrName) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

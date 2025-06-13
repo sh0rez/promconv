@@ -11,40 +11,42 @@ type DiskIoTime struct {
 }
 
 func NewDiskIoTime() DiskIoTime {
-	labels := []string{"system_device"}
+	labels := []string{AttrDevice("").Key()}
 	return DiskIoTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "system",
-		Name:      "disk_io_time",
-		Help:      "Time disk spent activated",
+		Name: "system_disk_io_time",
+		Help: "Time disk spent activated",
 	}, labels)}
 }
 
-func (m DiskIoTime) With(extra interface {
-	AttrSystemDevice() AttrDevice
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m DiskIoTime) With(extras ...interface{ SystemDevice() AttrDevice }) prometheus.Counter {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemDevice()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.SystemDevice().Value())
 }
 
-func (a DiskIoTime) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskIoTime {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+// Deprecated: Use [DiskIoTime.With] instead
+func (m DiskIoTime) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a DiskIoTime) WithDevice(attr interface{ SystemDevice() AttrDevice }) DiskIoTime {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
 
 type DiskIoTimeExtra struct {
 	// The device identifier
-	SystemDevice AttrDevice `otel:"system.device"`
+	AttrDevice AttrDevice `otel:"system.device"`
 }
 
-func (a DiskIoTimeExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
+func (a DiskIoTimeExtra) SystemDevice() AttrDevice { return a.AttrDevice }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -117,6 +119,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -224,6 +228,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -310,7 +315,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

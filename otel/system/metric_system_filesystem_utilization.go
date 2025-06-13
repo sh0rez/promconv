@@ -10,86 +10,82 @@ type FilesystemUtilization struct {
 }
 
 func NewFilesystemUtilization() FilesystemUtilization {
-	labels := []string{"system_device", "system_filesystem_mode", "system_filesystem_mountpoint", "system_filesystem_state", "system_filesystem_type"}
+	labels := []string{AttrDevice("").Key(), AttrFilesystemMode("").Key(), AttrFilesystemMountpoint("").Key(), AttrFilesystemState("").Key(), AttrFilesystemType("").Key()}
 	return FilesystemUtilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "filesystem_utilization",
-		Help:      "",
+		Name: "system_filesystem_utilization",
+		Help: "",
 	}, labels)}
 }
 
-func (m FilesystemUtilization) With(extra interface {
-	AttrSystemDevice() AttrDevice
-	AttrSystemFilesystemMode() AttrFilesystemMode
-	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
-	AttrSystemFilesystemState() AttrFilesystemState
-	AttrSystemFilesystemType() AttrFilesystemType
+func (m FilesystemUtilization) With(extras ...interface {
+	SystemDevice() AttrDevice
+	SystemFilesystemMode() AttrFilesystemMode
+	SystemFilesystemMountpoint() AttrFilesystemMountpoint
+	SystemFilesystemState() AttrFilesystemState
+	SystemFilesystemType() AttrFilesystemType
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemDevice()),
-		string(extra.AttrSystemFilesystemMode()),
-		string(extra.AttrSystemFilesystemMountpoint()),
-		string(extra.AttrSystemFilesystemState()),
-		string(extra.AttrSystemFilesystemType()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.SystemDevice().Value(), extra.SystemFilesystemMode().Value(), extra.SystemFilesystemMountpoint().Value(), extra.SystemFilesystemState().Value(), extra.SystemFilesystemType().Value())
 }
 
-func (a FilesystemUtilization) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) FilesystemUtilization {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+// Deprecated: Use [FilesystemUtilization.With] instead
+func (m FilesystemUtilization) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a FilesystemUtilization) WithDevice(attr interface{ SystemDevice() AttrDevice }) FilesystemUtilization {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
-func (a FilesystemUtilization) WithSystemFilesystemMode(attr interface{ AttrSystemFilesystemMode() AttrFilesystemMode }) FilesystemUtilization {
-	a.extra.SystemFilesystemMode = attr.AttrSystemFilesystemMode()
+func (a FilesystemUtilization) WithFilesystemMode(attr interface{ SystemFilesystemMode() AttrFilesystemMode }) FilesystemUtilization {
+	a.extra.AttrFilesystemMode = attr.SystemFilesystemMode()
 	return a
 }
-func (a FilesystemUtilization) WithSystemFilesystemMountpoint(attr interface {
-	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
+func (a FilesystemUtilization) WithFilesystemMountpoint(attr interface {
+	SystemFilesystemMountpoint() AttrFilesystemMountpoint
 }) FilesystemUtilization {
-	a.extra.SystemFilesystemMountpoint = attr.AttrSystemFilesystemMountpoint()
+	a.extra.AttrFilesystemMountpoint = attr.SystemFilesystemMountpoint()
 	return a
 }
-func (a FilesystemUtilization) WithSystemFilesystemState(attr interface{ AttrSystemFilesystemState() AttrFilesystemState }) FilesystemUtilization {
-	a.extra.SystemFilesystemState = attr.AttrSystemFilesystemState()
+func (a FilesystemUtilization) WithFilesystemState(attr interface{ SystemFilesystemState() AttrFilesystemState }) FilesystemUtilization {
+	a.extra.AttrFilesystemState = attr.SystemFilesystemState()
 	return a
 }
-func (a FilesystemUtilization) WithSystemFilesystemType(attr interface{ AttrSystemFilesystemType() AttrFilesystemType }) FilesystemUtilization {
-	a.extra.SystemFilesystemType = attr.AttrSystemFilesystemType()
+func (a FilesystemUtilization) WithFilesystemType(attr interface{ SystemFilesystemType() AttrFilesystemType }) FilesystemUtilization {
+	a.extra.AttrFilesystemType = attr.SystemFilesystemType()
 	return a
 }
 
 type FilesystemUtilizationExtra struct {
-	// Identifier for the device where the filesystem resides.
-	SystemDevice AttrDevice `otel:"system.device"`
-	// The filesystem mode
-	SystemFilesystemMode AttrFilesystemMode `otel:"system.filesystem.mode"`
-	// The filesystem mount path
-	SystemFilesystemMountpoint AttrFilesystemMountpoint `otel:"system.filesystem.mountpoint"`
-	// The filesystem state
-	SystemFilesystemState AttrFilesystemState `otel:"system.filesystem.state"`
-	// The filesystem type
-	SystemFilesystemType AttrFilesystemType `otel:"system.filesystem.type"`
+	// Identifier for the device where the filesystem resides
+	AttrDevice               AttrDevice               `otel:"system.device"`                // The filesystem mode
+	AttrFilesystemMode       AttrFilesystemMode       `otel:"system.filesystem.mode"`       // The filesystem mount path
+	AttrFilesystemMountpoint AttrFilesystemMountpoint `otel:"system.filesystem.mountpoint"` // The filesystem state
+	AttrFilesystemState      AttrFilesystemState      `otel:"system.filesystem.state"`      // The filesystem type
+	AttrFilesystemType       AttrFilesystemType       `otel:"system.filesystem.type"`
 }
 
-func (a FilesystemUtilizationExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
-func (a FilesystemUtilizationExtra) AttrSystemFilesystemMode() AttrFilesystemMode {
-	return a.SystemFilesystemMode
+func (a FilesystemUtilizationExtra) SystemDevice() AttrDevice { return a.AttrDevice }
+func (a FilesystemUtilizationExtra) SystemFilesystemMode() AttrFilesystemMode {
+	return a.AttrFilesystemMode
 }
-func (a FilesystemUtilizationExtra) AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint {
-	return a.SystemFilesystemMountpoint
+func (a FilesystemUtilizationExtra) SystemFilesystemMountpoint() AttrFilesystemMountpoint {
+	return a.AttrFilesystemMountpoint
 }
-func (a FilesystemUtilizationExtra) AttrSystemFilesystemState() AttrFilesystemState {
-	return a.SystemFilesystemState
+func (a FilesystemUtilizationExtra) SystemFilesystemState() AttrFilesystemState {
+	return a.AttrFilesystemState
 }
-func (a FilesystemUtilizationExtra) AttrSystemFilesystemType() AttrFilesystemType {
-	return a.SystemFilesystemType
+func (a FilesystemUtilizationExtra) SystemFilesystemType() AttrFilesystemType {
+	return a.AttrFilesystemType
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -144,7 +140,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -182,7 +177,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -247,7 +241,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -285,7 +278,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -444,6 +436,8 @@ State {
             "type": "metric",
             "unit": "1",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -551,6 +545,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -637,7 +632,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

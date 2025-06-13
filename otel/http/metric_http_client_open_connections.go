@@ -17,69 +17,68 @@ type ClientOpenConnections struct {
 }
 
 func NewClientOpenConnections() ClientOpenConnections {
-	labels := []string{"http_connection_state", "server_address", "server_port", "network_peer_address", "network_protocol_version", "url_scheme"}
+	labels := []string{AttrConnectionState("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key(), network.AttrPeerAddress("").Key(), network.AttrProtocolVersion("").Key(), url.AttrScheme("").Key()}
 	return ClientOpenConnections{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "http",
-		Name:      "client_open_connections",
-		Help:      "Number of outbound HTTP connections that are currently active or idle on the client.",
+		Name: "http_client_open_connections",
+		Help: "Number of outbound HTTP connections that are currently active or idle on the client.",
 	}, labels)}
 }
 
-func (m ClientOpenConnections) With(connectionState AttrConnectionState, address server.AttrAddress, port server.AttrPort, extra interface {
-	AttrNetworkPeerAddress() network.AttrPeerAddress
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
-	AttrUrlScheme() url.AttrScheme
+func (m ClientOpenConnections) With(connectionState AttrConnectionState, address server.AttrAddress, port server.AttrPort, extras ...interface {
+	NetworkPeerAddress() network.AttrPeerAddress
+	NetworkProtocolVersion() network.AttrProtocolVersion
+	UrlScheme() url.AttrScheme
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(connectionState),
-		string(address),
-		string(port),
-		string(extra.AttrNetworkPeerAddress()),
-		string(extra.AttrNetworkProtocolVersion()),
-		string(extra.AttrUrlScheme()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(connectionState.Value(), address.Value(), port.Value(), extra.NetworkPeerAddress().Value(), extra.NetworkProtocolVersion().Value(), extra.UrlScheme().Value())
+}
+
+// Deprecated: Use [ClientOpenConnections.With] instead
+func (m ClientOpenConnections) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 func (a ClientOpenConnections) WithNetworkPeerAddress(attr interface {
-	AttrNetworkPeerAddress() network.AttrPeerAddress
+	NetworkPeerAddress() network.AttrPeerAddress
 }) ClientOpenConnections {
-	a.extra.NetworkPeerAddress = attr.AttrNetworkPeerAddress()
+	a.extra.AttrNetworkPeerAddress = attr.NetworkPeerAddress()
 	return a
 }
 func (a ClientOpenConnections) WithNetworkProtocolVersion(attr interface {
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	NetworkProtocolVersion() network.AttrProtocolVersion
 }) ClientOpenConnections {
-	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	a.extra.AttrNetworkProtocolVersion = attr.NetworkProtocolVersion()
 	return a
 }
-func (a ClientOpenConnections) WithUrlScheme(attr interface{ AttrUrlScheme() url.AttrScheme }) ClientOpenConnections {
-	a.extra.UrlScheme = attr.AttrUrlScheme()
+func (a ClientOpenConnections) WithUrlScheme(attr interface{ UrlScheme() url.AttrScheme }) ClientOpenConnections {
+	a.extra.AttrUrlScheme = attr.UrlScheme()
 	return a
 }
 
 type ClientOpenConnectionsExtra struct {
-	// Peer address of the network connection - IP address or Unix domain socket name.
-	NetworkPeerAddress network.AttrPeerAddress `otel:"network.peer.address"`
-	// The actual version of the protocol used for network communication.
-	NetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"`
-	// The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.
-	UrlScheme url.AttrScheme `otel:"url.scheme"`
+	// Peer address of the network connection - IP address or Unix domain socket name
+	AttrNetworkPeerAddress     network.AttrPeerAddress     `otel:"network.peer.address"`     // The actual version of the protocol used for network communication
+	AttrNetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"` // The [URI scheme] component identifying the used protocol
+	//
+	// [URI scheme]: https://www.rfc-editor.org/rfc/rfc3986#section-3.1
+	AttrUrlScheme url.AttrScheme `otel:"url.scheme"`
 }
 
-func (a ClientOpenConnectionsExtra) AttrNetworkPeerAddress() network.AttrPeerAddress {
-	return a.NetworkPeerAddress
+func (a ClientOpenConnectionsExtra) NetworkPeerAddress() network.AttrPeerAddress {
+	return a.AttrNetworkPeerAddress
 }
-func (a ClientOpenConnectionsExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
-	return a.NetworkProtocolVersion
+func (a ClientOpenConnectionsExtra) NetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.AttrNetworkProtocolVersion
 }
-func (a ClientOpenConnectionsExtra) AttrUrlScheme() url.AttrScheme { return a.UrlScheme }
+func (a ClientOpenConnectionsExtra) UrlScheme() url.AttrScheme { return a.AttrUrlScheme }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -104,7 +103,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "active state.",
@@ -189,37 +187,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "State of the HTTP connection in the HTTP connection pool.",
-                    "examples": [
-                        "active",
-                        "idle",
-                    ],
-                    "name": "http.connection.state",
-                    "requirement_level": "required",
-                    "stability": "development",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "active state.",
-                                "deprecated": none,
-                                "id": "active",
-                                "note": none,
-                                "stability": "development",
-                                "value": "active",
-                            },
-                            {
-                                "brief": "idle state.",
-                                "deprecated": none,
-                                "id": "idle",
-                                "note": none,
-                                "stability": "development",
-                                "value": "idle",
-                            },
-                        ],
-                    },
-                },
-                {
                     "brief": "Peer address of the network connection - IP address or Unix domain socket name.",
                     "examples": [
                         "10.1.2.80",
@@ -252,6 +219,36 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "stable",
                     "type": "string",
+                },
+                {
+                    "brief": "State of the HTTP connection in the HTTP connection pool.",
+                    "examples": [
+                        "active",
+                        "idle",
+                    ],
+                    "name": "http.connection.state",
+                    "requirement_level": "required",
+                    "stability": "development",
+                    "type": {
+                        "members": [
+                            {
+                                "brief": "active state.",
+                                "deprecated": none,
+                                "id": "active",
+                                "note": none,
+                                "stability": "development",
+                                "value": "active",
+                            },
+                            {
+                                "brief": "idle state.",
+                                "deprecated": none,
+                                "id": "idle",
+                                "note": none,
+                                "stability": "development",
+                                "value": "idle",
+                            },
+                        ],
+                    },
                 },
                 {
                     "brief": "Port identifier of the [\"URI origin\"](https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-origin) HTTP request is sent to.\n",
@@ -372,6 +369,8 @@ State {
             "type": "metric",
             "unit": "{connection}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -479,6 +478,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -565,7 +565,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

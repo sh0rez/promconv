@@ -6,37 +6,32 @@ import (
 
 // Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking
 type CpuLogicalCount struct {
-	*prometheus.GaugeVec
-	extra CpuLogicalCountExtra
+	prometheus.Gauge
 }
 
 func NewCpuLogicalCount() CpuLogicalCount {
-	labels := []string{}
-	return CpuLogicalCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "cpu_logical_count",
-		Help:      "Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking",
-	}, labels)}
+	return CpuLogicalCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "system_cpu_logical_count",
+		Help: "Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking",
+	})}
 }
 
-func (m CpuLogicalCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m CpuLogicalCount) Register(regs ...prometheus.Registerer) CpuLogicalCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type CpuLogicalCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuLogicalCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "cpu.logical.count",
         "Type": "CpuLogicalCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking",
@@ -178,6 +172,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -264,7 +259,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

@@ -7,22 +7,36 @@ package android
 // [Activity lifecycle callbacks]: https://developer.android.com/guide/components/activities/activity-lifecycle#lc
 type AttrAppState string // android.app.state
 
-func (AttrAppState) Development() {}
-func (AttrAppState) Recommended() {}
+func (AttrAppState) Development()    {}
+func (AttrAppState) Recommended()    {}
+func (AttrAppState) Key() string     { return "android_app_state" }
+func (a AttrAppState) Value() string { return string(a) }
+
+const AppStateCreated AttrAppState = "created"
+const AppStateBackground AttrAppState = "background"
+const AppStateForeground AttrAppState = "foreground"
 
 // Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found [here]
 //
 // [here]: https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels
 type AttrOsApiLevel string // android.os.api_level
 
-func (AttrOsApiLevel) Development() {}
-func (AttrOsApiLevel) Recommended() {}
+func (AttrOsApiLevel) Development()    {}
+func (AttrOsApiLevel) Recommended()    {}
+func (AttrOsApiLevel) Key() string     { return "android_os_api_level" }
+func (a AttrOsApiLevel) Value() string { return string(a) }
 
 // Deprecated. Use `android.app.state` body field instead
 type AttrState string // android.state
 
-func (AttrState) Development() {}
-func (AttrState) Recommended() {}
+func (AttrState) Development()    {}
+func (AttrState) Recommended()    {}
+func (AttrState) Key() string     { return "android_state" }
+func (a AttrState) Value() string { return string(a) }
+
+const StateCreated AttrState = "created"
+const StateBackground AttrState = "background"
+const StateForeground AttrState = "foreground"
 
 /* State {
     name: "attr.go.j2",
@@ -42,7 +56,6 @@ func (AttrState) Recommended() {}
                     "root_namespace": "android",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Any time before Activity.onResume() or, if the app has no Activity, Context.startService() has been called in the app for the first time.\n",
@@ -94,7 +107,6 @@ func (AttrState) Recommended() {}
                     "root_namespace": "android",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Any time before Activity.onResume() or, if the app has no Activity, Context.startService() has been called in the app for the first time.\n",
@@ -233,6 +245,7 @@ func (AttrState) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

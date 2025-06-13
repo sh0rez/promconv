@@ -11,49 +11,51 @@ type MemoryUsed struct {
 }
 
 func NewMemoryUsed() MemoryUsed {
-	labels := []string{"jvm_memory_pool_name", "jvm_memory_type"}
+	labels := []string{AttrMemoryPoolName("").Key(), AttrMemoryType("").Key()}
 	return MemoryUsed{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "memory_used",
-		Help:      "Measure of memory used.",
+		Name: "jvm_memory_used",
+		Help: "Measure of memory used.",
 	}, labels)}
 }
 
-func (m MemoryUsed) With(extra interface {
-	AttrJvmMemoryPoolName() AttrMemoryPoolName
-	AttrJvmMemoryType() AttrMemoryType
+func (m MemoryUsed) With(extras ...interface {
+	JvmMemoryPoolName() AttrMemoryPoolName
+	JvmMemoryType() AttrMemoryType
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrJvmMemoryPoolName()),
-		string(extra.AttrJvmMemoryType()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.JvmMemoryPoolName().Value(), extra.JvmMemoryType().Value())
 }
 
-func (a MemoryUsed) WithJvmMemoryPoolName(attr interface{ AttrJvmMemoryPoolName() AttrMemoryPoolName }) MemoryUsed {
-	a.extra.JvmMemoryPoolName = attr.AttrJvmMemoryPoolName()
+// Deprecated: Use [MemoryUsed.With] instead
+func (m MemoryUsed) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a MemoryUsed) WithMemoryPoolName(attr interface{ JvmMemoryPoolName() AttrMemoryPoolName }) MemoryUsed {
+	a.extra.AttrMemoryPoolName = attr.JvmMemoryPoolName()
 	return a
 }
-func (a MemoryUsed) WithJvmMemoryType(attr interface{ AttrJvmMemoryType() AttrMemoryType }) MemoryUsed {
-	a.extra.JvmMemoryType = attr.AttrJvmMemoryType()
+func (a MemoryUsed) WithMemoryType(attr interface{ JvmMemoryType() AttrMemoryType }) MemoryUsed {
+	a.extra.AttrMemoryType = attr.JvmMemoryType()
 	return a
 }
 
 type MemoryUsedExtra struct {
-	// Name of the memory pool.
-	JvmMemoryPoolName AttrMemoryPoolName `otel:"jvm.memory.pool.name"`
-	// The type of memory.
-	JvmMemoryType AttrMemoryType `otel:"jvm.memory.type"`
+	// Name of the memory pool
+	AttrMemoryPoolName AttrMemoryPoolName `otel:"jvm.memory.pool.name"` // The type of memory
+	AttrMemoryType     AttrMemoryType     `otel:"jvm.memory.type"`
 }
 
-func (a MemoryUsedExtra) AttrJvmMemoryPoolName() AttrMemoryPoolName { return a.JvmMemoryPoolName }
-func (a MemoryUsedExtra) AttrJvmMemoryType() AttrMemoryType         { return a.JvmMemoryType }
+func (a MemoryUsedExtra) JvmMemoryPoolName() AttrMemoryPoolName { return a.AttrMemoryPoolName }
+func (a MemoryUsedExtra) JvmMemoryType() AttrMemoryType         { return a.AttrMemoryType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -91,7 +93,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Heap memory.",
@@ -125,7 +126,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Heap memory.",
@@ -204,6 +204,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -311,6 +313,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -397,7 +400,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

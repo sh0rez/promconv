@@ -11,50 +11,51 @@ type HostHeatingMargin struct {
 }
 
 func NewHostHeatingMargin() HostHeatingMargin {
-	labels := []string{"hw_id", "hw_name", "hw_parent"}
+	labels := []string{AttrId("").Key(), AttrName("").Key(), AttrParent("").Key()}
 	return HostHeatingMargin{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "hw",
-		Name:      "host_heating_margin",
-		Help:      "By how many degrees Celsius the temperature of the physical host can be increased, before reaching a warning threshold on one of the internal sensors",
+		Name: "hw_host_heating_margin",
+		Help: "By how many degrees Celsius the temperature of the physical host can be increased, before reaching a warning threshold on one of the internal sensors",
 	}, labels)}
 }
 
-func (m HostHeatingMargin) With(id AttrId, extra interface {
-	AttrHwName() AttrName
-	AttrHwParent() AttrParent
+func (m HostHeatingMargin) With(id AttrId, extras ...interface {
+	HwName() AttrName
+	HwParent() AttrParent
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(id),
-		string(extra.AttrHwName()),
-		string(extra.AttrHwParent()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(id.Value(), extra.HwName().Value(), extra.HwParent().Value())
 }
 
-func (a HostHeatingMargin) WithHwName(attr interface{ AttrHwName() AttrName }) HostHeatingMargin {
-	a.extra.HwName = attr.AttrHwName()
+// Deprecated: Use [HostHeatingMargin.With] instead
+func (m HostHeatingMargin) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a HostHeatingMargin) WithName(attr interface{ HwName() AttrName }) HostHeatingMargin {
+	a.extra.AttrName = attr.HwName()
 	return a
 }
-func (a HostHeatingMargin) WithHwParent(attr interface{ AttrHwParent() AttrParent }) HostHeatingMargin {
-	a.extra.HwParent = attr.AttrHwParent()
+func (a HostHeatingMargin) WithParent(attr interface{ HwParent() AttrParent }) HostHeatingMargin {
+	a.extra.AttrParent = attr.HwParent()
 	return a
 }
 
 type HostHeatingMarginExtra struct {
 	// An easily-recognizable name for the hardware component
-	HwName AttrName `otel:"hw.name"`
-	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
-	HwParent AttrParent `otel:"hw.parent"`
+	AttrName   AttrName   `otel:"hw.name"` // Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
+	AttrParent AttrParent `otel:"hw.parent"`
 }
 
-func (a HostHeatingMarginExtra) AttrHwName() AttrName     { return a.HwName }
-func (a HostHeatingMarginExtra) AttrHwParent() AttrParent { return a.HwParent }
+func (a HostHeatingMarginExtra) HwName() AttrName     { return a.AttrName }
+func (a HostHeatingMarginExtra) HwParent() AttrParent { return a.AttrParent }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -189,6 +190,8 @@ State {
             "type": "metric",
             "unit": "Cel",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -296,6 +299,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -382,7 +386,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

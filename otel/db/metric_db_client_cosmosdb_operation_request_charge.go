@@ -11,103 +11,97 @@ type ClientCosmosdbOperationRequestCharge struct {
 }
 
 func NewClientCosmosdbOperationRequestCharge() ClientCosmosdbOperationRequestCharge {
-	labels := []string{"db_collection_name", "db_cosmosdb_consistency_level", "db_cosmosdb_sub_status_code", "db_namespace", "db_operation_name", "db_cosmosdb_regions_contacted"}
+	labels := []string{AttrCollectionName("").Key(), AttrCosmosdbConsistencyLevel("").Key(), AttrCosmosdbSubStatusCode("").Key(), AttrNamespace("").Key(), AttrOperationName("").Key(), AttrCosmosdbRegionsContacted("").Key()}
 	return ClientCosmosdbOperationRequestCharge{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "db",
-		Name:      "client_cosmosdb_operation_request_charge",
-		Help:      "Deprecated, use `azure.cosmosdb.client.operation.request_charge` instead.",
+		Name: "db_client_cosmosdb_operation_request_charge",
+		Help: "Deprecated, use `azure.cosmosdb.client.operation.request_charge` instead.",
 	}, labels)}
 }
 
-func (m ClientCosmosdbOperationRequestCharge) With(extra interface {
-	AttrDbCollectionName() AttrCollectionName
-	AttrDbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
-	AttrDbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode
-	AttrDbNamespace() AttrNamespace
-	AttrDbOperationName() AttrOperationName
-	AttrDbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted
+func (m ClientCosmosdbOperationRequestCharge) With(extras ...interface {
+	DbCollectionName() AttrCollectionName
+	DbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
+	DbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode
+	DbNamespace() AttrNamespace
+	DbOperationName() AttrOperationName
+	DbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrDbCollectionName()),
-		string(extra.AttrDbCosmosdbConsistencyLevel()),
-		string(extra.AttrDbCosmosdbSubStatusCode()),
-		string(extra.AttrDbNamespace()),
-		string(extra.AttrDbOperationName()),
-		string(extra.AttrDbCosmosdbRegionsContacted()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(extra.DbCollectionName().Value(), extra.DbCosmosdbConsistencyLevel().Value(), extra.DbCosmosdbSubStatusCode().Value(), extra.DbNamespace().Value(), extra.DbOperationName().Value(), extra.DbCosmosdbRegionsContacted().Value())
 }
 
-func (a ClientCosmosdbOperationRequestCharge) WithDbCollectionName(attr interface{ AttrDbCollectionName() AttrCollectionName }) ClientCosmosdbOperationRequestCharge {
-	a.extra.DbCollectionName = attr.AttrDbCollectionName()
+// Deprecated: Use [ClientCosmosdbOperationRequestCharge.With] instead
+func (m ClientCosmosdbOperationRequestCharge) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a ClientCosmosdbOperationRequestCharge) WithCollectionName(attr interface{ DbCollectionName() AttrCollectionName }) ClientCosmosdbOperationRequestCharge {
+	a.extra.AttrCollectionName = attr.DbCollectionName()
 	return a
 }
-func (a ClientCosmosdbOperationRequestCharge) WithDbCosmosdbConsistencyLevel(attr interface {
-	AttrDbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
+func (a ClientCosmosdbOperationRequestCharge) WithCosmosdbConsistencyLevel(attr interface {
+	DbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
 }) ClientCosmosdbOperationRequestCharge {
-	a.extra.DbCosmosdbConsistencyLevel = attr.AttrDbCosmosdbConsistencyLevel()
+	a.extra.AttrCosmosdbConsistencyLevel = attr.DbCosmosdbConsistencyLevel()
 	return a
 }
-func (a ClientCosmosdbOperationRequestCharge) WithDbCosmosdbSubStatusCode(attr interface {
-	AttrDbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode
+func (a ClientCosmosdbOperationRequestCharge) WithCosmosdbSubStatusCode(attr interface {
+	DbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode
 }) ClientCosmosdbOperationRequestCharge {
-	a.extra.DbCosmosdbSubStatusCode = attr.AttrDbCosmosdbSubStatusCode()
+	a.extra.AttrCosmosdbSubStatusCode = attr.DbCosmosdbSubStatusCode()
 	return a
 }
-func (a ClientCosmosdbOperationRequestCharge) WithDbNamespace(attr interface{ AttrDbNamespace() AttrNamespace }) ClientCosmosdbOperationRequestCharge {
-	a.extra.DbNamespace = attr.AttrDbNamespace()
+func (a ClientCosmosdbOperationRequestCharge) WithNamespace(attr interface{ DbNamespace() AttrNamespace }) ClientCosmosdbOperationRequestCharge {
+	a.extra.AttrNamespace = attr.DbNamespace()
 	return a
 }
-func (a ClientCosmosdbOperationRequestCharge) WithDbOperationName(attr interface{ AttrDbOperationName() AttrOperationName }) ClientCosmosdbOperationRequestCharge {
-	a.extra.DbOperationName = attr.AttrDbOperationName()
+func (a ClientCosmosdbOperationRequestCharge) WithOperationName(attr interface{ DbOperationName() AttrOperationName }) ClientCosmosdbOperationRequestCharge {
+	a.extra.AttrOperationName = attr.DbOperationName()
 	return a
 }
-func (a ClientCosmosdbOperationRequestCharge) WithDbCosmosdbRegionsContacted(attr interface {
-	AttrDbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted
+func (a ClientCosmosdbOperationRequestCharge) WithCosmosdbRegionsContacted(attr interface {
+	DbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted
 }) ClientCosmosdbOperationRequestCharge {
-	a.extra.DbCosmosdbRegionsContacted = attr.AttrDbCosmosdbRegionsContacted()
+	a.extra.AttrCosmosdbRegionsContacted = attr.DbCosmosdbRegionsContacted()
 	return a
 }
 
 type ClientCosmosdbOperationRequestChargeExtra struct {
-	// Cosmos DB container name.
-	DbCollectionName AttrCollectionName `otel:"db.collection.name"`
-	// Deprecated, use `cosmosdb.consistency.level` instead.
-	DbCosmosdbConsistencyLevel AttrCosmosdbConsistencyLevel `otel:"db.cosmosdb.consistency_level"`
-	// Deprecated, use `azure.cosmosdb.response.sub_status_code` instead.
-	DbCosmosdbSubStatusCode AttrCosmosdbSubStatusCode `otel:"db.cosmosdb.sub_status_code"`
-	// The name of the database, fully qualified within the server address and port.
-	DbNamespace AttrNamespace `otel:"db.namespace"`
-	// The name of the operation or command being executed.
-	DbOperationName AttrOperationName `otel:"db.operation.name"`
-	// Deprecated, use `azure.cosmosdb.operation.contacted_regions` instead.
-	DbCosmosdbRegionsContacted AttrCosmosdbRegionsContacted `otel:"db.cosmosdb.regions_contacted"`
+	// Cosmos DB container name
+	AttrCollectionName           AttrCollectionName           `otel:"db.collection.name"`            // Deprecated, use `cosmosdb.consistency.level` instead
+	AttrCosmosdbConsistencyLevel AttrCosmosdbConsistencyLevel `otel:"db.cosmosdb.consistency_level"` // Deprecated, use `azure.cosmosdb.response.sub_status_code` instead
+	AttrCosmosdbSubStatusCode    AttrCosmosdbSubStatusCode    `otel:"db.cosmosdb.sub_status_code"`   // The name of the database, fully qualified within the server address and port
+	AttrNamespace                AttrNamespace                `otel:"db.namespace"`                  // The name of the operation or command being executed
+	AttrOperationName            AttrOperationName            `otel:"db.operation.name"`             // Deprecated, use `azure.cosmosdb.operation.contacted_regions` instead
+	AttrCosmosdbRegionsContacted AttrCosmosdbRegionsContacted `otel:"db.cosmosdb.regions_contacted"`
 }
 
-func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbCollectionName() AttrCollectionName {
-	return a.DbCollectionName
+func (a ClientCosmosdbOperationRequestChargeExtra) DbCollectionName() AttrCollectionName {
+	return a.AttrCollectionName
 }
-func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel {
-	return a.DbCosmosdbConsistencyLevel
+func (a ClientCosmosdbOperationRequestChargeExtra) DbCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel {
+	return a.AttrCosmosdbConsistencyLevel
 }
-func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode {
-	return a.DbCosmosdbSubStatusCode
+func (a ClientCosmosdbOperationRequestChargeExtra) DbCosmosdbSubStatusCode() AttrCosmosdbSubStatusCode {
+	return a.AttrCosmosdbSubStatusCode
 }
-func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbNamespace() AttrNamespace {
-	return a.DbNamespace
+func (a ClientCosmosdbOperationRequestChargeExtra) DbNamespace() AttrNamespace {
+	return a.AttrNamespace
 }
-func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbOperationName() AttrOperationName {
-	return a.DbOperationName
+func (a ClientCosmosdbOperationRequestChargeExtra) DbOperationName() AttrOperationName {
+	return a.AttrOperationName
 }
-func (a ClientCosmosdbOperationRequestChargeExtra) AttrDbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted {
-	return a.DbCosmosdbRegionsContacted
+func (a ClientCosmosdbOperationRequestChargeExtra) DbCosmosdbRegionsContacted() AttrCosmosdbRegionsContacted {
+	return a.AttrCosmosdbRegionsContacted
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -156,7 +150,6 @@ State {
                 },
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -351,7 +344,6 @@ State {
                     },
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -518,6 +510,8 @@ State {
             "type": "metric",
             "unit": "{request_unit}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -625,6 +619,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -711,7 +706,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

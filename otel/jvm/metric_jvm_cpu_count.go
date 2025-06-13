@@ -6,37 +6,32 @@ import (
 
 // Number of processors available to the Java virtual machine.
 type CpuCount struct {
-	*prometheus.GaugeVec
-	extra CpuCountExtra
+	prometheus.Gauge
 }
 
 func NewCpuCount() CpuCount {
-	labels := []string{}
-	return CpuCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "cpu_count",
-		Help:      "Number of processors available to the Java virtual machine.",
-	}, labels)}
+	return CpuCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "jvm_cpu_count",
+		Help: "Number of processors available to the Java virtual machine.",
+	})}
 }
 
-func (m CpuCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m CpuCount) Register(regs ...prometheus.Registerer) CpuCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type CpuCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "cpu.count",
         "Type": "CpuCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of processors available to the Java virtual machine.",
@@ -174,6 +168,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -260,7 +255,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

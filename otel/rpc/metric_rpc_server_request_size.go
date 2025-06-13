@@ -6,37 +6,32 @@ import (
 
 // Measures the size of RPC request messages (uncompressed).
 type ServerRequestSize struct {
-	*prometheus.HistogramVec
-	extra ServerRequestSizeExtra
+	prometheus.Histogram
 }
 
 func NewServerRequestSize() ServerRequestSize {
-	labels := []string{}
-	return ServerRequestSize{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "rpc",
-		Name:      "server_request_size",
-		Help:      "Measures the size of RPC request messages (uncompressed).",
-	}, labels)}
+	return ServerRequestSize{Histogram: prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name: "rpc_server_request_size",
+		Help: "Measures the size of RPC request messages (uncompressed).",
+	})}
 }
 
-func (m ServerRequestSize) With(extra interface {
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+func (m ServerRequestSize) Register(regs ...prometheus.Registerer) ServerRequestSize {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ServerRequestSizeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ServerRequestSizeExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "server.request.size",
         "Type": "ServerRequestSize",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Measures the size of RPC request messages (uncompressed).",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

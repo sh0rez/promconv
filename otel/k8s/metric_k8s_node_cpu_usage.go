@@ -6,37 +6,32 @@ import (
 
 // Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs
 type NodeCpuUsage struct {
-	*prometheus.GaugeVec
-	extra NodeCpuUsageExtra
+	prometheus.Gauge
 }
 
 func NewNodeCpuUsage() NodeCpuUsage {
-	labels := []string{}
-	return NodeCpuUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "node_cpu_usage",
-		Help:      "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs",
-	}, labels)}
+	return NodeCpuUsage{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_node_cpu_usage",
+		Help: "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs",
+	})}
 }
 
-func (m NodeCpuUsage) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m NodeCpuUsage) Register(regs ...prometheus.Registerer) NodeCpuUsage {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type NodeCpuUsageExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeCpuUsageExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "node.cpu.usage",
         "Type": "NodeCpuUsage",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

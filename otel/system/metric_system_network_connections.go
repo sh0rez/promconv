@@ -14,68 +14,71 @@ type NetworkConnections struct {
 }
 
 func NewNetworkConnections() NetworkConnections {
-	labels := []string{"network_connection_state", "network_interface_name", "network_transport"}
+	labels := []string{network.AttrConnectionState("").Key(), network.AttrInterfaceName("").Key(), network.AttrTransport("").Key()}
 	return NetworkConnections{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "network_connections",
-		Help:      "",
+		Name: "system_network_connections",
+		Help: "",
 	}, labels)}
 }
 
-func (m NetworkConnections) With(extra interface {
-	AttrNetworkConnectionState() network.AttrConnectionState
-	AttrNetworkInterfaceName() network.AttrInterfaceName
-	AttrNetworkTransport() network.AttrTransport
+func (m NetworkConnections) With(extras ...interface {
+	NetworkConnectionState() network.AttrConnectionState
+	NetworkInterfaceName() network.AttrInterfaceName
+	NetworkTransport() network.AttrTransport
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrNetworkConnectionState()),
-		string(extra.AttrNetworkInterfaceName()),
-		string(extra.AttrNetworkTransport()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.NetworkConnectionState().Value(), extra.NetworkInterfaceName().Value(), extra.NetworkTransport().Value())
+}
+
+// Deprecated: Use [NetworkConnections.With] instead
+func (m NetworkConnections) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 func (a NetworkConnections) WithNetworkConnectionState(attr interface {
-	AttrNetworkConnectionState() network.AttrConnectionState
+	NetworkConnectionState() network.AttrConnectionState
 }) NetworkConnections {
-	a.extra.NetworkConnectionState = attr.AttrNetworkConnectionState()
+	a.extra.AttrNetworkConnectionState = attr.NetworkConnectionState()
 	return a
 }
 func (a NetworkConnections) WithNetworkInterfaceName(attr interface {
-	AttrNetworkInterfaceName() network.AttrInterfaceName
+	NetworkInterfaceName() network.AttrInterfaceName
 }) NetworkConnections {
-	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	a.extra.AttrNetworkInterfaceName = attr.NetworkInterfaceName()
 	return a
 }
-func (a NetworkConnections) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) NetworkConnections {
-	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+func (a NetworkConnections) WithNetworkTransport(attr interface{ NetworkTransport() network.AttrTransport }) NetworkConnections {
+	a.extra.AttrNetworkTransport = attr.NetworkTransport()
 	return a
 }
 
 type NetworkConnectionsExtra struct {
 	// The state of network connection
-	NetworkConnectionState network.AttrConnectionState `otel:"network.connection.state"`
-	// The network interface name.
-	NetworkInterfaceName network.AttrInterfaceName `otel:"network.interface.name"`
-	// [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
-	NetworkTransport network.AttrTransport `otel:"network.transport"`
+	AttrNetworkConnectionState network.AttrConnectionState `otel:"network.connection.state"` // The network interface name
+	AttrNetworkInterfaceName   network.AttrInterfaceName   `otel:"network.interface.name"`   // [OSI transport layer] or [inter-process communication method]
+	//
+	// [OSI transport layer]: https://wikipedia.org/wiki/Transport_layer
+	// [inter-process communication method]: https://wikipedia.org/wiki/Inter-process_communication
+	AttrNetworkTransport network.AttrTransport `otel:"network.transport"`
 }
 
-func (a NetworkConnectionsExtra) AttrNetworkConnectionState() network.AttrConnectionState {
-	return a.NetworkConnectionState
+func (a NetworkConnectionsExtra) NetworkConnectionState() network.AttrConnectionState {
+	return a.AttrNetworkConnectionState
 }
-func (a NetworkConnectionsExtra) AttrNetworkInterfaceName() network.AttrInterfaceName {
-	return a.NetworkInterfaceName
+func (a NetworkConnectionsExtra) NetworkInterfaceName() network.AttrInterfaceName {
+	return a.AttrNetworkInterfaceName
 }
-func (a NetworkConnectionsExtra) AttrNetworkTransport() network.AttrTransport {
-	return a.NetworkTransport
+func (a NetworkConnectionsExtra) NetworkTransport() network.AttrTransport {
+	return a.AttrNetworkTransport
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -100,7 +103,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -215,7 +217,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "TCP",
@@ -274,7 +275,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "TCP",
@@ -340,7 +340,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -486,6 +485,8 @@ State {
             "type": "metric",
             "unit": "{connection}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -593,6 +594,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -679,7 +681,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

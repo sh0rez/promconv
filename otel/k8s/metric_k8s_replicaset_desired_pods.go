@@ -6,37 +6,32 @@ import (
 
 // Number of desired replica pods in this replicaset
 type ReplicasetDesiredPods struct {
-	*prometheus.GaugeVec
-	extra ReplicasetDesiredPodsExtra
+	prometheus.Gauge
 }
 
 func NewReplicasetDesiredPods() ReplicasetDesiredPods {
-	labels := []string{}
-	return ReplicasetDesiredPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "replicaset_desired_pods",
-		Help:      "Number of desired replica pods in this replicaset",
-	}, labels)}
+	return ReplicasetDesiredPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_replicaset_desired_pods",
+		Help: "Number of desired replica pods in this replicaset",
+	})}
 }
 
-func (m ReplicasetDesiredPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ReplicasetDesiredPods) Register(regs ...prometheus.Registerer) ReplicasetDesiredPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ReplicasetDesiredPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ReplicasetDesiredPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "replicaset.desired_pods",
         "Type": "ReplicasetDesiredPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of desired replica pods in this replicaset",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

@@ -6,37 +6,32 @@ import (
 
 // Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler
 type HpaCurrentPods struct {
-	*prometheus.GaugeVec
-	extra HpaCurrentPodsExtra
+	prometheus.Gauge
 }
 
 func NewHpaCurrentPods() HpaCurrentPods {
-	labels := []string{}
-	return HpaCurrentPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "hpa_current_pods",
-		Help:      "Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler",
-	}, labels)}
+	return HpaCurrentPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_hpa_current_pods",
+		Help: "Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler",
+	})}
 }
 
-func (m HpaCurrentPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m HpaCurrentPods) Register(regs ...prometheus.Registerer) HpaCurrentPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type HpaCurrentPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "HpaCurrentPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "hpa.current_pods",
         "Type": "HpaCurrentPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

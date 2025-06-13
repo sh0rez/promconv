@@ -3,8 +3,16 @@ package dotnet
 // Name of the garbage collector managed heap generation
 type AttrGcHeapGeneration string // dotnet.gc.heap.generation
 
-func (AttrGcHeapGeneration) Stable()      {}
-func (AttrGcHeapGeneration) Recommended() {}
+func (AttrGcHeapGeneration) Stable()         {}
+func (AttrGcHeapGeneration) Recommended()    {}
+func (AttrGcHeapGeneration) Key() string     { return "dotnet_gc_heap_generation" }
+func (a AttrGcHeapGeneration) Value() string { return string(a) }
+
+const GcHeapGenerationGen0 AttrGcHeapGeneration = "gen0"
+const GcHeapGenerationGen1 AttrGcHeapGeneration = "gen1"
+const GcHeapGenerationGen2 AttrGcHeapGeneration = "gen2"
+const GcHeapGenerationLoh AttrGcHeapGeneration = "loh"
+const GcHeapGenerationPoh AttrGcHeapGeneration = "poh"
 
 /* State {
     name: "attr.go.j2",
@@ -25,7 +33,6 @@ func (AttrGcHeapGeneration) Recommended() {}
                     "root_namespace": "dotnet",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Generation 0",
@@ -180,6 +187,7 @@ func (AttrGcHeapGeneration) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

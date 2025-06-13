@@ -6,37 +6,32 @@ import (
 
 // Go runtime memory limit configured by the user, if a limit exists.
 type MemoryLimit struct {
-	*prometheus.GaugeVec
-	extra MemoryLimitExtra
+	prometheus.Gauge
 }
 
 func NewMemoryLimit() MemoryLimit {
-	labels := []string{}
-	return MemoryLimit{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "go",
-		Name:      "memory_limit",
-		Help:      "Go runtime memory limit configured by the user, if a limit exists.",
-	}, labels)}
+	return MemoryLimit{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "go_memory_limit",
+		Help: "Go runtime memory limit configured by the user, if a limit exists.",
+	})}
 }
 
-func (m MemoryLimit) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryLimit) Register(regs ...prometheus.Registerer) MemoryLimit {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MemoryLimitExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryLimitExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "memory.limit",
         "Type": "MemoryLimit",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Go runtime memory limit configured by the user, if a limit exists.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

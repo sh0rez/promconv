@@ -3,14 +3,27 @@ package cpu
 // The logical CPU number [0..n-1]
 type AttrLogicalNumber string // cpu.logical_number
 
-func (AttrLogicalNumber) Development() {}
-func (AttrLogicalNumber) Recommended() {}
+func (AttrLogicalNumber) Development()    {}
+func (AttrLogicalNumber) Recommended()    {}
+func (AttrLogicalNumber) Key() string     { return "cpu_logical_number" }
+func (a AttrLogicalNumber) Value() string { return string(a) }
 
 // The mode of the CPU
 type AttrMode string // cpu.mode
 
-func (AttrMode) Development() {}
-func (AttrMode) Recommended() {}
+func (AttrMode) Development()    {}
+func (AttrMode) Recommended()    {}
+func (AttrMode) Key() string     { return "cpu_mode" }
+func (a AttrMode) Value() string { return string(a) }
+
+const ModeUser AttrMode = "user"
+const ModeSystem AttrMode = "system"
+const ModeNice AttrMode = "nice"
+const ModeIdle AttrMode = "idle"
+const ModeIowait AttrMode = "iowait"
+const ModeInterrupt AttrMode = "interrupt"
+const ModeSteal AttrMode = "steal"
+const ModeKernel AttrMode = "kernel"
 
 /* State {
     name: "attr.go.j2",
@@ -41,7 +54,6 @@ func (AttrMode) Recommended() {}
                     "root_namespace": "cpu",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -220,6 +232,7 @@ func (AttrMode) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

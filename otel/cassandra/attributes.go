@@ -5,38 +5,62 @@ package cassandra
 // [CQL]: https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/dml/dmlConfigConsistency.html
 type AttrConsistencyLevel string // cassandra.consistency.level
 
-func (AttrConsistencyLevel) Development() {}
-func (AttrConsistencyLevel) Recommended() {}
+func (AttrConsistencyLevel) Development()    {}
+func (AttrConsistencyLevel) Recommended()    {}
+func (AttrConsistencyLevel) Key() string     { return "cassandra_consistency_level" }
+func (a AttrConsistencyLevel) Value() string { return string(a) }
+
+const ConsistencyLevelAll AttrConsistencyLevel = "all"
+const ConsistencyLevelEachQuorum AttrConsistencyLevel = "each_quorum"
+const ConsistencyLevelQuorum AttrConsistencyLevel = "quorum"
+const ConsistencyLevelLocalQuorum AttrConsistencyLevel = "local_quorum"
+const ConsistencyLevelOne AttrConsistencyLevel = "one"
+const ConsistencyLevelTwo AttrConsistencyLevel = "two"
+const ConsistencyLevelThree AttrConsistencyLevel = "three"
+const ConsistencyLevelLocalOne AttrConsistencyLevel = "local_one"
+const ConsistencyLevelAny AttrConsistencyLevel = "any"
+const ConsistencyLevelSerial AttrConsistencyLevel = "serial"
+const ConsistencyLevelLocalSerial AttrConsistencyLevel = "local_serial"
 
 // The data center of the coordinating node for a query
 type AttrCoordinatorDc string // cassandra.coordinator.dc
 
-func (AttrCoordinatorDc) Development() {}
-func (AttrCoordinatorDc) Recommended() {}
+func (AttrCoordinatorDc) Development()    {}
+func (AttrCoordinatorDc) Recommended()    {}
+func (AttrCoordinatorDc) Key() string     { return "cassandra_coordinator_dc" }
+func (a AttrCoordinatorDc) Value() string { return string(a) }
 
 // The ID of the coordinating node for a query
 type AttrCoordinatorId string // cassandra.coordinator.id
 
-func (AttrCoordinatorId) Development() {}
-func (AttrCoordinatorId) Recommended() {}
+func (AttrCoordinatorId) Development()    {}
+func (AttrCoordinatorId) Recommended()    {}
+func (AttrCoordinatorId) Key() string     { return "cassandra_coordinator_id" }
+func (a AttrCoordinatorId) Value() string { return string(a) }
 
 // The fetch size used for paging, i.e. how many rows will be returned at once
 type AttrPageSize string // cassandra.page.size
 
-func (AttrPageSize) Development() {}
-func (AttrPageSize) Recommended() {}
+func (AttrPageSize) Development()    {}
+func (AttrPageSize) Recommended()    {}
+func (AttrPageSize) Key() string     { return "cassandra_page_size" }
+func (a AttrPageSize) Value() string { return string(a) }
 
 // Whether or not the query is idempotent
 type AttrQueryIdempotent string // cassandra.query.idempotent
 
-func (AttrQueryIdempotent) Development() {}
-func (AttrQueryIdempotent) Recommended() {}
+func (AttrQueryIdempotent) Development()    {}
+func (AttrQueryIdempotent) Recommended()    {}
+func (AttrQueryIdempotent) Key() string     { return "cassandra_query_idempotent" }
+func (a AttrQueryIdempotent) Value() string { return string(a) }
 
 // The number of times a query was speculatively executed. Not set or `0` if the query was not executed speculatively
 type AttrSpeculativeExecutionCount string // cassandra.speculative_execution.count
 
-func (AttrSpeculativeExecutionCount) Development() {}
-func (AttrSpeculativeExecutionCount) Recommended() {}
+func (AttrSpeculativeExecutionCount) Development()    {}
+func (AttrSpeculativeExecutionCount) Recommended()    {}
+func (AttrSpeculativeExecutionCount) Key() string     { return "cassandra_speculative_execution_count" }
+func (a AttrSpeculativeExecutionCount) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -52,7 +76,6 @@ func (AttrSpeculativeExecutionCount) Recommended() {}
                     "root_namespace": "cassandra",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -304,6 +327,7 @@ func (AttrSpeculativeExecutionCount) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

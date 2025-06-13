@@ -6,37 +6,32 @@ import (
 
 // The number of timer instances that are currently active.
 type TimerCount struct {
-	*prometheus.GaugeVec
-	extra TimerCountExtra
+	prometheus.Gauge
 }
 
 func NewTimerCount() TimerCount {
-	labels := []string{}
-	return TimerCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "dotnet",
-		Name:      "timer_count",
-		Help:      "The number of timer instances that are currently active.",
-	}, labels)}
+	return TimerCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "dotnet_timer_count",
+		Help: "The number of timer instances that are currently active.",
+	})}
 }
 
-func (m TimerCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m TimerCount) Register(regs ...prometheus.Registerer) TimerCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type TimerCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "TimerCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "timer.count",
         "Type": "TimerCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of timer instances that are currently active.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

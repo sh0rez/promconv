@@ -6,37 +6,32 @@ import (
 
 // The number of pending and actively running pods for a job
 type JobActivePods struct {
-	*prometheus.GaugeVec
-	extra JobActivePodsExtra
+	prometheus.Gauge
 }
 
 func NewJobActivePods() JobActivePods {
-	labels := []string{}
-	return JobActivePods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "job_active_pods",
-		Help:      "The number of pending and actively running pods for a job",
-	}, labels)}
+	return JobActivePods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_job_active_pods",
+		Help: "The number of pending and actively running pods for a job",
+	})}
 }
 
-func (m JobActivePods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m JobActivePods) Register(regs ...prometheus.Registerer) JobActivePods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type JobActivePodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "JobActivePodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "job.active_pods",
         "Type": "JobActivePods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of pending and actively running pods for a job",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

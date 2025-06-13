@@ -6,37 +6,32 @@ import (
 
 // The number of work items that the thread pool has completed since the process has started.
 type ThreadPoolWorkItemCount struct {
-	*prometheus.CounterVec
-	extra ThreadPoolWorkItemCountExtra
+	prometheus.Counter
 }
 
 func NewThreadPoolWorkItemCount() ThreadPoolWorkItemCount {
-	labels := []string{}
-	return ThreadPoolWorkItemCount{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "dotnet",
-		Name:      "thread_pool_work_item_count",
-		Help:      "The number of work items that the thread pool has completed since the process has started.",
-	}, labels)}
+	return ThreadPoolWorkItemCount{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "dotnet_thread_pool_work_item_count",
+		Help: "The number of work items that the thread pool has completed since the process has started.",
+	})}
 }
 
-func (m ThreadPoolWorkItemCount) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m ThreadPoolWorkItemCount) Register(regs ...prometheus.Registerer) ThreadPoolWorkItemCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ThreadPoolWorkItemCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ThreadPoolWorkItemCountExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "thread_pool.work_item.count",
         "Type": "ThreadPoolWorkItemCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of work items that the thread pool has completed since the process has started.\n",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

@@ -11,22 +11,20 @@ type GcLastCollectionHeapFragmentationSize struct {
 }
 
 func NewGcLastCollectionHeapFragmentationSize() GcLastCollectionHeapFragmentationSize {
-	labels := []string{"dotnet_gc_heap_generation"}
+	labels := []string{AttrGcHeapGeneration("").Key()}
 	return GcLastCollectionHeapFragmentationSize{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "dotnet",
-		Name:      "gc_last_collection_heap_fragmentation_size",
-		Help:      "The heap fragmentation, as observed during the latest garbage collection.",
+		Name: "dotnet_gc_last_collection_heap_fragmentation_size",
+		Help: "The heap fragmentation, as observed during the latest garbage collection.",
 	}, labels)}
 }
 
-func (m GcLastCollectionHeapFragmentationSize) With(gcHeapGeneration AttrGcHeapGeneration, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(gcHeapGeneration),
-	)
+func (m GcLastCollectionHeapFragmentationSize) With(gcHeapGeneration AttrGcHeapGeneration, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(gcHeapGeneration.Value())
+}
+
+// Deprecated: Use [GcLastCollectionHeapFragmentationSize.With] instead
+func (m GcLastCollectionHeapFragmentationSize) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type GcLastCollectionHeapFragmentationSizeExtra struct {
@@ -34,7 +32,7 @@ type GcLastCollectionHeapFragmentationSizeExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -60,7 +58,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Generation 0",
@@ -119,7 +116,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Generation 0",
@@ -198,6 +194,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -305,6 +303,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -391,7 +390,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

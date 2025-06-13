@@ -6,37 +6,32 @@ import (
 
 // Count of allocations to the heap by the application.
 type MemoryAllocations struct {
-	*prometheus.CounterVec
-	extra MemoryAllocationsExtra
+	prometheus.Counter
 }
 
 func NewMemoryAllocations() MemoryAllocations {
-	labels := []string{}
-	return MemoryAllocations{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "go",
-		Name:      "memory_allocations",
-		Help:      "Count of allocations to the heap by the application.",
-	}, labels)}
+	return MemoryAllocations{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "go_memory_allocations",
+		Help: "Count of allocations to the heap by the application.",
+	})}
 }
 
-func (m MemoryAllocations) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryAllocations) Register(regs ...prometheus.Registerer) MemoryAllocations {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MemoryAllocationsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryAllocationsExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "memory.allocations",
         "Type": "MemoryAllocations",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Count of allocations to the heap by the application.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

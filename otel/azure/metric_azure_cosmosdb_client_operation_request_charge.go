@@ -17,137 +17,126 @@ type CosmosdbClientOperationRequestCharge struct {
 }
 
 func NewCosmosdbClientOperationRequestCharge() CosmosdbClientOperationRequestCharge {
-	labels := []string{"db_operation_name", "azure_cosmosdb_consistency_level", "azure_cosmosdb_response_sub_status_code", "db_collection_name", "db_namespace", "db_response_status_code", "error_type", "server_port", "azure_cosmosdb_operation_contacted_regions", "server_address"}
+	labels := []string{db.AttrOperationName("").Key(), AttrCosmosdbConsistencyLevel("").Key(), AttrCosmosdbResponseSubStatusCode("").Key(), db.AttrCollectionName("").Key(), db.AttrNamespace("").Key(), db.AttrResponseStatusCode("").Key(), error.AttrType("").Key(), server.AttrPort("").Key(), AttrCosmosdbOperationContactedRegions("").Key(), server.AttrAddress("").Key()}
 	return CosmosdbClientOperationRequestCharge{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "azure",
-		Name:      "cosmosdb_client_operation_request_charge",
-		Help:      "[Request units](https://learn.microsoft.com/azure/cosmos-db/request-units) consumed by the operation",
+		Name: "azure_cosmosdb_client_operation_request_charge",
+		Help: "[Request units](https://learn.microsoft.com/azure/cosmos-db/request-units) consumed by the operation",
 	}, labels)}
 }
 
-func (m CosmosdbClientOperationRequestCharge) With(operationName db.AttrOperationName, extra interface {
-	AttrAzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
-	AttrAzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode
-	AttrDbCollectionName() db.AttrCollectionName
-	AttrDbNamespace() db.AttrNamespace
-	AttrDbResponseStatusCode() db.AttrResponseStatusCode
-	AttrErrorType() error.AttrType
-	AttrServerPort() server.AttrPort
-	AttrAzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions
-	AttrServerAddress() server.AttrAddress
+func (m CosmosdbClientOperationRequestCharge) With(operationName db.AttrOperationName, extras ...interface {
+	AzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
+	AzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode
+	DbCollectionName() db.AttrCollectionName
+	DbNamespace() db.AttrNamespace
+	DbResponseStatusCode() db.AttrResponseStatusCode
+	ErrorType() error.AttrType
+	ServerPort() server.AttrPort
+	AzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions
+	ServerAddress() server.AttrAddress
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(operationName),
-		string(extra.AttrAzureCosmosdbConsistencyLevel()),
-		string(extra.AttrAzureCosmosdbResponseSubStatusCode()),
-		string(extra.AttrDbCollectionName()),
-		string(extra.AttrDbNamespace()),
-		string(extra.AttrDbResponseStatusCode()),
-		string(extra.AttrErrorType()),
-		string(extra.AttrServerPort()),
-		string(extra.AttrAzureCosmosdbOperationContactedRegions()),
-		string(extra.AttrServerAddress()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(operationName.Value(), extra.AzureCosmosdbConsistencyLevel().Value(), extra.AzureCosmosdbResponseSubStatusCode().Value(), extra.DbCollectionName().Value(), extra.DbNamespace().Value(), extra.DbResponseStatusCode().Value(), extra.ErrorType().Value(), extra.ServerPort().Value(), extra.AzureCosmosdbOperationContactedRegions().Value(), extra.ServerAddress().Value())
 }
 
-func (a CosmosdbClientOperationRequestCharge) WithAzureCosmosdbConsistencyLevel(attr interface {
-	AttrAzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
+// Deprecated: Use [CosmosdbClientOperationRequestCharge.With] instead
+func (m CosmosdbClientOperationRequestCharge) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a CosmosdbClientOperationRequestCharge) WithCosmosdbConsistencyLevel(attr interface {
+	AzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel
 }) CosmosdbClientOperationRequestCharge {
-	a.extra.AzureCosmosdbConsistencyLevel = attr.AttrAzureCosmosdbConsistencyLevel()
+	a.extra.AttrCosmosdbConsistencyLevel = attr.AzureCosmosdbConsistencyLevel()
 	return a
 }
-func (a CosmosdbClientOperationRequestCharge) WithAzureCosmosdbResponseSubStatusCode(attr interface {
-	AttrAzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode
+func (a CosmosdbClientOperationRequestCharge) WithCosmosdbResponseSubStatusCode(attr interface {
+	AzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode
 }) CosmosdbClientOperationRequestCharge {
-	a.extra.AzureCosmosdbResponseSubStatusCode = attr.AttrAzureCosmosdbResponseSubStatusCode()
+	a.extra.AttrCosmosdbResponseSubStatusCode = attr.AzureCosmosdbResponseSubStatusCode()
 	return a
 }
-func (a CosmosdbClientOperationRequestCharge) WithDbCollectionName(attr interface{ AttrDbCollectionName() db.AttrCollectionName }) CosmosdbClientOperationRequestCharge {
-	a.extra.DbCollectionName = attr.AttrDbCollectionName()
+func (a CosmosdbClientOperationRequestCharge) WithDbCollectionName(attr interface{ DbCollectionName() db.AttrCollectionName }) CosmosdbClientOperationRequestCharge {
+	a.extra.AttrDbCollectionName = attr.DbCollectionName()
 	return a
 }
-func (a CosmosdbClientOperationRequestCharge) WithDbNamespace(attr interface{ AttrDbNamespace() db.AttrNamespace }) CosmosdbClientOperationRequestCharge {
-	a.extra.DbNamespace = attr.AttrDbNamespace()
+func (a CosmosdbClientOperationRequestCharge) WithDbNamespace(attr interface{ DbNamespace() db.AttrNamespace }) CosmosdbClientOperationRequestCharge {
+	a.extra.AttrDbNamespace = attr.DbNamespace()
 	return a
 }
 func (a CosmosdbClientOperationRequestCharge) WithDbResponseStatusCode(attr interface {
-	AttrDbResponseStatusCode() db.AttrResponseStatusCode
+	DbResponseStatusCode() db.AttrResponseStatusCode
 }) CosmosdbClientOperationRequestCharge {
-	a.extra.DbResponseStatusCode = attr.AttrDbResponseStatusCode()
+	a.extra.AttrDbResponseStatusCode = attr.DbResponseStatusCode()
 	return a
 }
-func (a CosmosdbClientOperationRequestCharge) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) CosmosdbClientOperationRequestCharge {
-	a.extra.ErrorType = attr.AttrErrorType()
+func (a CosmosdbClientOperationRequestCharge) WithErrorType(attr interface{ ErrorType() error.AttrType }) CosmosdbClientOperationRequestCharge {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a CosmosdbClientOperationRequestCharge) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) CosmosdbClientOperationRequestCharge {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a CosmosdbClientOperationRequestCharge) WithServerPort(attr interface{ ServerPort() server.AttrPort }) CosmosdbClientOperationRequestCharge {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
-func (a CosmosdbClientOperationRequestCharge) WithAzureCosmosdbOperationContactedRegions(attr interface {
-	AttrAzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions
+func (a CosmosdbClientOperationRequestCharge) WithCosmosdbOperationContactedRegions(attr interface {
+	AzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions
 }) CosmosdbClientOperationRequestCharge {
-	a.extra.AzureCosmosdbOperationContactedRegions = attr.AttrAzureCosmosdbOperationContactedRegions()
+	a.extra.AttrCosmosdbOperationContactedRegions = attr.AzureCosmosdbOperationContactedRegions()
 	return a
 }
-func (a CosmosdbClientOperationRequestCharge) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) CosmosdbClientOperationRequestCharge {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a CosmosdbClientOperationRequestCharge) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) CosmosdbClientOperationRequestCharge {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
 
 type CosmosdbClientOperationRequestChargeExtra struct {
-	// Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).
-	AzureCosmosdbConsistencyLevel AttrCosmosdbConsistencyLevel `otel:"azure.cosmosdb.consistency.level"`
-	// Cosmos DB sub status code.
-	AzureCosmosdbResponseSubStatusCode AttrCosmosdbResponseSubStatusCode `otel:"azure.cosmosdb.response.sub_status_code"`
-	// Cosmos DB container name.
-	DbCollectionName db.AttrCollectionName `otel:"db.collection.name"`
-	// The name of the database, fully qualified within the server address and port.
-	DbNamespace db.AttrNamespace `otel:"db.namespace"`
-	// Database response status code.
-	DbResponseStatusCode db.AttrResponseStatusCode `otel:"db.response.status_code"`
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
-	// List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.
-	AzureCosmosdbOperationContactedRegions AttrCosmosdbOperationContactedRegions `otel:"azure.cosmosdb.operation.contacted_regions"`
-	// Name of the database host.
-	ServerAddress server.AttrAddress `otel:"server.address"`
+	// Account or request [consistency level]
+	//
+	// [consistency level]: https://learn.microsoft.com/azure/cosmos-db/consistency-levels
+	AttrCosmosdbConsistencyLevel          AttrCosmosdbConsistencyLevel          `otel:"azure.cosmosdb.consistency.level"`           // Cosmos DB sub status code
+	AttrCosmosdbResponseSubStatusCode     AttrCosmosdbResponseSubStatusCode     `otel:"azure.cosmosdb.response.sub_status_code"`    // Cosmos DB container name
+	AttrDbCollectionName                  db.AttrCollectionName                 `otel:"db.collection.name"`                         // The name of the database, fully qualified within the server address and port
+	AttrDbNamespace                       db.AttrNamespace                      `otel:"db.namespace"`                               // Database response status code
+	AttrDbResponseStatusCode              db.AttrResponseStatusCode             `otel:"db.response.status_code"`                    // Describes a class of error the operation ended with
+	AttrErrorType                         error.AttrType                        `otel:"error.type"`                                 // Server port number
+	AttrServerPort                        server.AttrPort                       `otel:"server.port"`                                // List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call
+	AttrCosmosdbOperationContactedRegions AttrCosmosdbOperationContactedRegions `otel:"azure.cosmosdb.operation.contacted_regions"` // Name of the database host
+	AttrServerAddress                     server.AttrAddress                    `otel:"server.address"`
 }
 
-func (a CosmosdbClientOperationRequestChargeExtra) AttrAzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel {
-	return a.AzureCosmosdbConsistencyLevel
+func (a CosmosdbClientOperationRequestChargeExtra) AzureCosmosdbConsistencyLevel() AttrCosmosdbConsistencyLevel {
+	return a.AttrCosmosdbConsistencyLevel
 }
-func (a CosmosdbClientOperationRequestChargeExtra) AttrAzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode {
-	return a.AzureCosmosdbResponseSubStatusCode
+func (a CosmosdbClientOperationRequestChargeExtra) AzureCosmosdbResponseSubStatusCode() AttrCosmosdbResponseSubStatusCode {
+	return a.AttrCosmosdbResponseSubStatusCode
 }
-func (a CosmosdbClientOperationRequestChargeExtra) AttrDbCollectionName() db.AttrCollectionName {
-	return a.DbCollectionName
+func (a CosmosdbClientOperationRequestChargeExtra) DbCollectionName() db.AttrCollectionName {
+	return a.AttrDbCollectionName
 }
-func (a CosmosdbClientOperationRequestChargeExtra) AttrDbNamespace() db.AttrNamespace {
-	return a.DbNamespace
+func (a CosmosdbClientOperationRequestChargeExtra) DbNamespace() db.AttrNamespace {
+	return a.AttrDbNamespace
 }
-func (a CosmosdbClientOperationRequestChargeExtra) AttrDbResponseStatusCode() db.AttrResponseStatusCode {
-	return a.DbResponseStatusCode
+func (a CosmosdbClientOperationRequestChargeExtra) DbResponseStatusCode() db.AttrResponseStatusCode {
+	return a.AttrDbResponseStatusCode
 }
-func (a CosmosdbClientOperationRequestChargeExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a CosmosdbClientOperationRequestChargeExtra) AttrServerPort() server.AttrPort {
-	return a.ServerPort
+func (a CosmosdbClientOperationRequestChargeExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a CosmosdbClientOperationRequestChargeExtra) ServerPort() server.AttrPort {
+	return a.AttrServerPort
 }
-func (a CosmosdbClientOperationRequestChargeExtra) AttrAzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions {
-	return a.AzureCosmosdbOperationContactedRegions
+func (a CosmosdbClientOperationRequestChargeExtra) AzureCosmosdbOperationContactedRegions() AttrCosmosdbOperationContactedRegions {
+	return a.AttrCosmosdbOperationContactedRegions
 }
-func (a CosmosdbClientOperationRequestChargeExtra) AttrServerAddress() server.AttrAddress {
-	return a.ServerAddress
+func (a CosmosdbClientOperationRequestChargeExtra) ServerAddress() server.AttrAddress {
+	return a.AttrServerAddress
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -190,7 +179,6 @@ State {
                 },
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -306,7 +294,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -368,6 +355,49 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Database response status code.",
+                    "examples": [
+                        "102",
+                        "ORA-17002",
+                        "08P01",
+                        "404",
+                    ],
+                    "name": "db.response.status_code",
+                    "note": "The status code returned by the database. Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.\nSemantic conventions for individual database systems SHOULD document what `db.response.status_code` means in the context of that system.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If the operation failed and status code is available.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Describes a class of error the operation ended with.\n",
+                    "examples": [
+                        "timeout",
+                        "java.net.UnknownHostException",
+                        "server_certificate_invalid",
+                        "500",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD match the `db.response.status_code` returned by the database or the client library, or the canonical name of exception that occurred.\nWhen using canonical exception type name, instrumentation SHOULD do the best effort to report the most relevant type. For example, if the original exception is wrapped into a generic one, the original exception SHOULD be preferred.\nInstrumentations SHOULD document how `error.type` is populated.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If and only if the operation failed.",
+                    },
+                    "stability": "stable",
+                    "type": {
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
+                {
                     "brief": "Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).",
                     "examples": [
                         "Eventual",
@@ -382,7 +412,6 @@ State {
                     },
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -496,50 +525,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": "string",
-                },
-                {
-                    "brief": "Database response status code.",
-                    "examples": [
-                        "102",
-                        "ORA-17002",
-                        "08P01",
-                        "404",
-                    ],
-                    "name": "db.response.status_code",
-                    "note": "The status code returned by the database. Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.\nSemantic conventions for individual database systems SHOULD document what `db.response.status_code` means in the context of that system.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If the operation failed and status code is available.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Describes a class of error the operation ended with.\n",
-                    "examples": [
-                        "timeout",
-                        "java.net.UnknownHostException",
-                        "server_certificate_invalid",
-                        "500",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD match the `db.response.status_code` returned by the database or the client library, or the canonical name of exception that occurred.\nWhen using canonical exception type name, instrumentation SHOULD do the best effort to report the most relevant type. For example, if the original exception is wrapped into a generic one, the original exception SHOULD be preferred.\nInstrumentations SHOULD document how `error.type` is populated.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If and only if the operation failed.",
-                    },
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
                 },
                 {
                     "brief": "Name of the database host.\n",
@@ -710,6 +695,8 @@ State {
             "type": "metric",
             "unit": "{request_unit}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -817,6 +804,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -903,7 +891,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

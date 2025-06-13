@@ -11,42 +11,42 @@ type PagingFaults struct {
 }
 
 func NewPagingFaults() PagingFaults {
-	labels := []string{"process_paging_fault_type"}
+	labels := []string{AttrPagingFaultType("").Key()}
 	return PagingFaults{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "process",
-		Name:      "paging_faults",
-		Help:      "Number of page faults the process has made.",
+		Name: "process_paging_faults",
+		Help: "Number of page faults the process has made.",
 	}, labels)}
 }
 
-func (m PagingFaults) With(extra interface {
-	AttrProcessPagingFaultType() AttrPagingFaultType
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m PagingFaults) With(extras ...interface{ ProcessPagingFaultType() AttrPagingFaultType }) prometheus.Counter {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrProcessPagingFaultType()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.ProcessPagingFaultType().Value())
 }
 
-func (a PagingFaults) WithProcessPagingFaultType(attr interface{ AttrProcessPagingFaultType() AttrPagingFaultType }) PagingFaults {
-	a.extra.ProcessPagingFaultType = attr.AttrProcessPagingFaultType()
+// Deprecated: Use [PagingFaults.With] instead
+func (m PagingFaults) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a PagingFaults) WithPagingFaultType(attr interface{ ProcessPagingFaultType() AttrPagingFaultType }) PagingFaults {
+	a.extra.AttrPagingFaultType = attr.ProcessPagingFaultType()
 	return a
 }
 
 type PagingFaultsExtra struct {
-	// The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.
-	ProcessPagingFaultType AttrPagingFaultType `otel:"process.paging.fault_type"`
+	// The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults
+	AttrPagingFaultType AttrPagingFaultType `otel:"process.paging.fault_type"`
 }
 
-func (a PagingFaultsExtra) AttrProcessPagingFaultType() AttrPagingFaultType {
-	return a.ProcessPagingFaultType
-}
+func (a PagingFaultsExtra) ProcessPagingFaultType() AttrPagingFaultType { return a.AttrPagingFaultType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -67,7 +67,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -97,7 +96,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -151,6 +149,8 @@ State {
             "type": "metric",
             "unit": "{fault}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -258,6 +258,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -344,7 +345,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

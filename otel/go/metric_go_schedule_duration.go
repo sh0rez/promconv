@@ -6,37 +6,32 @@ import (
 
 // The time goroutines have spent in the scheduler in a runnable state before actually running.
 type ScheduleDuration struct {
-	*prometheus.HistogramVec
-	extra ScheduleDurationExtra
+	prometheus.Histogram
 }
 
 func NewScheduleDuration() ScheduleDuration {
-	labels := []string{}
-	return ScheduleDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "go",
-		Name:      "schedule_duration",
-		Help:      "The time goroutines have spent in the scheduler in a runnable state before actually running.",
-	}, labels)}
+	return ScheduleDuration{Histogram: prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name: "go_schedule_duration",
+		Help: "The time goroutines have spent in the scheduler in a runnable state before actually running.",
+	})}
 }
 
-func (m ScheduleDuration) With(extra interface {
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+func (m ScheduleDuration) Register(regs ...prometheus.Registerer) ScheduleDuration {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ScheduleDurationExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ScheduleDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "schedule.duration",
         "Type": "ScheduleDuration",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The time goroutines have spent in the scheduler in a runnable state before actually running.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

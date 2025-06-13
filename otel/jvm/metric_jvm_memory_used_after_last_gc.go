@@ -11,51 +11,53 @@ type MemoryUsedAfterLastGc struct {
 }
 
 func NewMemoryUsedAfterLastGc() MemoryUsedAfterLastGc {
-	labels := []string{"jvm_memory_pool_name", "jvm_memory_type"}
+	labels := []string{AttrMemoryPoolName("").Key(), AttrMemoryType("").Key()}
 	return MemoryUsedAfterLastGc{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "memory_used_after_last_gc",
-		Help:      "Measure of memory used, as measured after the most recent garbage collection event on this pool.",
+		Name: "jvm_memory_used_after_last_gc",
+		Help: "Measure of memory used, as measured after the most recent garbage collection event on this pool.",
 	}, labels)}
 }
 
-func (m MemoryUsedAfterLastGc) With(extra interface {
-	AttrJvmMemoryPoolName() AttrMemoryPoolName
-	AttrJvmMemoryType() AttrMemoryType
+func (m MemoryUsedAfterLastGc) With(extras ...interface {
+	JvmMemoryPoolName() AttrMemoryPoolName
+	JvmMemoryType() AttrMemoryType
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrJvmMemoryPoolName()),
-		string(extra.AttrJvmMemoryType()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.JvmMemoryPoolName().Value(), extra.JvmMemoryType().Value())
 }
 
-func (a MemoryUsedAfterLastGc) WithJvmMemoryPoolName(attr interface{ AttrJvmMemoryPoolName() AttrMemoryPoolName }) MemoryUsedAfterLastGc {
-	a.extra.JvmMemoryPoolName = attr.AttrJvmMemoryPoolName()
+// Deprecated: Use [MemoryUsedAfterLastGc.With] instead
+func (m MemoryUsedAfterLastGc) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a MemoryUsedAfterLastGc) WithMemoryPoolName(attr interface{ JvmMemoryPoolName() AttrMemoryPoolName }) MemoryUsedAfterLastGc {
+	a.extra.AttrMemoryPoolName = attr.JvmMemoryPoolName()
 	return a
 }
-func (a MemoryUsedAfterLastGc) WithJvmMemoryType(attr interface{ AttrJvmMemoryType() AttrMemoryType }) MemoryUsedAfterLastGc {
-	a.extra.JvmMemoryType = attr.AttrJvmMemoryType()
+func (a MemoryUsedAfterLastGc) WithMemoryType(attr interface{ JvmMemoryType() AttrMemoryType }) MemoryUsedAfterLastGc {
+	a.extra.AttrMemoryType = attr.JvmMemoryType()
 	return a
 }
 
 type MemoryUsedAfterLastGcExtra struct {
-	// Name of the memory pool.
-	JvmMemoryPoolName AttrMemoryPoolName `otel:"jvm.memory.pool.name"`
-	// The type of memory.
-	JvmMemoryType AttrMemoryType `otel:"jvm.memory.type"`
+	// Name of the memory pool
+	AttrMemoryPoolName AttrMemoryPoolName `otel:"jvm.memory.pool.name"` // The type of memory
+	AttrMemoryType     AttrMemoryType     `otel:"jvm.memory.type"`
 }
 
-func (a MemoryUsedAfterLastGcExtra) AttrJvmMemoryPoolName() AttrMemoryPoolName {
-	return a.JvmMemoryPoolName
+func (a MemoryUsedAfterLastGcExtra) JvmMemoryPoolName() AttrMemoryPoolName {
+	return a.AttrMemoryPoolName
 }
-func (a MemoryUsedAfterLastGcExtra) AttrJvmMemoryType() AttrMemoryType { return a.JvmMemoryType }
+func (a MemoryUsedAfterLastGcExtra) JvmMemoryType() AttrMemoryType { return a.AttrMemoryType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -93,7 +95,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Heap memory.",
@@ -127,7 +128,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Heap memory.",
@@ -206,6 +206,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -313,6 +315,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -399,7 +402,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -17,8 +17,10 @@ package otel
 // These values will therefore be reused in the case of an application restart
 type AttrComponentName string // otel.component.name
 
-func (AttrComponentName) Development() {}
-func (AttrComponentName) Recommended() {}
+func (AttrComponentName) Development()    {}
+func (AttrComponentName) Recommended()    {}
+func (AttrComponentName) Key() string     { return "otel_component_name" }
+func (a AttrComponentName) Value() string { return string(a) }
 
 // A name identifying the type of the OpenTelemetry component.
 //
@@ -26,50 +28,88 @@ func (AttrComponentName) Recommended() {}
 // E.g. for Java the fully qualified classname SHOULD be used in this case
 type AttrComponentType string // otel.component.type
 
-func (AttrComponentType) Development() {}
-func (AttrComponentType) Recommended() {}
+func (AttrComponentType) Development()    {}
+func (AttrComponentType) Recommended()    {}
+func (AttrComponentType) Key() string     { return "otel_component_type" }
+func (a AttrComponentType) Value() string { return string(a) }
+
+const ComponentTypeBatchingSpanProcessor AttrComponentType = "batching_span_processor"
+const ComponentTypeSimpleSpanProcessor AttrComponentType = "simple_span_processor"
+const ComponentTypeBatchingLogProcessor AttrComponentType = "batching_log_processor"
+const ComponentTypeSimpleLogProcessor AttrComponentType = "simple_log_processor"
+const ComponentTypeOtlpGrpcSpanExporter AttrComponentType = "otlp_grpc_span_exporter"
+const ComponentTypeOtlpHttpSpanExporter AttrComponentType = "otlp_http_span_exporter"
+const ComponentTypeOtlpHttpJsonSpanExporter AttrComponentType = "otlp_http_json_span_exporter"
+const ComponentTypeOtlpGrpcLogExporter AttrComponentType = "otlp_grpc_log_exporter"
+const ComponentTypeOtlpHttpLogExporter AttrComponentType = "otlp_http_log_exporter"
+const ComponentTypeOtlpHttpJsonLogExporter AttrComponentType = "otlp_http_json_log_exporter"
+const ComponentTypePeriodicMetricReader AttrComponentType = "periodic_metric_reader"
+const ComponentTypeOtlpGrpcMetricExporter AttrComponentType = "otlp_grpc_metric_exporter"
+const ComponentTypeOtlpHttpMetricExporter AttrComponentType = "otlp_http_metric_exporter"
+const ComponentTypeOtlpHttpJsonMetricExporter AttrComponentType = "otlp_http_json_metric_exporter"
 
 // Deprecated. Use the `otel.scope.name` attribute
 type AttrLibraryName string // otel.library.name
 
-func (AttrLibraryName) Development() {}
-func (AttrLibraryName) Recommended() {}
+func (AttrLibraryName) Development()    {}
+func (AttrLibraryName) Recommended()    {}
+func (AttrLibraryName) Key() string     { return "otel_library_name" }
+func (a AttrLibraryName) Value() string { return string(a) }
 
 // Deprecated. Use the `otel.scope.version` attribute
 type AttrLibraryVersion string // otel.library.version
 
-func (AttrLibraryVersion) Development() {}
-func (AttrLibraryVersion) Recommended() {}
+func (AttrLibraryVersion) Development()    {}
+func (AttrLibraryVersion) Recommended()    {}
+func (AttrLibraryVersion) Key() string     { return "otel_library_version" }
+func (a AttrLibraryVersion) Value() string { return string(a) }
 
 // The name of the instrumentation scope - (`InstrumentationScope.Name` in OTLP)
 type AttrScopeName string // otel.scope.name
 
-func (AttrScopeName) Stable()      {}
-func (AttrScopeName) Recommended() {}
+func (AttrScopeName) Stable()         {}
+func (AttrScopeName) Recommended()    {}
+func (AttrScopeName) Key() string     { return "otel_scope_name" }
+func (a AttrScopeName) Value() string { return string(a) }
 
 // The version of the instrumentation scope - (`InstrumentationScope.Version` in OTLP)
 type AttrScopeVersion string // otel.scope.version
 
-func (AttrScopeVersion) Stable()      {}
-func (AttrScopeVersion) Recommended() {}
+func (AttrScopeVersion) Stable()         {}
+func (AttrScopeVersion) Recommended()    {}
+func (AttrScopeVersion) Key() string     { return "otel_scope_version" }
+func (a AttrScopeVersion) Value() string { return string(a) }
 
 // The result value of the sampler for this span
 type AttrSpanSamplingResult string // otel.span.sampling_result
 
-func (AttrSpanSamplingResult) Development() {}
-func (AttrSpanSamplingResult) Recommended() {}
+func (AttrSpanSamplingResult) Development()    {}
+func (AttrSpanSamplingResult) Recommended()    {}
+func (AttrSpanSamplingResult) Key() string     { return "otel_span_sampling_result" }
+func (a AttrSpanSamplingResult) Value() string { return string(a) }
+
+const SpanSamplingResultDrop AttrSpanSamplingResult = "DROP"
+const SpanSamplingResultRecordOnly AttrSpanSamplingResult = "RECORD_ONLY"
+const SpanSamplingResultRecordAndSample AttrSpanSamplingResult = "RECORD_AND_SAMPLE"
 
 // Name of the code, either "OK" or "ERROR". MUST NOT be set if the status code is UNSET
 type AttrStatusCode string // otel.status_code
 
-func (AttrStatusCode) Stable()      {}
-func (AttrStatusCode) Recommended() {}
+func (AttrStatusCode) Stable()         {}
+func (AttrStatusCode) Recommended()    {}
+func (AttrStatusCode) Key() string     { return "otel_status_code" }
+func (a AttrStatusCode) Value() string { return string(a) }
+
+const StatusCodeOk AttrStatusCode = "OK"
+const StatusCodeError AttrStatusCode = "ERROR"
 
 // Description of the Status if it has a value, otherwise not set
 type AttrStatusDescription string // otel.status_description
 
-func (AttrStatusDescription) Stable()      {}
-func (AttrStatusDescription) Recommended() {}
+func (AttrStatusDescription) Stable()         {}
+func (AttrStatusDescription) Recommended()    {}
+func (AttrStatusDescription) Key() string     { return "otel_status_description" }
+func (a AttrStatusDescription) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -103,7 +143,6 @@ func (AttrStatusDescription) Recommended() {}
                     "root_namespace": "otel",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The builtin SDK batching span processor\n",
@@ -281,7 +320,6 @@ func (AttrStatusDescription) Recommended() {}
                     "root_namespace": "otel",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The span is not sampled and not recording",
@@ -317,7 +355,6 @@ func (AttrStatusDescription) Recommended() {}
                     "root_namespace": "otel",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The operation has been validated by an Application developer or Operator to have completed successfully.",
@@ -459,6 +496,7 @@ func (AttrStatusDescription) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

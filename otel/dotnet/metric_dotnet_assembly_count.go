@@ -6,37 +6,32 @@ import (
 
 // The number of .NET assemblies that are currently loaded.
 type AssemblyCount struct {
-	*prometheus.GaugeVec
-	extra AssemblyCountExtra
+	prometheus.Gauge
 }
 
 func NewAssemblyCount() AssemblyCount {
-	labels := []string{}
-	return AssemblyCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "dotnet",
-		Name:      "assembly_count",
-		Help:      "The number of .NET assemblies that are currently loaded.",
-	}, labels)}
+	return AssemblyCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "dotnet_assembly_count",
+		Help: "The number of .NET assemblies that are currently loaded.",
+	})}
 }
 
-func (m AssemblyCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m AssemblyCount) Register(regs ...prometheus.Registerer) AssemblyCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type AssemblyCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "AssemblyCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "assembly.count",
         "Type": "AssemblyCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of .NET assemblies that are currently loaded.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

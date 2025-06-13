@@ -3,8 +3,23 @@ package profile
 // Describes the interpreter or compiler of a single frame
 type AttrFrameType string // profile.frame.type
 
-func (AttrFrameType) Development() {}
-func (AttrFrameType) Recommended() {}
+func (AttrFrameType) Development()    {}
+func (AttrFrameType) Recommended()    {}
+func (AttrFrameType) Key() string     { return "profile_frame_type" }
+func (a AttrFrameType) Value() string { return string(a) }
+
+const FrameTypeDotnet AttrFrameType = "dotnet"
+const FrameTypeJvm AttrFrameType = "jvm"
+const FrameTypeKernel AttrFrameType = "kernel"
+const FrameTypeNative AttrFrameType = "native"
+const FrameTypePerl AttrFrameType = "perl"
+const FrameTypePhp AttrFrameType = "php"
+const FrameTypeCpython AttrFrameType = "cpython"
+const FrameTypeRuby AttrFrameType = "ruby"
+const FrameTypeV8js AttrFrameType = "v8js"
+const FrameTypeBeam AttrFrameType = "beam"
+const FrameTypeGo AttrFrameType = "go"
+const FrameTypeRust AttrFrameType = "rust"
 
 /* State {
     name: "attr.go.j2",
@@ -23,7 +38,6 @@ func (AttrFrameType) Recommended() {}
                     "root_namespace": "profile",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[.NET](https://wikipedia.org/wiki/.NET)\n",
@@ -234,6 +248,7 @@ func (AttrFrameType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

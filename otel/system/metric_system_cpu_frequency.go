@@ -4,35 +4,53 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Deprecated. Use `cpu.frequency` instead.
+import (
+	"shorez.de/promconv/otel/cpu"
+)
+
+// Operating frequency of the logical CPU in Hertz.
 type CpuFrequency struct {
 	*prometheus.GaugeVec
 	extra CpuFrequencyExtra
 }
 
 func NewCpuFrequency() CpuFrequency {
-	labels := []string{}
+	labels := []string{cpu.AttrLogicalNumber("").Key()}
 	return CpuFrequency{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "cpu_frequency",
-		Help:      "Deprecated. Use `cpu.frequency` instead.",
+		Name: "system_cpu_frequency",
+		Help: "Operating frequency of the logical CPU in Hertz.",
 	}, labels)}
 }
 
-func (m CpuFrequency) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m CpuFrequency) With(extras ...interface{ CpuLogicalNumber() cpu.AttrLogicalNumber }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues()
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.CpuLogicalNumber().Value())
+}
+
+// Deprecated: Use [CpuFrequency.With] instead
+func (m CpuFrequency) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a CpuFrequency) WithCpuLogicalNumber(attr interface{ CpuLogicalNumber() cpu.AttrLogicalNumber }) CpuFrequency {
+	a.extra.AttrCpuLogicalNumber = attr.CpuLogicalNumber()
+	return a
 }
 
 type CpuFrequencyExtra struct {
+	// The logical CPU number [0..n-1]
+	AttrCpuLogicalNumber cpu.AttrLogicalNumber `otel:"cpu.logical_number"`
 }
+
+func (a CpuFrequencyExtra) CpuLogicalNumber() cpu.AttrLogicalNumber { return a.AttrCpuLogicalNumber }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -46,21 +64,53 @@ State {
         },
         "Name": "cpu.frequency",
         "Type": "CpuFrequency",
-        "attributes": [],
-        "ctx": {
-            "attributes": [],
-            "brief": "Deprecated. Use `cpu.frequency` instead.",
-            "deprecated": {
-                "note": "Replaced by `cpu.frequency`.",
-                "reason": "renamed",
-                "renamed_to": "cpu.frequency",
+        "attributes": [
+            {
+                "brief": "The logical CPU number [0..n-1]",
+                "examples": [
+                    1,
+                ],
+                "name": "cpu.logical_number",
+                "requirement_level": "recommended",
+                "stability": "development",
+                "type": "int",
             },
+        ],
+        "ctx": {
+            "attributes": [
+                {
+                    "brief": "The logical CPU number [0..n-1]",
+                    "examples": [
+                        1,
+                    ],
+                    "name": "cpu.logical_number",
+                    "requirement_level": "recommended",
+                    "stability": "development",
+                    "type": "int",
+                },
+            ],
+            "brief": "Operating frequency of the logical CPU in Hertz.",
+            "entity_associations": [
+                "host",
+            ],
             "events": [],
             "id": "metric.system.cpu.frequency",
             "instrument": "gauge",
             "lineage": {
+                "attributes": {
+                    "cpu.logical_number": {
+                        "inherited_fields": [
+                            "brief",
+                            "examples",
+                            "note",
+                            "requirement_level",
+                            "stability",
+                        ],
+                        "source_group": "registry.cpu",
+                    },
+                },
                 "provenance": {
-                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/system/deprecated/metrics-deprecated.yaml",
+                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/system/metrics.yaml",
                     "registry_id": "main",
                 },
             },
@@ -70,8 +120,10 @@ State {
             "span_kind": none,
             "stability": "development",
             "type": "metric",
-            "unit": "{Hz}",
+            "unit": "Hz",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -179,6 +231,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -265,7 +318,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

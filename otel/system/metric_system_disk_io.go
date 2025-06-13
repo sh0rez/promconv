@@ -14,49 +14,51 @@ type DiskIo struct {
 }
 
 func NewDiskIo() DiskIo {
-	labels := []string{"disk_io_direction", "system_device"}
+	labels := []string{disk.AttrIoDirection("").Key(), AttrDevice("").Key()}
 	return DiskIo{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "system",
-		Name:      "disk_io",
-		Help:      "",
+		Name: "system_disk_io",
+		Help: "",
 	}, labels)}
 }
 
-func (m DiskIo) With(extra interface {
-	AttrDiskIoDirection() disk.AttrIoDirection
-	AttrSystemDevice() AttrDevice
+func (m DiskIo) With(extras ...interface {
+	DiskIoDirection() disk.AttrIoDirection
+	SystemDevice() AttrDevice
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrDiskIoDirection()),
-		string(extra.AttrSystemDevice()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.DiskIoDirection().Value(), extra.SystemDevice().Value())
 }
 
-func (a DiskIo) WithDiskIoDirection(attr interface{ AttrDiskIoDirection() disk.AttrIoDirection }) DiskIo {
-	a.extra.DiskIoDirection = attr.AttrDiskIoDirection()
+// Deprecated: Use [DiskIo.With] instead
+func (m DiskIo) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a DiskIo) WithDiskIoDirection(attr interface{ DiskIoDirection() disk.AttrIoDirection }) DiskIo {
+	a.extra.AttrDiskIoDirection = attr.DiskIoDirection()
 	return a
 }
-func (a DiskIo) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) DiskIo {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+func (a DiskIo) WithDevice(attr interface{ SystemDevice() AttrDevice }) DiskIo {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
 
 type DiskIoExtra struct {
-	// The disk IO operation direction.
-	DiskIoDirection disk.AttrIoDirection `otel:"disk.io.direction"`
-	// The device identifier
-	SystemDevice AttrDevice `otel:"system.device"`
+	// The disk IO operation direction
+	AttrDiskIoDirection disk.AttrIoDirection `otel:"disk.io.direction"` // The device identifier
+	AttrDevice          AttrDevice           `otel:"system.device"`
 }
 
-func (a DiskIoExtra) AttrDiskIoDirection() disk.AttrIoDirection { return a.DiskIoDirection }
-func (a DiskIoExtra) AttrSystemDevice() AttrDevice              { return a.SystemDevice }
+func (a DiskIoExtra) DiskIoDirection() disk.AttrIoDirection { return a.AttrDiskIoDirection }
+func (a DiskIoExtra) SystemDevice() AttrDevice              { return a.AttrDevice }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -80,7 +82,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -123,7 +124,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -197,6 +197,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -304,6 +306,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -390,7 +393,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

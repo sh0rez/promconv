@@ -11,51 +11,51 @@ type Power struct {
 }
 
 func NewPower() Power {
-	labels := []string{"hw_id", "hw_type", "hw_name", "hw_parent"}
+	labels := []string{AttrId("").Key(), AttrType("").Key(), AttrName("").Key(), AttrParent("").Key()}
 	return Power{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "hw",
-		Name:      "power",
-		Help:      "Instantaneous power consumed by the component",
+		Name: "hw_power",
+		Help: "Instantaneous power consumed by the component",
 	}, labels)}
 }
 
-func (m Power) With(id AttrId, kind AttrType, extra interface {
-	AttrHwName() AttrName
-	AttrHwParent() AttrParent
+func (m Power) With(id AttrId, kind AttrType, extras ...interface {
+	HwName() AttrName
+	HwParent() AttrParent
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(id),
-		string(kind),
-		string(extra.AttrHwName()),
-		string(extra.AttrHwParent()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(id.Value(), kind.Value(), extra.HwName().Value(), extra.HwParent().Value())
 }
 
-func (a Power) WithHwName(attr interface{ AttrHwName() AttrName }) Power {
-	a.extra.HwName = attr.AttrHwName()
+// Deprecated: Use [Power.With] instead
+func (m Power) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a Power) WithName(attr interface{ HwName() AttrName }) Power {
+	a.extra.AttrName = attr.HwName()
 	return a
 }
-func (a Power) WithHwParent(attr interface{ AttrHwParent() AttrParent }) Power {
-	a.extra.HwParent = attr.AttrHwParent()
+func (a Power) WithParent(attr interface{ HwParent() AttrParent }) Power {
+	a.extra.AttrParent = attr.HwParent()
 	return a
 }
 
 type PowerExtra struct {
 	// An easily-recognizable name for the hardware component
-	HwName AttrName `otel:"hw.name"`
-	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
-	HwParent AttrParent `otel:"hw.parent"`
+	AttrName   AttrName   `otel:"hw.name"` // Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
+	AttrParent AttrParent `otel:"hw.parent"`
 }
 
-func (a PowerExtra) AttrHwName() AttrName     { return a.HwName }
-func (a PowerExtra) AttrHwParent() AttrParent { return a.HwParent }
+func (a PowerExtra) HwName() AttrName     { return a.AttrName }
+func (a PowerExtra) HwParent() AttrParent { return a.AttrParent }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -87,7 +87,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Battery",
@@ -264,7 +263,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Battery",
@@ -450,6 +448,8 @@ State {
             "type": "metric",
             "unit": "W",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -557,6 +557,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -643,7 +644,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

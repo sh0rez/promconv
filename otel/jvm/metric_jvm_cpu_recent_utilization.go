@@ -6,37 +6,32 @@ import (
 
 // Recent CPU utilization for the process as reported by the JVM.
 type CpuRecentUtilization struct {
-	*prometheus.GaugeVec
-	extra CpuRecentUtilizationExtra
+	prometheus.Gauge
 }
 
 func NewCpuRecentUtilization() CpuRecentUtilization {
-	labels := []string{}
-	return CpuRecentUtilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "cpu_recent_utilization",
-		Help:      "Recent CPU utilization for the process as reported by the JVM.",
-	}, labels)}
+	return CpuRecentUtilization{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "jvm_cpu_recent_utilization",
+		Help: "Recent CPU utilization for the process as reported by the JVM.",
+	})}
 }
 
-func (m CpuRecentUtilization) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m CpuRecentUtilization) Register(regs ...prometheus.Registerer) CpuRecentUtilization {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type CpuRecentUtilizationExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuRecentUtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "cpu.recent_utilization",
         "Type": "CpuRecentUtilization",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Recent CPU utilization for the process as reported by the JVM.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

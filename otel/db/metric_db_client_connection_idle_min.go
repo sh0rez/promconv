@@ -11,22 +11,20 @@ type ClientConnectionIdleMin struct {
 }
 
 func NewClientConnectionIdleMin() ClientConnectionIdleMin {
-	labels := []string{"db_client_connection_pool_name"}
+	labels := []string{AttrClientConnectionPoolName("").Key()}
 	return ClientConnectionIdleMin{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "db",
-		Name:      "client_connection_idle_min",
-		Help:      "The minimum number of idle open connections allowed",
+		Name: "db_client_connection_idle_min",
+		Help: "The minimum number of idle open connections allowed",
 	}, labels)}
 }
 
-func (m ClientConnectionIdleMin) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(clientConnectionPoolName),
-	)
+func (m ClientConnectionIdleMin) With(clientConnectionPoolName AttrClientConnectionPoolName, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(clientConnectionPoolName.Value())
+}
+
+// Deprecated: Use [ClientConnectionIdleMin.With] instead
+func (m ClientConnectionIdleMin) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type ClientConnectionIdleMinExtra struct {
@@ -34,7 +32,7 @@ type ClientConnectionIdleMinExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -105,6 +103,8 @@ State {
             "type": "metric",
             "unit": "{connection}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -212,6 +212,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -298,7 +299,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

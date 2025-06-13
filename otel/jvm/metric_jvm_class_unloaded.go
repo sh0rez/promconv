@@ -6,37 +6,32 @@ import (
 
 // Number of classes unloaded since JVM start.
 type ClassUnloaded struct {
-	*prometheus.CounterVec
-	extra ClassUnloadedExtra
+	prometheus.Counter
 }
 
 func NewClassUnloaded() ClassUnloaded {
-	labels := []string{}
-	return ClassUnloaded{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "jvm",
-		Name:      "class_unloaded",
-		Help:      "Number of classes unloaded since JVM start.",
-	}, labels)}
+	return ClassUnloaded{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "jvm_class_unloaded",
+		Help: "Number of classes unloaded since JVM start.",
+	})}
 }
 
-func (m ClassUnloaded) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m ClassUnloaded) Register(regs ...prometheus.Registerer) ClassUnloaded {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ClassUnloadedExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClassUnloadedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "class.unloaded",
         "Type": "ClassUnloaded",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of classes unloaded since JVM start.",
@@ -174,6 +168,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -260,7 +255,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

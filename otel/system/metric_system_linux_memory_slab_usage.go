@@ -15,44 +15,48 @@ type LinuxMemorySlabUsage struct {
 }
 
 func NewLinuxMemorySlabUsage() LinuxMemorySlabUsage {
-	labels := []string{"linux_memory_slab_state"}
+	labels := []string{linux.AttrMemorySlabState("").Key()}
 	return LinuxMemorySlabUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "linux_memory_slab_usage",
-		Help:      "Reports the memory used by the Linux kernel for managing caches of frequently used objects.",
+		Name: "system_linux_memory_slab_usage",
+		Help: "Reports the memory used by the Linux kernel for managing caches of frequently used objects.",
 	}, labels)}
 }
 
-func (m LinuxMemorySlabUsage) With(extra interface {
-	AttrLinuxMemorySlabState() linux.AttrMemorySlabState
+func (m LinuxMemorySlabUsage) With(extras ...interface {
+	LinuxMemorySlabState() linux.AttrMemorySlabState
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrLinuxMemorySlabState()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.LinuxMemorySlabState().Value())
+}
+
+// Deprecated: Use [LinuxMemorySlabUsage.With] instead
+func (m LinuxMemorySlabUsage) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 func (a LinuxMemorySlabUsage) WithLinuxMemorySlabState(attr interface {
-	AttrLinuxMemorySlabState() linux.AttrMemorySlabState
+	LinuxMemorySlabState() linux.AttrMemorySlabState
 }) LinuxMemorySlabUsage {
-	a.extra.LinuxMemorySlabState = attr.AttrLinuxMemorySlabState()
+	a.extra.AttrLinuxMemorySlabState = attr.LinuxMemorySlabState()
 	return a
 }
 
 type LinuxMemorySlabUsageExtra struct {
 	// The Linux Slab memory state
-	LinuxMemorySlabState linux.AttrMemorySlabState `otel:"linux.memory.slab.state"`
+	AttrLinuxMemorySlabState linux.AttrMemorySlabState `otel:"linux.memory.slab.state"`
 }
 
-func (a LinuxMemorySlabUsageExtra) AttrLinuxMemorySlabState() linux.AttrMemorySlabState {
-	return a.LinuxMemorySlabState
+func (a LinuxMemorySlabUsageExtra) LinuxMemorySlabState() linux.AttrMemorySlabState {
+	return a.AttrLinuxMemorySlabState
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -77,7 +81,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -111,7 +114,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -167,6 +169,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -274,6 +278,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -360,7 +365,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

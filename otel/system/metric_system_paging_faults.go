@@ -10,40 +10,42 @@ type PagingFaults struct {
 }
 
 func NewPagingFaults() PagingFaults {
-	labels := []string{"system_paging_type"}
+	labels := []string{AttrPagingType("").Key()}
 	return PagingFaults{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "system",
-		Name:      "paging_faults",
-		Help:      "",
+		Name: "system_paging_faults",
+		Help: "",
 	}, labels)}
 }
 
-func (m PagingFaults) With(extra interface {
-	AttrSystemPagingType() AttrPagingType
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m PagingFaults) With(extras ...interface{ SystemPagingType() AttrPagingType }) prometheus.Counter {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemPagingType()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.SystemPagingType().Value())
 }
 
-func (a PagingFaults) WithSystemPagingType(attr interface{ AttrSystemPagingType() AttrPagingType }) PagingFaults {
-	a.extra.SystemPagingType = attr.AttrSystemPagingType()
+// Deprecated: Use [PagingFaults.With] instead
+func (m PagingFaults) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a PagingFaults) WithPagingType(attr interface{ SystemPagingType() AttrPagingType }) PagingFaults {
+	a.extra.AttrPagingType = attr.SystemPagingType()
 	return a
 }
 
 type PagingFaultsExtra struct {
 	// The memory paging type
-	SystemPagingType AttrPagingType `otel:"system.paging.type"`
+	AttrPagingType AttrPagingType `otel:"system.paging.type"`
 }
 
-func (a PagingFaultsExtra) AttrSystemPagingType() AttrPagingType { return a.SystemPagingType }
+func (a PagingFaultsExtra) SystemPagingType() AttrPagingType { return a.AttrPagingType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -67,7 +69,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -100,7 +101,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -154,6 +154,8 @@ State {
             "type": "metric",
             "unit": "{fault}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -261,6 +263,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -347,7 +350,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

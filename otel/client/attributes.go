@@ -4,15 +4,19 @@ package client
 // When observed from the server side, and when communicating through an intermediary, `client.address` SHOULD represent the client address behind any intermediaries,  for example proxies, if it's available
 type AttrAddress string // client.address
 
-func (AttrAddress) Stable()      {}
-func (AttrAddress) Recommended() {}
+func (AttrAddress) Stable()         {}
+func (AttrAddress) Recommended()    {}
+func (AttrAddress) Key() string     { return "client_address" }
+func (a AttrAddress) Value() string { return string(a) }
 
 // Client port number.
 // When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available
 type AttrPort string // client.port
 
-func (AttrPort) Stable()      {}
-func (AttrPort) Recommended() {}
+func (AttrPort) Stable()         {}
+func (AttrPort) Recommended()    {}
+func (AttrPort) Key() string     { return "client_port" }
+func (a AttrPort) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -157,6 +161,7 @@ func (AttrPort) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

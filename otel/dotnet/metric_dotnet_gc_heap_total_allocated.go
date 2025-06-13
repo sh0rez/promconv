@@ -6,37 +6,32 @@ import (
 
 // The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.
 type GcHeapTotalAllocated struct {
-	*prometheus.CounterVec
-	extra GcHeapTotalAllocatedExtra
+	prometheus.Counter
 }
 
 func NewGcHeapTotalAllocated() GcHeapTotalAllocated {
-	labels := []string{}
-	return GcHeapTotalAllocated{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "dotnet",
-		Name:      "gc_heap_total_allocated",
-		Help:      "The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.",
-	}, labels)}
+	return GcHeapTotalAllocated{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "dotnet_gc_heap_total_allocated",
+		Help: "The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.",
+	})}
 }
 
-func (m GcHeapTotalAllocated) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m GcHeapTotalAllocated) Register(regs ...prometheus.Registerer) GcHeapTotalAllocated {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type GcHeapTotalAllocatedExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcHeapTotalAllocatedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "gc.heap.total_allocated",
         "Type": "GcHeapTotalAllocated",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.\n",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

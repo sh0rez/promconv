@@ -15,60 +15,58 @@ type Errors struct {
 }
 
 func NewErrors() Errors {
-	labels := []string{"hw_id", "hw_type", "error_type", "hw_name", "hw_parent"}
+	labels := []string{AttrId("").Key(), AttrType("").Key(), error.AttrType("").Key(), AttrName("").Key(), AttrParent("").Key()}
 	return Errors{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "hw",
-		Name:      "errors",
-		Help:      "Number of errors encountered by the component",
+		Name: "hw_errors",
+		Help: "Number of errors encountered by the component",
 	}, labels)}
 }
 
-func (m Errors) With(id AttrId, kind AttrType, extra interface {
-	AttrErrorType() error.AttrType
-	AttrHwName() AttrName
-	AttrHwParent() AttrParent
+func (m Errors) With(id AttrId, kind AttrType, extras ...interface {
+	ErrorType() error.AttrType
+	HwName() AttrName
+	HwParent() AttrParent
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(id),
-		string(kind),
-		string(extra.AttrErrorType()),
-		string(extra.AttrHwName()),
-		string(extra.AttrHwParent()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(id.Value(), kind.Value(), extra.ErrorType().Value(), extra.HwName().Value(), extra.HwParent().Value())
 }
 
-func (a Errors) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) Errors {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [Errors.With] instead
+func (m Errors) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a Errors) WithErrorType(attr interface{ ErrorType() error.AttrType }) Errors {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a Errors) WithHwName(attr interface{ AttrHwName() AttrName }) Errors {
-	a.extra.HwName = attr.AttrHwName()
+func (a Errors) WithName(attr interface{ HwName() AttrName }) Errors {
+	a.extra.AttrName = attr.HwName()
 	return a
 }
-func (a Errors) WithHwParent(attr interface{ AttrHwParent() AttrParent }) Errors {
-	a.extra.HwParent = attr.AttrHwParent()
+func (a Errors) WithParent(attr interface{ HwParent() AttrParent }) Errors {
+	a.extra.AttrParent = attr.HwParent()
 	return a
 }
 
 type ErrorsExtra struct {
 	// The type of error encountered by the component
-	ErrorType error.AttrType `otel:"error.type"`
-	// An easily-recognizable name for the hardware component
-	HwName AttrName `otel:"hw.name"`
-	// Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
-	HwParent AttrParent `otel:"hw.parent"`
+	AttrErrorType error.AttrType `otel:"error.type"` // An easily-recognizable name for the hardware component
+	AttrName      AttrName       `otel:"hw.name"`    // Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)
+	AttrParent    AttrParent     `otel:"hw.parent"`
 }
 
-func (a ErrorsExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a ErrorsExtra) AttrHwName() AttrName          { return a.HwName }
-func (a ErrorsExtra) AttrHwParent() AttrParent      { return a.HwParent }
+func (a ErrorsExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a ErrorsExtra) HwName() AttrName          { return a.AttrName }
+func (a ErrorsExtra) HwParent() AttrParent      { return a.AttrParent }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -100,7 +98,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Battery",
@@ -232,7 +229,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -305,7 +301,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Battery",
@@ -437,7 +432,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -530,6 +524,8 @@ State {
             "type": "metric",
             "unit": "{error}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -637,6 +633,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -723,7 +720,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

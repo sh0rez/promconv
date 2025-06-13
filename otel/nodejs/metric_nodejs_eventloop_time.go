@@ -11,22 +11,20 @@ type EventloopTime struct {
 }
 
 func NewEventloopTime() EventloopTime {
-	labels := []string{"nodejs_eventloop_state"}
+	labels := []string{AttrEventloopState("").Key()}
 	return EventloopTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "nodejs",
-		Name:      "eventloop_time",
-		Help:      "Cumulative duration of time the event loop has been in each state.",
+		Name: "nodejs_eventloop_time",
+		Help: "Cumulative duration of time the event loop has been in each state.",
 	}, labels)}
 }
 
-func (m EventloopTime) With(eventloopState AttrEventloopState, extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(eventloopState),
-	)
+func (m EventloopTime) With(eventloopState AttrEventloopState, extras ...interface{}) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(eventloopState.Value())
+}
+
+// Deprecated: Use [EventloopTime.With] instead
+func (m EventloopTime) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 type EventloopTimeExtra struct {
@@ -34,7 +32,7 @@ type EventloopTimeExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -55,7 +53,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Active time.",
@@ -85,7 +82,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Active time.",
@@ -139,6 +135,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -246,6 +244,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -332,7 +331,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

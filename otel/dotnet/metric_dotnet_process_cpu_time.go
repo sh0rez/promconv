@@ -15,22 +15,20 @@ type ProcessCpuTime struct {
 }
 
 func NewProcessCpuTime() ProcessCpuTime {
-	labels := []string{"cpu_mode"}
+	labels := []string{cpu.AttrMode("").Key()}
 	return ProcessCpuTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "dotnet",
-		Name:      "process_cpu_time",
-		Help:      "CPU time used by the process.",
+		Name: "dotnet_process_cpu_time",
+		Help: "CPU time used by the process.",
 	}, labels)}
 }
 
-func (m ProcessCpuTime) With(mode cpu.AttrMode, extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(mode),
-	)
+func (m ProcessCpuTime) With(mode cpu.AttrMode, extras ...interface{}) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(mode.Value())
+}
+
+// Deprecated: Use [ProcessCpuTime.With] instead
+func (m ProcessCpuTime) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 type ProcessCpuTimeExtra struct {
@@ -38,7 +36,7 @@ type ProcessCpuTimeExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -63,7 +61,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -145,7 +142,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -248,6 +244,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -355,6 +353,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -441,7 +440,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

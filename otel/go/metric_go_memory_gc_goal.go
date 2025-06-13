@@ -6,37 +6,32 @@ import (
 
 // Heap size target for the end of the GC cycle.
 type MemoryGcGoal struct {
-	*prometheus.GaugeVec
-	extra MemoryGcGoalExtra
+	prometheus.Gauge
 }
 
 func NewMemoryGcGoal() MemoryGcGoal {
-	labels := []string{}
-	return MemoryGcGoal{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "go",
-		Name:      "memory_gc_goal",
-		Help:      "Heap size target for the end of the GC cycle.",
-	}, labels)}
+	return MemoryGcGoal{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "go_memory_gc_goal",
+		Help: "Heap size target for the end of the GC cycle.",
+	})}
 }
 
-func (m MemoryGcGoal) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryGcGoal) Register(regs ...prometheus.Registerer) MemoryGcGoal {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MemoryGcGoalExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryGcGoalExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "memory.gc.goal",
         "Type": "MemoryGcGoal",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Heap size target for the end of the GC cycle.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

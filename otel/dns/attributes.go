@@ -4,8 +4,10 @@ package dns
 // If the name field contains non-printable characters (below 32 or above 126), those characters should be represented as escaped base 10 integers (\DDD). Back slashes and quotes should be escaped. Tabs, carriage returns, and line feeds should be converted to \t, \r, and \n respectively
 type AttrQuestionName string // dns.question.name
 
-func (AttrQuestionName) Development() {}
-func (AttrQuestionName) Recommended() {}
+func (AttrQuestionName) Development()    {}
+func (AttrQuestionName) Recommended()    {}
+func (AttrQuestionName) Key() string     { return "dns_question_name" }
+func (a AttrQuestionName) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -137,6 +139,7 @@ func (AttrQuestionName) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

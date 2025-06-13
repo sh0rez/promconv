@@ -6,37 +6,32 @@ import (
 
 // Measures the duration of outbound RPC.
 type ClientDuration struct {
-	*prometheus.HistogramVec
-	extra ClientDurationExtra
+	prometheus.Histogram
 }
 
 func NewClientDuration() ClientDuration {
-	labels := []string{}
-	return ClientDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "rpc",
-		Name:      "client_duration",
-		Help:      "Measures the duration of outbound RPC.",
-	}, labels)}
+	return ClientDuration{Histogram: prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name: "rpc_client_duration",
+		Help: "Measures the duration of outbound RPC.",
+	})}
 }
 
-func (m ClientDuration) With(extra interface {
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+func (m ClientDuration) Register(regs ...prometheus.Registerer) ClientDuration {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ClientDurationExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClientDurationExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "client.duration",
         "Type": "ClientDuration",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Measures the duration of outbound RPC.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

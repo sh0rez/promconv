@@ -6,37 +6,32 @@ import (
 
 // Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller
 type ReplicationcontrollerAvailablePods struct {
-	*prometheus.GaugeVec
-	extra ReplicationcontrollerAvailablePodsExtra
+	prometheus.Gauge
 }
 
 func NewReplicationcontrollerAvailablePods() ReplicationcontrollerAvailablePods {
-	labels := []string{}
-	return ReplicationcontrollerAvailablePods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "replicationcontroller_available_pods",
-		Help:      "Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller",
-	}, labels)}
+	return ReplicationcontrollerAvailablePods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_replicationcontroller_available_pods",
+		Help: "Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller",
+	})}
 }
 
-func (m ReplicationcontrollerAvailablePods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ReplicationcontrollerAvailablePods) Register(regs ...prometheus.Registerer) ReplicationcontrollerAvailablePods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ReplicationcontrollerAvailablePodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ReplicationcontrollerAvailablePodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "replicationcontroller.available_pods",
         "Type": "ReplicationcontrollerAvailablePods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

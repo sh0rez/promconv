@@ -3,26 +3,34 @@ package network
 // The ISO 3166-1 alpha-2 2-character country code associated with the mobile carrier network
 type AttrCarrierIcc string // network.carrier.icc
 
-func (AttrCarrierIcc) Development() {}
-func (AttrCarrierIcc) Recommended() {}
+func (AttrCarrierIcc) Development()    {}
+func (AttrCarrierIcc) Recommended()    {}
+func (AttrCarrierIcc) Key() string     { return "network_carrier_icc" }
+func (a AttrCarrierIcc) Value() string { return string(a) }
 
 // The mobile carrier country code
 type AttrCarrierMcc string // network.carrier.mcc
 
-func (AttrCarrierMcc) Development() {}
-func (AttrCarrierMcc) Recommended() {}
+func (AttrCarrierMcc) Development()    {}
+func (AttrCarrierMcc) Recommended()    {}
+func (AttrCarrierMcc) Key() string     { return "network_carrier_mcc" }
+func (a AttrCarrierMcc) Value() string { return string(a) }
 
 // The mobile carrier network code
 type AttrCarrierMnc string // network.carrier.mnc
 
-func (AttrCarrierMnc) Development() {}
-func (AttrCarrierMnc) Recommended() {}
+func (AttrCarrierMnc) Development()    {}
+func (AttrCarrierMnc) Recommended()    {}
+func (AttrCarrierMnc) Key() string     { return "network_carrier_mnc" }
+func (a AttrCarrierMnc) Value() string { return string(a) }
 
 // The name of the mobile carrier
 type AttrCarrierName string // network.carrier.name
 
-func (AttrCarrierName) Development() {}
-func (AttrCarrierName) Recommended() {}
+func (AttrCarrierName) Development()    {}
+func (AttrCarrierName) Recommended()    {}
+func (AttrCarrierName) Key() string     { return "network_carrier_name" }
+func (a AttrCarrierName) Value() string { return string(a) }
 
 // The state of network connection
 // Connection states are defined as part of the [rfc9293]
@@ -30,56 +38,117 @@ func (AttrCarrierName) Recommended() {}
 // [rfc9293]: https://datatracker.ietf.org/doc/html/rfc9293#section-3.3.2
 type AttrConnectionState string // network.connection.state
 
-func (AttrConnectionState) Development() {}
-func (AttrConnectionState) Recommended() {}
+func (AttrConnectionState) Development()    {}
+func (AttrConnectionState) Recommended()    {}
+func (AttrConnectionState) Key() string     { return "network_connection_state" }
+func (a AttrConnectionState) Value() string { return string(a) }
+
+const ConnectionStateClosed AttrConnectionState = "closed"
+const ConnectionStateCloseWait AttrConnectionState = "close_wait"
+const ConnectionStateClosing AttrConnectionState = "closing"
+const ConnectionStateEstablished AttrConnectionState = "established"
+const ConnectionStateFinWait1 AttrConnectionState = "fin_wait_1"
+const ConnectionStateFinWait2 AttrConnectionState = "fin_wait_2"
+const ConnectionStateLastAck AttrConnectionState = "last_ack"
+const ConnectionStateListen AttrConnectionState = "listen"
+const ConnectionStateSynReceived AttrConnectionState = "syn_received"
+const ConnectionStateSynSent AttrConnectionState = "syn_sent"
+const ConnectionStateTimeWait AttrConnectionState = "time_wait"
 
 // This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a wifi connection
 type AttrConnectionSubtype string // network.connection.subtype
 
-func (AttrConnectionSubtype) Development() {}
-func (AttrConnectionSubtype) Recommended() {}
+func (AttrConnectionSubtype) Development()    {}
+func (AttrConnectionSubtype) Recommended()    {}
+func (AttrConnectionSubtype) Key() string     { return "network_connection_subtype" }
+func (a AttrConnectionSubtype) Value() string { return string(a) }
+
+const ConnectionSubtypeGprs AttrConnectionSubtype = "gprs"
+const ConnectionSubtypeEdge AttrConnectionSubtype = "edge"
+const ConnectionSubtypeUmts AttrConnectionSubtype = "umts"
+const ConnectionSubtypeCdma AttrConnectionSubtype = "cdma"
+const ConnectionSubtypeEvdo0 AttrConnectionSubtype = "evdo_0"
+const ConnectionSubtypeEvdoA AttrConnectionSubtype = "evdo_a"
+const ConnectionSubtypeCdma20001xrtt AttrConnectionSubtype = "cdma2000_1xrtt"
+const ConnectionSubtypeHsdpa AttrConnectionSubtype = "hsdpa"
+const ConnectionSubtypeHsupa AttrConnectionSubtype = "hsupa"
+const ConnectionSubtypeHspa AttrConnectionSubtype = "hspa"
+const ConnectionSubtypeIden AttrConnectionSubtype = "iden"
+const ConnectionSubtypeEvdoB AttrConnectionSubtype = "evdo_b"
+const ConnectionSubtypeLte AttrConnectionSubtype = "lte"
+const ConnectionSubtypeEhrpd AttrConnectionSubtype = "ehrpd"
+const ConnectionSubtypeHspap AttrConnectionSubtype = "hspap"
+const ConnectionSubtypeGsm AttrConnectionSubtype = "gsm"
+const ConnectionSubtypeTdScdma AttrConnectionSubtype = "td_scdma"
+const ConnectionSubtypeIwlan AttrConnectionSubtype = "iwlan"
+const ConnectionSubtypeNr AttrConnectionSubtype = "nr"
+const ConnectionSubtypeNrnsa AttrConnectionSubtype = "nrnsa"
+const ConnectionSubtypeLteCa AttrConnectionSubtype = "lte_ca"
 
 // The internet connection type
 type AttrConnectionType string // network.connection.type
 
-func (AttrConnectionType) Development() {}
-func (AttrConnectionType) Recommended() {}
+func (AttrConnectionType) Development()    {}
+func (AttrConnectionType) Recommended()    {}
+func (AttrConnectionType) Key() string     { return "network_connection_type" }
+func (a AttrConnectionType) Value() string { return string(a) }
+
+const ConnectionTypeWifi AttrConnectionType = "wifi"
+const ConnectionTypeWired AttrConnectionType = "wired"
+const ConnectionTypeCell AttrConnectionType = "cell"
+const ConnectionTypeUnavailable AttrConnectionType = "unavailable"
+const ConnectionTypeUnknown AttrConnectionType = "unknown"
 
 // The network interface name
 type AttrInterfaceName string // network.interface.name
 
-func (AttrInterfaceName) Development() {}
-func (AttrInterfaceName) Recommended() {}
+func (AttrInterfaceName) Development()    {}
+func (AttrInterfaceName) Recommended()    {}
+func (AttrInterfaceName) Key() string     { return "network_interface_name" }
+func (a AttrInterfaceName) Value() string { return string(a) }
 
 // The network IO operation direction
 type AttrIoDirection string // network.io.direction
 
-func (AttrIoDirection) Development() {}
-func (AttrIoDirection) Recommended() {}
+func (AttrIoDirection) Development()    {}
+func (AttrIoDirection) Recommended()    {}
+func (AttrIoDirection) Key() string     { return "network_io_direction" }
+func (a AttrIoDirection) Value() string { return string(a) }
+
+const IoDirectionTransmit AttrIoDirection = "transmit"
+const IoDirectionReceive AttrIoDirection = "receive"
 
 // Local address of the network connection - IP address or Unix domain socket name
 type AttrLocalAddress string // network.local.address
 
-func (AttrLocalAddress) Stable()      {}
-func (AttrLocalAddress) Recommended() {}
+func (AttrLocalAddress) Stable()         {}
+func (AttrLocalAddress) Recommended()    {}
+func (AttrLocalAddress) Key() string     { return "network_local_address" }
+func (a AttrLocalAddress) Value() string { return string(a) }
 
 // Local port number of the network connection
 type AttrLocalPort string // network.local.port
 
-func (AttrLocalPort) Stable()      {}
-func (AttrLocalPort) Recommended() {}
+func (AttrLocalPort) Stable()         {}
+func (AttrLocalPort) Recommended()    {}
+func (AttrLocalPort) Key() string     { return "network_local_port" }
+func (a AttrLocalPort) Value() string { return string(a) }
 
 // Peer address of the network connection - IP address or Unix domain socket name
 type AttrPeerAddress string // network.peer.address
 
-func (AttrPeerAddress) Stable()      {}
-func (AttrPeerAddress) Recommended() {}
+func (AttrPeerAddress) Stable()         {}
+func (AttrPeerAddress) Recommended()    {}
+func (AttrPeerAddress) Key() string     { return "network_peer_address" }
+func (a AttrPeerAddress) Value() string { return string(a) }
 
 // Peer port number of the network connection
 type AttrPeerPort string // network.peer.port
 
-func (AttrPeerPort) Stable()      {}
-func (AttrPeerPort) Recommended() {}
+func (AttrPeerPort) Stable()         {}
+func (AttrPeerPort) Recommended()    {}
+func (AttrPeerPort) Key() string     { return "network_peer_port" }
+func (a AttrPeerPort) Value() string { return string(a) }
 
 // [OSI application layer] or non-OSI equivalent.
 // The value SHOULD be normalized to lowercase
@@ -87,8 +156,10 @@ func (AttrPeerPort) Recommended() {}
 // [OSI application layer]: https://wikipedia.org/wiki/Application_layer
 type AttrProtocolName string // network.protocol.name
 
-func (AttrProtocolName) Stable()      {}
-func (AttrProtocolName) Recommended() {}
+func (AttrProtocolName) Stable()         {}
+func (AttrProtocolName) Recommended()    {}
+func (AttrProtocolName) Key() string     { return "network_protocol_name" }
+func (a AttrProtocolName) Value() string { return string(a) }
 
 // The actual version of the protocol used for network communication.
 // If protocol version is subject to negotiation (for example using [ALPN]), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set
@@ -96,8 +167,10 @@ func (AttrProtocolName) Recommended() {}
 // [ALPN]: https://www.rfc-editor.org/rfc/rfc7301.html
 type AttrProtocolVersion string // network.protocol.version
 
-func (AttrProtocolVersion) Stable()      {}
-func (AttrProtocolVersion) Recommended() {}
+func (AttrProtocolVersion) Stable()         {}
+func (AttrProtocolVersion) Recommended()    {}
+func (AttrProtocolVersion) Key() string     { return "network_protocol_version" }
+func (a AttrProtocolVersion) Value() string { return string(a) }
 
 // [OSI transport layer] or [inter-process communication method].
 //
@@ -111,8 +184,16 @@ func (AttrProtocolVersion) Recommended() {}
 // [inter-process communication method]: https://wikipedia.org/wiki/Inter-process_communication
 type AttrTransport string // network.transport
 
-func (AttrTransport) Stable()      {}
-func (AttrTransport) Recommended() {}
+func (AttrTransport) Stable()         {}
+func (AttrTransport) Recommended()    {}
+func (AttrTransport) Key() string     { return "network_transport" }
+func (a AttrTransport) Value() string { return string(a) }
+
+const TransportTcp AttrTransport = "tcp"
+const TransportUdp AttrTransport = "udp"
+const TransportPipe AttrTransport = "pipe"
+const TransportUnix AttrTransport = "unix"
+const TransportQuic AttrTransport = "quic"
 
 // [OSI network layer] or non-OSI equivalent.
 // The value SHOULD be normalized to lowercase
@@ -120,8 +201,13 @@ func (AttrTransport) Recommended() {}
 // [OSI network layer]: https://wikipedia.org/wiki/Network_layer
 type AttrType string // network.type
 
-func (AttrType) Stable()      {}
-func (AttrType) Recommended() {}
+func (AttrType) Stable()         {}
+func (AttrType) Recommended()    {}
+func (AttrType) Key() string     { return "network_type" }
+func (a AttrType) Value() string { return string(a) }
+
+const TypeIpv4 AttrType = "ipv4"
+const TypeIpv6 AttrType = "ipv6"
 
 /* State {
     name: "attr.go.j2",
@@ -177,7 +263,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "network",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -278,7 +363,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "network",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "GPRS",
@@ -459,7 +543,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "network",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -526,7 +609,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "network",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -632,7 +714,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "network",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "TCP",
@@ -689,7 +770,6 @@ func (AttrType) Recommended() {}
                     "root_namespace": "network",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "IPv4",
@@ -820,6 +900,7 @@ func (AttrType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

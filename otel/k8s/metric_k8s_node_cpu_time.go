@@ -6,37 +6,32 @@ import (
 
 // Total CPU time consumed
 type NodeCpuTime struct {
-	*prometheus.CounterVec
-	extra NodeCpuTimeExtra
+	prometheus.Counter
 }
 
 func NewNodeCpuTime() NodeCpuTime {
-	labels := []string{}
-	return NodeCpuTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "k8s",
-		Name:      "node_cpu_time",
-		Help:      "Total CPU time consumed",
-	}, labels)}
+	return NodeCpuTime{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "k8s_node_cpu_time",
+		Help: "Total CPU time consumed",
+	})}
 }
 
-func (m NodeCpuTime) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m NodeCpuTime) Register(regs ...prometheus.Registerer) NodeCpuTime {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type NodeCpuTimeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeCpuTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "node.cpu.time",
         "Type": "NodeCpuTime",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Total CPU time consumed",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

@@ -18,98 +18,97 @@ type ClientResponseBodySize struct {
 }
 
 func NewClientResponseBodySize() ClientResponseBodySize {
-	labels := []string{"http_request_method", "server_address", "server_port", "error_type", "http_response_status_code", "network_protocol_name", "url_template", "network_protocol_version", "url_scheme"}
+	labels := []string{AttrRequestMethod("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key(), error.AttrType("").Key(), AttrResponseStatusCode("").Key(), network.AttrProtocolName("").Key(), url.AttrTemplate("").Key(), network.AttrProtocolVersion("").Key(), url.AttrScheme("").Key()}
 	return ClientResponseBodySize{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "http",
-		Name:      "client_response_body_size",
-		Help:      "Size of HTTP client response bodies.",
+		Name: "http_client_response_body_size",
+		Help: "Size of HTTP client response bodies.",
 	}, labels)}
 }
 
-func (m ClientResponseBodySize) With(requestMethod AttrRequestMethod, address server.AttrAddress, port server.AttrPort, extra interface {
-	AttrErrorType() error.AttrType
-	AttrHttpResponseStatusCode() AttrResponseStatusCode
-	AttrNetworkProtocolName() network.AttrProtocolName
-	AttrUrlTemplate() url.AttrTemplate
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
-	AttrUrlScheme() url.AttrScheme
+func (m ClientResponseBodySize) With(requestMethod AttrRequestMethod, address server.AttrAddress, port server.AttrPort, extras ...interface {
+	ErrorType() error.AttrType
+	HttpResponseStatusCode() AttrResponseStatusCode
+	NetworkProtocolName() network.AttrProtocolName
+	UrlTemplate() url.AttrTemplate
+	NetworkProtocolVersion() network.AttrProtocolVersion
+	UrlScheme() url.AttrScheme
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(requestMethod),
-		string(address),
-		string(port),
-		string(extra.AttrErrorType()),
-		string(extra.AttrHttpResponseStatusCode()),
-		string(extra.AttrNetworkProtocolName()),
-		string(extra.AttrUrlTemplate()),
-		string(extra.AttrNetworkProtocolVersion()),
-		string(extra.AttrUrlScheme()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(requestMethod.Value(), address.Value(), port.Value(), extra.ErrorType().Value(), extra.HttpResponseStatusCode().Value(), extra.NetworkProtocolName().Value(), extra.UrlTemplate().Value(), extra.NetworkProtocolVersion().Value(), extra.UrlScheme().Value())
 }
 
-func (a ClientResponseBodySize) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientResponseBodySize {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [ClientResponseBodySize.With] instead
+func (m ClientResponseBodySize) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a ClientResponseBodySize) WithErrorType(attr interface{ ErrorType() error.AttrType }) ClientResponseBodySize {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a ClientResponseBodySize) WithHttpResponseStatusCode(attr interface{ AttrHttpResponseStatusCode() AttrResponseStatusCode }) ClientResponseBodySize {
-	a.extra.HttpResponseStatusCode = attr.AttrHttpResponseStatusCode()
+func (a ClientResponseBodySize) WithResponseStatusCode(attr interface{ HttpResponseStatusCode() AttrResponseStatusCode }) ClientResponseBodySize {
+	a.extra.AttrResponseStatusCode = attr.HttpResponseStatusCode()
 	return a
 }
 func (a ClientResponseBodySize) WithNetworkProtocolName(attr interface {
-	AttrNetworkProtocolName() network.AttrProtocolName
+	NetworkProtocolName() network.AttrProtocolName
 }) ClientResponseBodySize {
-	a.extra.NetworkProtocolName = attr.AttrNetworkProtocolName()
+	a.extra.AttrNetworkProtocolName = attr.NetworkProtocolName()
 	return a
 }
-func (a ClientResponseBodySize) WithUrlTemplate(attr interface{ AttrUrlTemplate() url.AttrTemplate }) ClientResponseBodySize {
-	a.extra.UrlTemplate = attr.AttrUrlTemplate()
+func (a ClientResponseBodySize) WithUrlTemplate(attr interface{ UrlTemplate() url.AttrTemplate }) ClientResponseBodySize {
+	a.extra.AttrUrlTemplate = attr.UrlTemplate()
 	return a
 }
 func (a ClientResponseBodySize) WithNetworkProtocolVersion(attr interface {
-	AttrNetworkProtocolVersion() network.AttrProtocolVersion
+	NetworkProtocolVersion() network.AttrProtocolVersion
 }) ClientResponseBodySize {
-	a.extra.NetworkProtocolVersion = attr.AttrNetworkProtocolVersion()
+	a.extra.AttrNetworkProtocolVersion = attr.NetworkProtocolVersion()
 	return a
 }
-func (a ClientResponseBodySize) WithUrlScheme(attr interface{ AttrUrlScheme() url.AttrScheme }) ClientResponseBodySize {
-	a.extra.UrlScheme = attr.AttrUrlScheme()
+func (a ClientResponseBodySize) WithUrlScheme(attr interface{ UrlScheme() url.AttrScheme }) ClientResponseBodySize {
+	a.extra.AttrUrlScheme = attr.UrlScheme()
 	return a
 }
 
 type ClientResponseBodySizeExtra struct {
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// [HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).
-	HttpResponseStatusCode AttrResponseStatusCode `otel:"http.response.status_code"`
-	// [OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.
-	NetworkProtocolName network.AttrProtocolName `otel:"network.protocol.name"`
-	// The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).
-	UrlTemplate url.AttrTemplate `otel:"url.template"`
-	// The actual version of the protocol used for network communication.
-	NetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"`
-	// The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.
-	UrlScheme url.AttrScheme `otel:"url.scheme"`
+	// Describes a class of error the operation ended with
+	AttrErrorType error.AttrType `otel:"error.type"` // [HTTP response status code]
+	//
+	// [HTTP response status code]: https://tools.ietf.org/html/rfc7231#section-6
+	AttrResponseStatusCode AttrResponseStatusCode `otel:"http.response.status_code"` // [OSI application layer] or non-OSI equivalent
+	//
+	// [OSI application layer]: https://wikipedia.org/wiki/Application_layer
+	AttrNetworkProtocolName network.AttrProtocolName `otel:"network.protocol.name"` // The low-cardinality template of an [absolute path reference]
+	//
+	// [absolute path reference]: https://www.rfc-editor.org/rfc/rfc3986#section-4.2
+	AttrUrlTemplate            url.AttrTemplate            `otel:"url.template"`             // The actual version of the protocol used for network communication
+	AttrNetworkProtocolVersion network.AttrProtocolVersion `otel:"network.protocol.version"` // The [URI scheme] component identifying the used protocol
+	//
+	// [URI scheme]: https://www.rfc-editor.org/rfc/rfc3986#section-3.1
+	AttrUrlScheme url.AttrScheme `otel:"url.scheme"`
 }
 
-func (a ClientResponseBodySizeExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a ClientResponseBodySizeExtra) AttrHttpResponseStatusCode() AttrResponseStatusCode {
-	return a.HttpResponseStatusCode
+func (a ClientResponseBodySizeExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a ClientResponseBodySizeExtra) HttpResponseStatusCode() AttrResponseStatusCode {
+	return a.AttrResponseStatusCode
 }
-func (a ClientResponseBodySizeExtra) AttrNetworkProtocolName() network.AttrProtocolName {
-	return a.NetworkProtocolName
+func (a ClientResponseBodySizeExtra) NetworkProtocolName() network.AttrProtocolName {
+	return a.AttrNetworkProtocolName
 }
-func (a ClientResponseBodySizeExtra) AttrUrlTemplate() url.AttrTemplate { return a.UrlTemplate }
-func (a ClientResponseBodySizeExtra) AttrNetworkProtocolVersion() network.AttrProtocolVersion {
-	return a.NetworkProtocolVersion
+func (a ClientResponseBodySizeExtra) UrlTemplate() url.AttrTemplate { return a.AttrUrlTemplate }
+func (a ClientResponseBodySizeExtra) NetworkProtocolVersion() network.AttrProtocolVersion {
+	return a.AttrNetworkProtocolVersion
 }
-func (a ClientResponseBodySizeExtra) AttrUrlScheme() url.AttrScheme { return a.UrlScheme }
+func (a ClientResponseBodySizeExtra) UrlScheme() url.AttrScheme { return a.AttrUrlScheme }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -136,7 +135,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "CONNECT method.",
@@ -262,7 +260,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -345,18 +342,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).",
-                    "examples": [
-                        200,
-                    ],
-                    "name": "http.response.status_code",
-                    "requirement_level": {
-                        "conditionally_required": "If and only if one was received/sent.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
                     "brief": "Describes a class of error the operation ended with.\n",
                     "examples": [
                         "timeout",
@@ -371,7 +356,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -385,6 +369,57 @@ State {
                     },
                 },
                 {
+                    "brief": "[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).",
+                    "examples": [
+                        200,
+                    ],
+                    "name": "http.response.status_code",
+                    "requirement_level": {
+                        "conditionally_required": "If and only if one was received/sent.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
+                    "brief": "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.",
+                    "examples": [
+                        "http",
+                        "spdy",
+                    ],
+                    "name": "network.protocol.name",
+                    "note": "The value SHOULD be normalized to lowercase.",
+                    "requirement_level": {
+                        "conditionally_required": "If not `http` and `network.protocol.version` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The actual version of the protocol used for network communication.",
+                    "examples": [
+                        "1.0",
+                        "1.1",
+                        "2",
+                        "3",
+                    ],
+                    "name": "network.protocol.version",
+                    "note": "If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
+                    "examples": [
+                        "http",
+                        "https",
+                    ],
+                    "name": "url.scheme",
+                    "requirement_level": "opt_in",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
                     "brief": "HTTP request method.",
                     "examples": [
                         "GET",
@@ -396,7 +431,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "CONNECT method.",
@@ -482,42 +516,18 @@ State {
                     },
                 },
                 {
-                    "brief": "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.",
+                    "brief": "The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).\n",
                     "examples": [
-                        "http",
-                        "spdy",
+                        "/users/{id}",
+                        "/users/:id",
+                        "/users?id={id}",
                     ],
-                    "name": "network.protocol.name",
-                    "note": "The value SHOULD be normalized to lowercase.",
+                    "name": "url.template",
+                    "note": "The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.\n",
                     "requirement_level": {
-                        "conditionally_required": "If not `http` and `network.protocol.version` is set.",
+                        "conditionally_required": "If available.",
                     },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The actual version of the protocol used for network communication.",
-                    "examples": [
-                        "1.0",
-                        "1.1",
-                        "2",
-                        "3",
-                    ],
-                    "name": "network.protocol.version",
-                    "note": "If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.\n",
-                    "examples": [
-                        "http",
-                        "https",
-                    ],
-                    "name": "url.scheme",
-                    "requirement_level": "opt_in",
-                    "stability": "stable",
+                    "stability": "development",
                     "type": "string",
                 },
                 {
@@ -545,21 +555,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": "int",
-                },
-                {
-                    "brief": "The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).\n",
-                    "examples": [
-                        "/users/{id}",
-                        "/users/:id",
-                        "/users?id={id}",
-                    ],
-                    "name": "url.template",
-                    "note": "The `url.template` MUST have low cardinality. It is not usually available on HTTP clients, but may be known by the application or specialized HTTP instrumentation.\n",
-                    "requirement_level": {
-                        "conditionally_required": "If available.",
-                    },
-                    "stability": "development",
-                    "type": "string",
                 },
             ],
             "brief": "Size of HTTP client response bodies.",
@@ -691,6 +686,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -798,6 +795,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -884,7 +882,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

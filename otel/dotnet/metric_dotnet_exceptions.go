@@ -15,22 +15,20 @@ type Exceptions struct {
 }
 
 func NewExceptions() Exceptions {
-	labels := []string{"error_type"}
+	labels := []string{error.AttrType("").Key()}
 	return Exceptions{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "dotnet",
-		Name:      "exceptions",
-		Help:      "The number of exceptions that have been thrown in managed code.",
+		Name: "dotnet_exceptions",
+		Help: "The number of exceptions that have been thrown in managed code.",
 	}, labels)}
 }
 
-func (m Exceptions) With(kind error.AttrType, extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(kind),
-	)
+func (m Exceptions) With(kind error.AttrType, extras ...interface{}) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(kind.Value())
+}
+
+// Deprecated: Use [Exceptions.With] instead
+func (m Exceptions) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 type ExceptionsExtra struct {
@@ -38,7 +36,7 @@ type ExceptionsExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -63,7 +61,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -89,7 +86,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -136,6 +132,8 @@ State {
             "type": "metric",
             "unit": "{exception}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -243,6 +241,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -329,7 +328,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

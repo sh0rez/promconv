@@ -6,37 +6,32 @@ import (
 
 // The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.
 type GcLastCollectionMemoryCommittedSize struct {
-	*prometheus.GaugeVec
-	extra GcLastCollectionMemoryCommittedSizeExtra
+	prometheus.Gauge
 }
 
 func NewGcLastCollectionMemoryCommittedSize() GcLastCollectionMemoryCommittedSize {
-	labels := []string{}
-	return GcLastCollectionMemoryCommittedSize{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "dotnet",
-		Name:      "gc_last_collection_memory_committed_size",
-		Help:      "The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.",
-	}, labels)}
+	return GcLastCollectionMemoryCommittedSize{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "dotnet_gc_last_collection_memory_committed_size",
+		Help: "The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.",
+	})}
 }
 
-func (m GcLastCollectionMemoryCommittedSize) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m GcLastCollectionMemoryCommittedSize) Register(regs ...prometheus.Registerer) GcLastCollectionMemoryCommittedSize {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type GcLastCollectionMemoryCommittedSizeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcLastCollectionMemoryCommittedSizeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "gc.last_collection.memory.committed_size",
         "Type": "GcLastCollectionMemoryCommittedSize",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.\n",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

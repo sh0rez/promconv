@@ -11,49 +11,51 @@ type RepositoryCount struct {
 }
 
 func NewRepositoryCount() RepositoryCount {
-	labels := []string{"vcs_owner_name", "vcs_provider_name"}
+	labels := []string{AttrOwnerName("").Key(), AttrProviderName("").Key()}
 	return RepositoryCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "vcs",
-		Name:      "repository_count",
-		Help:      "The number of repositories in an organization.",
+		Name: "vcs_repository_count",
+		Help: "The number of repositories in an organization.",
 	}, labels)}
 }
 
-func (m RepositoryCount) With(extra interface {
-	AttrVcsOwnerName() AttrOwnerName
-	AttrVcsProviderName() AttrProviderName
+func (m RepositoryCount) With(extras ...interface {
+	VcsOwnerName() AttrOwnerName
+	VcsProviderName() AttrProviderName
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrVcsOwnerName()),
-		string(extra.AttrVcsProviderName()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.VcsOwnerName().Value(), extra.VcsProviderName().Value())
 }
 
-func (a RepositoryCount) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) RepositoryCount {
-	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+// Deprecated: Use [RepositoryCount.With] instead
+func (m RepositoryCount) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a RepositoryCount) WithOwnerName(attr interface{ VcsOwnerName() AttrOwnerName }) RepositoryCount {
+	a.extra.AttrOwnerName = attr.VcsOwnerName()
 	return a
 }
-func (a RepositoryCount) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) RepositoryCount {
-	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+func (a RepositoryCount) WithProviderName(attr interface{ VcsProviderName() AttrProviderName }) RepositoryCount {
+	a.extra.AttrProviderName = attr.VcsProviderName()
 	return a
 }
 
 type RepositoryCountExtra struct {
-	// The group owner within the version control system.
-	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
-	// The name of the version control system provider.
-	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
+	// The group owner within the version control system
+	AttrOwnerName    AttrOwnerName    `otel:"vcs.owner.name"` // The name of the version control system provider
+	AttrProviderName AttrProviderName `otel:"vcs.provider.name"`
 }
 
-func (a RepositoryCountExtra) AttrVcsOwnerName() AttrOwnerName       { return a.VcsOwnerName }
-func (a RepositoryCountExtra) AttrVcsProviderName() AttrProviderName { return a.VcsProviderName }
+func (a RepositoryCountExtra) VcsOwnerName() AttrOwnerName       { return a.AttrOwnerName }
+func (a RepositoryCountExtra) VcsProviderName() AttrProviderName { return a.AttrProviderName }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -92,7 +94,6 @@ State {
                 "requirement_level": "opt_in",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "[GitHub](https://github.com)",
@@ -164,7 +165,6 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[GitHub](https://github.com)",
@@ -254,6 +254,8 @@ State {
             "type": "metric",
             "unit": "{repository}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -361,6 +363,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -447,7 +450,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

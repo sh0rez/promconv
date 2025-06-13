@@ -6,37 +6,32 @@ import (
 
 // Shared memory used (mostly by tmpfs).
 type MemoryShared struct {
-	*prometheus.GaugeVec
-	extra MemorySharedExtra
+	prometheus.Gauge
 }
 
 func NewMemoryShared() MemoryShared {
-	labels := []string{}
-	return MemoryShared{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "memory_shared",
-		Help:      "Shared memory used (mostly by tmpfs).",
-	}, labels)}
+	return MemoryShared{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "system_memory_shared",
+		Help: "Shared memory used (mostly by tmpfs).",
+	})}
 }
 
-func (m MemoryShared) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryShared) Register(regs ...prometheus.Registerer) MemoryShared {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MemorySharedExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemorySharedExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "memory.shared",
         "Type": "MemoryShared",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Shared memory used (mostly by tmpfs).",
@@ -178,6 +172,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -264,7 +259,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

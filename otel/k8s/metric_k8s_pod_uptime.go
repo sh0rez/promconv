@@ -6,37 +6,32 @@ import (
 
 // The time the Pod has been running
 type PodUptime struct {
-	*prometheus.GaugeVec
-	extra PodUptimeExtra
+	prometheus.Gauge
 }
 
 func NewPodUptime() PodUptime {
-	labels := []string{}
-	return PodUptime{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "pod_uptime",
-		Help:      "The time the Pod has been running",
-	}, labels)}
+	return PodUptime{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_pod_uptime",
+		Help: "The time the Pod has been running",
+	})}
 }
 
-func (m PodUptime) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m PodUptime) Register(regs ...prometheus.Registerer) PodUptime {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type PodUptimeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "PodUptimeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "pod.uptime",
         "Type": "PodUptime",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The time the Pod has been running",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

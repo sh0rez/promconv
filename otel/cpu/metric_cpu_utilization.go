@@ -4,56 +4,58 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.
+// Deprecated. Use `system.cpu.utilization` instead.
 type Utilization struct {
 	*prometheus.GaugeVec
 	extra UtilizationExtra
 }
 
 func NewUtilization() Utilization {
-	labels := []string{"cpu_logical_number", "cpu_mode"}
+	labels := []string{AttrLogicalNumber("").Key(), AttrMode("").Key()}
 	return Utilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "cpu",
-		Name:      "utilization",
-		Help:      "For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.",
+		Name: "cpu_utilization",
+		Help: "Deprecated. Use `system.cpu.utilization` instead.",
 	}, labels)}
 }
 
-func (m Utilization) With(extra interface {
-	AttrCpuLogicalNumber() AttrLogicalNumber
-	AttrCpuMode() AttrMode
+func (m Utilization) With(extras ...interface {
+	CpuLogicalNumber() AttrLogicalNumber
+	CpuMode() AttrMode
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrCpuLogicalNumber()),
-		string(extra.AttrCpuMode()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.CpuLogicalNumber().Value(), extra.CpuMode().Value())
 }
 
-func (a Utilization) WithCpuLogicalNumber(attr interface{ AttrCpuLogicalNumber() AttrLogicalNumber }) Utilization {
-	a.extra.CpuLogicalNumber = attr.AttrCpuLogicalNumber()
+// Deprecated: Use [Utilization.With] instead
+func (m Utilization) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a Utilization) WithLogicalNumber(attr interface{ CpuLogicalNumber() AttrLogicalNumber }) Utilization {
+	a.extra.AttrLogicalNumber = attr.CpuLogicalNumber()
 	return a
 }
-func (a Utilization) WithCpuMode(attr interface{ AttrCpuMode() AttrMode }) Utilization {
-	a.extra.CpuMode = attr.AttrCpuMode()
+func (a Utilization) WithMode(attr interface{ CpuMode() AttrMode }) Utilization {
+	a.extra.AttrMode = attr.CpuMode()
 	return a
 }
 
 type UtilizationExtra struct {
 	// The logical CPU number [0..n-1]
-	CpuLogicalNumber AttrLogicalNumber `otel:"cpu.logical_number"`
-	// The mode of the CPU
-	CpuMode AttrMode `otel:"cpu.mode"`
+	AttrLogicalNumber AttrLogicalNumber `otel:"cpu.logical_number"` // The mode of the CPU
+	AttrMode          AttrMode          `otel:"cpu.mode"`
 }
 
-func (a UtilizationExtra) AttrCpuLogicalNumber() AttrLogicalNumber { return a.CpuLogicalNumber }
-func (a UtilizationExtra) AttrCpuMode() AttrMode                   { return a.CpuMode }
+func (a UtilizationExtra) CpuLogicalNumber() AttrLogicalNumber { return a.AttrLogicalNumber }
+func (a UtilizationExtra) CpuMode() AttrMode                   { return a.AttrMode }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -85,11 +87,10 @@ State {
                     "system",
                 ],
                 "name": "cpu.mode",
-                "note": "Following modes SHOULD be used: `user`, `system`, `nice`, `idle`, `iowait`, `interrupt`, `steal`",
+                "note": "Following states SHOULD be used: `user`, `system`, `nice`, `idle`, `iowait`, `interrupt`, `steal`",
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -178,11 +179,10 @@ State {
                         "system",
                     ],
                     "name": "cpu.mode",
-                    "note": "Following modes SHOULD be used: `user`, `system`, `nice`, `idle`, `iowait`, `interrupt`, `steal`",
+                    "note": "Following states SHOULD be used: `user`, `system`, `nice`, `idle`, `iowait`, `interrupt`, `steal`",
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -252,7 +252,12 @@ State {
                     },
                 },
             ],
-            "brief": "For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.",
+            "brief": "Deprecated. Use `system.cpu.utilization` instead.",
+            "deprecated": {
+                "note": "Replaced by `system.cpu.utilization`.",
+                "reason": "renamed",
+                "renamed_to": "system.cpu.utilization",
+            },
             "events": [],
             "id": "metric.cpu.utilization",
             "instrument": "gauge",
@@ -282,7 +287,7 @@ State {
                     },
                 },
                 "provenance": {
-                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/cpu/metrics.yaml",
+                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/cpu/deprecated.yaml",
                     "registry_id": "main",
                 },
             },
@@ -294,6 +299,8 @@ State {
             "type": "metric",
             "unit": "1",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -401,6 +408,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -487,7 +495,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

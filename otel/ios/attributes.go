@@ -7,16 +7,32 @@ package ios
 // [UIApplicationDelegate documentation]: https://developer.apple.com/documentation/uikit/uiapplicationdelegate
 type AttrAppState string // ios.app.state
 
-func (AttrAppState) Development() {}
-func (AttrAppState) Recommended() {}
+func (AttrAppState) Development()    {}
+func (AttrAppState) Recommended()    {}
+func (AttrAppState) Key() string     { return "ios_app_state" }
+func (a AttrAppState) Value() string { return string(a) }
+
+const AppStateActive AttrAppState = "active"
+const AppStateInactive AttrAppState = "inactive"
+const AppStateBackground AttrAppState = "background"
+const AppStateForeground AttrAppState = "foreground"
+const AppStateTerminate AttrAppState = "terminate"
 
 // The iOS lifecycle states are defined in the [UIApplicationDelegate documentation], and from which the `OS terminology` column values are derived
 //
 // [UIApplicationDelegate documentation]: https://developer.apple.com/documentation/uikit/uiapplicationdelegate
 type AttrState string // ios.state
 
-func (AttrState) Development() {}
-func (AttrState) Recommended() {}
+func (AttrState) Development()    {}
+func (AttrState) Recommended()    {}
+func (AttrState) Key() string     { return "ios_state" }
+func (a AttrState) Value() string { return string(a) }
+
+const StateActive AttrState = "active"
+const StateInactive AttrState = "inactive"
+const StateBackground AttrState = "background"
+const StateForeground AttrState = "foreground"
+const StateTerminate AttrState = "terminate"
 
 /* State {
     name: "attr.go.j2",
@@ -33,7 +49,6 @@ func (AttrState) Recommended() {}
                     "root_namespace": "ios",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The app has become `active`. Associated with UIKit notification `applicationDidBecomeActive`.\n",
@@ -89,7 +104,6 @@ func (AttrState) Recommended() {}
                     "root_namespace": "ios",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The app has become `active`. Associated with UIKit notification `applicationDidBecomeActive`.\n",
@@ -244,6 +258,7 @@ func (AttrState) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

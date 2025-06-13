@@ -5,36 +5,68 @@ type AttrContextId string // feature_flag.context.id
 
 func (AttrContextId) ReleaseCandidate() {}
 func (AttrContextId) Recommended()      {}
+func (AttrContextId) Key() string       { return "feature_flag_context_id" }
+func (a AttrContextId) Value() string   { return string(a) }
 
 // Deprecated, use `error.message` instead
 type AttrEvaluationErrorMessage string // feature_flag.evaluation.error.message
 
-func (AttrEvaluationErrorMessage) Development() {}
-func (AttrEvaluationErrorMessage) Recommended() {}
+func (AttrEvaluationErrorMessage) Development()    {}
+func (AttrEvaluationErrorMessage) Recommended()    {}
+func (AttrEvaluationErrorMessage) Key() string     { return "feature_flag_evaluation_error_message" }
+func (a AttrEvaluationErrorMessage) Value() string { return string(a) }
 
 // Deprecated, use `feature_flag.result.reason` instead
 type AttrEvaluationReason string // feature_flag.evaluation.reason
 
-func (AttrEvaluationReason) Development() {}
-func (AttrEvaluationReason) Recommended() {}
+func (AttrEvaluationReason) Development()    {}
+func (AttrEvaluationReason) Recommended()    {}
+func (AttrEvaluationReason) Key() string     { return "feature_flag_evaluation_reason" }
+func (a AttrEvaluationReason) Value() string { return string(a) }
+
+const EvaluationReasonStatic AttrEvaluationReason = "static"
+const EvaluationReasonDefault AttrEvaluationReason = "default"
+const EvaluationReasonTargetingMatch AttrEvaluationReason = "targeting_match"
+const EvaluationReasonSplit AttrEvaluationReason = "split"
+const EvaluationReasonCached AttrEvaluationReason = "cached"
+const EvaluationReasonDisabled AttrEvaluationReason = "disabled"
+const EvaluationReasonUnknown AttrEvaluationReason = "unknown"
+const EvaluationReasonStale AttrEvaluationReason = "stale"
+const EvaluationReasonError AttrEvaluationReason = "error"
 
 // The lookup key of the feature flag
 type AttrKey string // feature_flag.key
 
 func (AttrKey) ReleaseCandidate() {}
 func (AttrKey) Recommended()      {}
+func (AttrKey) Key() string       { return "feature_flag_key" }
+func (a AttrKey) Value() string   { return string(a) }
 
 // Identifies the feature flag provider
 type AttrProviderName string // feature_flag.provider.name
 
 func (AttrProviderName) ReleaseCandidate() {}
 func (AttrProviderName) Recommended()      {}
+func (AttrProviderName) Key() string       { return "feature_flag_provider_name" }
+func (a AttrProviderName) Value() string   { return string(a) }
 
 // The reason code which shows how a feature flag value was determined
 type AttrResultReason string // feature_flag.result.reason
 
 func (AttrResultReason) ReleaseCandidate() {}
 func (AttrResultReason) Recommended()      {}
+func (AttrResultReason) Key() string       { return "feature_flag_result_reason" }
+func (a AttrResultReason) Value() string   { return string(a) }
+
+const ResultReasonStatic AttrResultReason = "static"
+const ResultReasonDefault AttrResultReason = "default"
+const ResultReasonTargetingMatch AttrResultReason = "targeting_match"
+const ResultReasonSplit AttrResultReason = "split"
+const ResultReasonCached AttrResultReason = "cached"
+const ResultReasonDisabled AttrResultReason = "disabled"
+const ResultReasonUnknown AttrResultReason = "unknown"
+const ResultReasonStale AttrResultReason = "stale"
+const ResultReasonError AttrResultReason = "error"
 
 // The evaluated value of the feature flag.
 // With some feature flag providers, feature flag results can be quite large or contain private or sensitive details.
@@ -46,6 +78,8 @@ type AttrResultValue string // feature_flag.result.value
 
 func (AttrResultValue) ReleaseCandidate() {}
 func (AttrResultValue) Recommended()      {}
+func (AttrResultValue) Key() string       { return "feature_flag_result_value" }
+func (a AttrResultValue) Value() string   { return string(a) }
 
 // A semantic identifier for an evaluated flag value.
 //
@@ -57,6 +91,8 @@ type AttrResultVariant string // feature_flag.result.variant
 
 func (AttrResultVariant) ReleaseCandidate() {}
 func (AttrResultVariant) Recommended()      {}
+func (AttrResultVariant) Key() string       { return "feature_flag_result_variant" }
+func (a AttrResultVariant) Value() string   { return string(a) }
 
 // The identifier of the [flag set] to which the feature flag belongs
 //
@@ -65,18 +101,24 @@ type AttrSetId string // feature_flag.set.id
 
 func (AttrSetId) ReleaseCandidate() {}
 func (AttrSetId) Recommended()      {}
+func (AttrSetId) Key() string       { return "feature_flag_set_id" }
+func (a AttrSetId) Value() string   { return string(a) }
 
 // Deprecated, use `feature_flag.result.variant` instead
 type AttrVariant string // feature_flag.variant
 
-func (AttrVariant) Development() {}
-func (AttrVariant) Recommended() {}
+func (AttrVariant) Development()    {}
+func (AttrVariant) Recommended()    {}
+func (AttrVariant) Key() string     { return "feature_flag_variant" }
+func (a AttrVariant) Value() string { return string(a) }
 
 // The version of the ruleset used during the evaluation. This may be any stable value which uniquely identifies the ruleset
 type AttrVersion string // feature_flag.version
 
 func (AttrVersion) ReleaseCandidate() {}
 func (AttrVersion) Recommended()      {}
+func (AttrVersion) Key() string       { return "feature_flag_version" }
+func (a AttrVersion) Value() string   { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -130,7 +172,6 @@ func (AttrVersion) Recommended()      {}
                     "root_namespace": "feature_flag",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The resolved value is static (no dynamic evaluation).",
@@ -242,7 +283,6 @@ func (AttrVersion) Recommended()      {}
                     "root_namespace": "feature_flag",
                     "stability": "release_candidate",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The resolved value is static (no dynamic evaluation).",
@@ -500,6 +540,7 @@ func (AttrVersion) Recommended()      {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

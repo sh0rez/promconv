@@ -15,57 +15,59 @@ type NetworkDropped struct {
 }
 
 func NewNetworkDropped() NetworkDropped {
-	labels := []string{"network_interface_name", "network_io_direction"}
+	labels := []string{network.AttrInterfaceName("").Key(), network.AttrIoDirection("").Key()}
 	return NetworkDropped{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "system",
-		Name:      "network_dropped",
-		Help:      "Count of packets that are dropped or discarded even though there was no error",
+		Name: "system_network_dropped",
+		Help: "Count of packets that are dropped or discarded even though there was no error",
 	}, labels)}
 }
 
-func (m NetworkDropped) With(extra interface {
-	AttrNetworkInterfaceName() network.AttrInterfaceName
-	AttrNetworkIoDirection() network.AttrIoDirection
+func (m NetworkDropped) With(extras ...interface {
+	NetworkInterfaceName() network.AttrInterfaceName
+	NetworkIoDirection() network.AttrIoDirection
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrNetworkInterfaceName()),
-		string(extra.AttrNetworkIoDirection()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.NetworkInterfaceName().Value(), extra.NetworkIoDirection().Value())
+}
+
+// Deprecated: Use [NetworkDropped.With] instead
+func (m NetworkDropped) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 func (a NetworkDropped) WithNetworkInterfaceName(attr interface {
-	AttrNetworkInterfaceName() network.AttrInterfaceName
+	NetworkInterfaceName() network.AttrInterfaceName
 }) NetworkDropped {
-	a.extra.NetworkInterfaceName = attr.AttrNetworkInterfaceName()
+	a.extra.AttrNetworkInterfaceName = attr.NetworkInterfaceName()
 	return a
 }
 func (a NetworkDropped) WithNetworkIoDirection(attr interface {
-	AttrNetworkIoDirection() network.AttrIoDirection
+	NetworkIoDirection() network.AttrIoDirection
 }) NetworkDropped {
-	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	a.extra.AttrNetworkIoDirection = attr.NetworkIoDirection()
 	return a
 }
 
 type NetworkDroppedExtra struct {
-	// The network interface name.
-	NetworkInterfaceName network.AttrInterfaceName `otel:"network.interface.name"`
-	// The network IO operation direction.
-	NetworkIoDirection network.AttrIoDirection `otel:"network.io.direction"`
+	// The network interface name
+	AttrNetworkInterfaceName network.AttrInterfaceName `otel:"network.interface.name"` // The network IO operation direction
+	AttrNetworkIoDirection   network.AttrIoDirection   `otel:"network.io.direction"`
 }
 
-func (a NetworkDroppedExtra) AttrNetworkInterfaceName() network.AttrInterfaceName {
-	return a.NetworkInterfaceName
+func (a NetworkDroppedExtra) NetworkInterfaceName() network.AttrInterfaceName {
+	return a.AttrNetworkInterfaceName
 }
-func (a NetworkDroppedExtra) AttrNetworkIoDirection() network.AttrIoDirection {
-	return a.NetworkIoDirection
+func (a NetworkDroppedExtra) NetworkIoDirection() network.AttrIoDirection {
+	return a.AttrNetworkIoDirection
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -100,7 +102,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -133,7 +134,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -210,6 +210,8 @@ State {
             "type": "metric",
             "unit": "{packet}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -317,6 +319,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -403,7 +406,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

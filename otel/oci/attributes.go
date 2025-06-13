@@ -10,8 +10,10 @@ package oci
 // [Example Image Manifest]: https://github.com/opencontainers/image-spec/blob/main/manifest.md#example-image-manifest
 type AttrManifestDigest string // oci.manifest.digest
 
-func (AttrManifestDigest) Development() {}
-func (AttrManifestDigest) Recommended() {}
+func (AttrManifestDigest) Development()    {}
+func (AttrManifestDigest) Recommended()    {}
+func (AttrManifestDigest) Key() string     { return "oci_manifest_digest" }
+func (a AttrManifestDigest) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -142,6 +144,7 @@ func (AttrManifestDigest) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

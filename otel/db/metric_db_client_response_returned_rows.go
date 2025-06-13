@@ -17,147 +17,128 @@ type ClientResponseReturnedRows struct {
 }
 
 func NewClientResponseReturnedRows() ClientResponseReturnedRows {
-	labels := []string{"db_system_name", "db_collection_name", "db_namespace", "db_operation_name", "db_response_status_code", "error_type", "server_port", "db_query_summary", "network_peer_address", "network_peer_port", "server_address", "db_query_text"}
+	labels := []string{AttrSystemName("").Key(), AttrCollectionName("").Key(), AttrNamespace("").Key(), AttrOperationName("").Key(), AttrResponseStatusCode("").Key(), error.AttrType("").Key(), server.AttrPort("").Key(), AttrQuerySummary("").Key(), network.AttrPeerAddress("").Key(), network.AttrPeerPort("").Key(), server.AttrAddress("").Key(), AttrQueryText("").Key()}
 	return ClientResponseReturnedRows{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "db",
-		Name:      "client_response_returned_rows",
-		Help:      "The actual number of records returned by the database operation.",
+		Name: "db_client_response_returned_rows",
+		Help: "The actual number of records returned by the database operation.",
 	}, labels)}
 }
 
-func (m ClientResponseReturnedRows) With(systemName AttrSystemName, extra interface {
-	AttrDbCollectionName() AttrCollectionName
-	AttrDbNamespace() AttrNamespace
-	AttrDbOperationName() AttrOperationName
-	AttrDbResponseStatusCode() AttrResponseStatusCode
-	AttrErrorType() error.AttrType
-	AttrServerPort() server.AttrPort
-	AttrDbQuerySummary() AttrQuerySummary
-	AttrNetworkPeerAddress() network.AttrPeerAddress
-	AttrNetworkPeerPort() network.AttrPeerPort
-	AttrServerAddress() server.AttrAddress
-	AttrDbQueryText() AttrQueryText
+func (m ClientResponseReturnedRows) With(systemName AttrSystemName, extras ...interface {
+	DbCollectionName() AttrCollectionName
+	DbNamespace() AttrNamespace
+	DbOperationName() AttrOperationName
+	DbResponseStatusCode() AttrResponseStatusCode
+	ErrorType() error.AttrType
+	ServerPort() server.AttrPort
+	DbQuerySummary() AttrQuerySummary
+	NetworkPeerAddress() network.AttrPeerAddress
+	NetworkPeerPort() network.AttrPeerPort
+	ServerAddress() server.AttrAddress
+	DbQueryText() AttrQueryText
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(systemName),
-		string(extra.AttrDbCollectionName()),
-		string(extra.AttrDbNamespace()),
-		string(extra.AttrDbOperationName()),
-		string(extra.AttrDbResponseStatusCode()),
-		string(extra.AttrErrorType()),
-		string(extra.AttrServerPort()),
-		string(extra.AttrDbQuerySummary()),
-		string(extra.AttrNetworkPeerAddress()),
-		string(extra.AttrNetworkPeerPort()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrDbQueryText()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(systemName.Value(), extra.DbCollectionName().Value(), extra.DbNamespace().Value(), extra.DbOperationName().Value(), extra.DbResponseStatusCode().Value(), extra.ErrorType().Value(), extra.ServerPort().Value(), extra.DbQuerySummary().Value(), extra.NetworkPeerAddress().Value(), extra.NetworkPeerPort().Value(), extra.ServerAddress().Value(), extra.DbQueryText().Value())
 }
 
-func (a ClientResponseReturnedRows) WithDbCollectionName(attr interface{ AttrDbCollectionName() AttrCollectionName }) ClientResponseReturnedRows {
-	a.extra.DbCollectionName = attr.AttrDbCollectionName()
+// Deprecated: Use [ClientResponseReturnedRows.With] instead
+func (m ClientResponseReturnedRows) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a ClientResponseReturnedRows) WithCollectionName(attr interface{ DbCollectionName() AttrCollectionName }) ClientResponseReturnedRows {
+	a.extra.AttrCollectionName = attr.DbCollectionName()
 	return a
 }
-func (a ClientResponseReturnedRows) WithDbNamespace(attr interface{ AttrDbNamespace() AttrNamespace }) ClientResponseReturnedRows {
-	a.extra.DbNamespace = attr.AttrDbNamespace()
+func (a ClientResponseReturnedRows) WithNamespace(attr interface{ DbNamespace() AttrNamespace }) ClientResponseReturnedRows {
+	a.extra.AttrNamespace = attr.DbNamespace()
 	return a
 }
-func (a ClientResponseReturnedRows) WithDbOperationName(attr interface{ AttrDbOperationName() AttrOperationName }) ClientResponseReturnedRows {
-	a.extra.DbOperationName = attr.AttrDbOperationName()
+func (a ClientResponseReturnedRows) WithOperationName(attr interface{ DbOperationName() AttrOperationName }) ClientResponseReturnedRows {
+	a.extra.AttrOperationName = attr.DbOperationName()
 	return a
 }
-func (a ClientResponseReturnedRows) WithDbResponseStatusCode(attr interface{ AttrDbResponseStatusCode() AttrResponseStatusCode }) ClientResponseReturnedRows {
-	a.extra.DbResponseStatusCode = attr.AttrDbResponseStatusCode()
+func (a ClientResponseReturnedRows) WithResponseStatusCode(attr interface{ DbResponseStatusCode() AttrResponseStatusCode }) ClientResponseReturnedRows {
+	a.extra.AttrResponseStatusCode = attr.DbResponseStatusCode()
 	return a
 }
-func (a ClientResponseReturnedRows) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientResponseReturnedRows {
-	a.extra.ErrorType = attr.AttrErrorType()
+func (a ClientResponseReturnedRows) WithErrorType(attr interface{ ErrorType() error.AttrType }) ClientResponseReturnedRows {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a ClientResponseReturnedRows) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientResponseReturnedRows {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ClientResponseReturnedRows) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ClientResponseReturnedRows {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
-func (a ClientResponseReturnedRows) WithDbQuerySummary(attr interface{ AttrDbQuerySummary() AttrQuerySummary }) ClientResponseReturnedRows {
-	a.extra.DbQuerySummary = attr.AttrDbQuerySummary()
+func (a ClientResponseReturnedRows) WithQuerySummary(attr interface{ DbQuerySummary() AttrQuerySummary }) ClientResponseReturnedRows {
+	a.extra.AttrQuerySummary = attr.DbQuerySummary()
 	return a
 }
 func (a ClientResponseReturnedRows) WithNetworkPeerAddress(attr interface {
-	AttrNetworkPeerAddress() network.AttrPeerAddress
+	NetworkPeerAddress() network.AttrPeerAddress
 }) ClientResponseReturnedRows {
-	a.extra.NetworkPeerAddress = attr.AttrNetworkPeerAddress()
+	a.extra.AttrNetworkPeerAddress = attr.NetworkPeerAddress()
 	return a
 }
-func (a ClientResponseReturnedRows) WithNetworkPeerPort(attr interface{ AttrNetworkPeerPort() network.AttrPeerPort }) ClientResponseReturnedRows {
-	a.extra.NetworkPeerPort = attr.AttrNetworkPeerPort()
+func (a ClientResponseReturnedRows) WithNetworkPeerPort(attr interface{ NetworkPeerPort() network.AttrPeerPort }) ClientResponseReturnedRows {
+	a.extra.AttrNetworkPeerPort = attr.NetworkPeerPort()
 	return a
 }
-func (a ClientResponseReturnedRows) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientResponseReturnedRows {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ClientResponseReturnedRows) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ClientResponseReturnedRows {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ClientResponseReturnedRows) WithDbQueryText(attr interface{ AttrDbQueryText() AttrQueryText }) ClientResponseReturnedRows {
-	a.extra.DbQueryText = attr.AttrDbQueryText()
+func (a ClientResponseReturnedRows) WithQueryText(attr interface{ DbQueryText() AttrQueryText }) ClientResponseReturnedRows {
+	a.extra.AttrQueryText = attr.DbQueryText()
 	return a
 }
 
 type ClientResponseReturnedRowsExtra struct {
-	// The name of a collection (table, container) within the database.
-	DbCollectionName AttrCollectionName `otel:"db.collection.name"`
-	// The name of the database, fully qualified within the server address and port.
-	DbNamespace AttrNamespace `otel:"db.namespace"`
-	// The name of the operation or command being executed.
-	DbOperationName AttrOperationName `otel:"db.operation.name"`
-	// Database response status code.
-	DbResponseStatusCode AttrResponseStatusCode `otel:"db.response.status_code"`
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
-	// Low cardinality summary of a database query.
-	DbQuerySummary AttrQuerySummary `otel:"db.query.summary"`
-	// Peer address of the database node where the operation was performed.
-	NetworkPeerAddress network.AttrPeerAddress `otel:"network.peer.address"`
-	// Peer port number of the network connection.
-	NetworkPeerPort network.AttrPeerPort `otel:"network.peer.port"`
-	// Name of the database host.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// The database query being executed.
-	DbQueryText AttrQueryText `otel:"db.query.text"`
+	// The name of a collection (table, container) within the database
+	AttrCollectionName     AttrCollectionName      `otel:"db.collection.name"`      // The name of the database, fully qualified within the server address and port
+	AttrNamespace          AttrNamespace           `otel:"db.namespace"`            // The name of the operation or command being executed
+	AttrOperationName      AttrOperationName       `otel:"db.operation.name"`       // Database response status code
+	AttrResponseStatusCode AttrResponseStatusCode  `otel:"db.response.status_code"` // Describes a class of error the operation ended with
+	AttrErrorType          error.AttrType          `otel:"error.type"`              // Server port number
+	AttrServerPort         server.AttrPort         `otel:"server.port"`             // Low cardinality summary of a database query
+	AttrQuerySummary       AttrQuerySummary        `otel:"db.query.summary"`        // Peer address of the database node where the operation was performed
+	AttrNetworkPeerAddress network.AttrPeerAddress `otel:"network.peer.address"`    // Peer port number of the network connection
+	AttrNetworkPeerPort    network.AttrPeerPort    `otel:"network.peer.port"`       // Name of the database host
+	AttrServerAddress      server.AttrAddress      `otel:"server.address"`          // The database query being executed
+	AttrQueryText          AttrQueryText           `otel:"db.query.text"`
 }
 
-func (a ClientResponseReturnedRowsExtra) AttrDbCollectionName() AttrCollectionName {
-	return a.DbCollectionName
+func (a ClientResponseReturnedRowsExtra) DbCollectionName() AttrCollectionName {
+	return a.AttrCollectionName
 }
-func (a ClientResponseReturnedRowsExtra) AttrDbNamespace() AttrNamespace { return a.DbNamespace }
-func (a ClientResponseReturnedRowsExtra) AttrDbOperationName() AttrOperationName {
-	return a.DbOperationName
+func (a ClientResponseReturnedRowsExtra) DbNamespace() AttrNamespace { return a.AttrNamespace }
+func (a ClientResponseReturnedRowsExtra) DbOperationName() AttrOperationName {
+	return a.AttrOperationName
 }
-func (a ClientResponseReturnedRowsExtra) AttrDbResponseStatusCode() AttrResponseStatusCode {
-	return a.DbResponseStatusCode
+func (a ClientResponseReturnedRowsExtra) DbResponseStatusCode() AttrResponseStatusCode {
+	return a.AttrResponseStatusCode
 }
-func (a ClientResponseReturnedRowsExtra) AttrErrorType() error.AttrType   { return a.ErrorType }
-func (a ClientResponseReturnedRowsExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
-func (a ClientResponseReturnedRowsExtra) AttrDbQuerySummary() AttrQuerySummary {
-	return a.DbQuerySummary
+func (a ClientResponseReturnedRowsExtra) ErrorType() error.AttrType        { return a.AttrErrorType }
+func (a ClientResponseReturnedRowsExtra) ServerPort() server.AttrPort      { return a.AttrServerPort }
+func (a ClientResponseReturnedRowsExtra) DbQuerySummary() AttrQuerySummary { return a.AttrQuerySummary }
+func (a ClientResponseReturnedRowsExtra) NetworkPeerAddress() network.AttrPeerAddress {
+	return a.AttrNetworkPeerAddress
 }
-func (a ClientResponseReturnedRowsExtra) AttrNetworkPeerAddress() network.AttrPeerAddress {
-	return a.NetworkPeerAddress
+func (a ClientResponseReturnedRowsExtra) NetworkPeerPort() network.AttrPeerPort {
+	return a.AttrNetworkPeerPort
 }
-func (a ClientResponseReturnedRowsExtra) AttrNetworkPeerPort() network.AttrPeerPort {
-	return a.NetworkPeerPort
+func (a ClientResponseReturnedRowsExtra) ServerAddress() server.AttrAddress {
+	return a.AttrServerAddress
 }
-func (a ClientResponseReturnedRowsExtra) AttrServerAddress() server.AttrAddress {
-	return a.ServerAddress
-}
-func (a ClientResponseReturnedRowsExtra) AttrDbQueryText() AttrQueryText { return a.DbQueryText }
+func (a ClientResponseReturnedRowsExtra) DbQueryText() AttrQueryText { return a.AttrQueryText }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -179,7 +160,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Some other SQL database. Fallback only.",
@@ -586,7 +566,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -714,7 +693,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -728,44 +706,15 @@ State {
                     },
                 },
                 {
-                    "brief": "Name of the database host.\n",
+                    "brief": "Peer address of the database node where the operation was performed.",
                     "examples": [
-                        "example.com",
                         "10.1.2.80",
                         "/tmp/my.sock",
                     ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "name": "network.peer.address",
+                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
                     "requirement_level": {
-                        "conditionally_required": "If using a port other than the default port for this DBMS and if `server.address` is set.",
-                    },
-                    "stability": "stable",
-                    "type": "int",
-                },
-                {
-                    "brief": "Low cardinality summary of a database query.\n",
-                    "examples": [
-                        "SELECT wuser_table",
-                        "INSERT shipping_details SELECT orders",
-                        "get user by id",
-                    ],
-                    "name": "db.query.summary",
-                    "note": "The query summary describes a class of database queries and is useful\nas a grouping key, especially when analyzing telemetry for database\ncalls involving complex queries.\n\nSummary may be available to the instrumentation through\ninstrumentation hooks or other means. If it is not available, instrumentations\nthat support query parsing SHOULD generate a summary following\n[Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)\nsection.\n",
-                    "requirement_level": {
-                        "recommended": "if available through instrumentation hooks or if the instrumentation supports generating a query summary.",
+                        "recommended": "If applicable for this database system.",
                     },
                     "stability": "stable",
                     "type": "string",
@@ -780,6 +729,20 @@ State {
                     "note": "It is RECOMMENDED to capture the value as provided by the application\nwithout attempting to do any case normalization.\n\nThe collection name SHOULD NOT be extracted from `db.query.text`,\nwhen the database system supports query text with multiple collections\nin non-batch operations.\n\nFor batch operations, if the individual operations are known to have the same\ncollection name then that collection name SHOULD be used.\n",
                     "requirement_level": {
                         "conditionally_required": "If readily available and if a database call is performed on a single collection.\n",
+                    },
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "The name of the database, fully qualified within the server address and port.\n",
+                    "examples": [
+                        "customers",
+                        "test.users",
+                    ],
+                    "name": "db.namespace",
+                    "note": "If a database system has multiple namespace components, they SHOULD be concatenated from the most general to the most specific namespace component, using `|` as a separator between the components. Any missing components (and their associated separators) SHOULD be omitted.\nSemantic conventions for individual database systems SHOULD document what `db.namespace` means in the context of that system.\nIt is RECOMMENDED to capture the value as provided by the application without attempting to do any case normalization.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If available.",
                     },
                     "stability": "stable",
                     "type": "string",
@@ -800,15 +763,16 @@ State {
                     "type": "string",
                 },
                 {
-                    "brief": "The name of the database, fully qualified within the server address and port.\n",
+                    "brief": "Low cardinality summary of a database query.\n",
                     "examples": [
-                        "customers",
-                        "test.users",
+                        "SELECT wuser_table",
+                        "INSERT shipping_details SELECT orders",
+                        "get user by id",
                     ],
-                    "name": "db.namespace",
-                    "note": "If a database system has multiple namespace components, they SHOULD be concatenated from the most general to the most specific namespace component, using `|` as a separator between the components. Any missing components (and their associated separators) SHOULD be omitted.\nSemantic conventions for individual database systems SHOULD document what `db.namespace` means in the context of that system.\nIt is RECOMMENDED to capture the value as provided by the application without attempting to do any case normalization.\n",
+                    "name": "db.query.summary",
+                    "note": "The query summary describes a class of database queries and is useful\nas a grouping key, especially when analyzing telemetry for database\ncalls involving complex queries.\n\nSummary may be available to the instrumentation through\ninstrumentation hooks or other means. If it is not available, instrumentations\nthat support query parsing SHOULD generate a summary following\n[Generating query summary](/docs/database/database-spans.md#generating-a-summary-of-the-query)\nsection.\n",
                     "requirement_level": {
-                        "conditionally_required": "If available.",
+                        "recommended": "if available through instrumentation hooks or if the instrumentation supports generating a query summary.",
                     },
                     "stability": "stable",
                     "type": "string",
@@ -832,7 +796,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Some other SQL database. Fallback only.",
@@ -1166,20 +1129,6 @@ State {
                     },
                 },
                 {
-                    "brief": "Peer address of the database node where the operation was performed.",
-                    "examples": [
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "network.peer.address",
-                    "note": "Semantic conventions for individual database systems SHOULD document whether `network.peer.*` attributes are applicable. Network peer address and port are useful when the application interacts with individual database nodes directly.\nIf a database operation involved multiple network calls (for example retries), the address of the last contacted node SHOULD be used.\n",
-                    "requirement_level": {
-                        "recommended": "If applicable for this database system.",
-                    },
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
                     "brief": "Peer port number of the network connection.",
                     "examples": [
                         65123,
@@ -1187,6 +1136,34 @@ State {
                     "name": "network.peer.port",
                     "requirement_level": {
                         "recommended": "If and only if `network.peer.address` is set.",
+                    },
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
+                    "brief": "Name of the database host.\n",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": {
+                        "conditionally_required": "If using a port other than the default port for this DBMS and if `server.address` is set.",
                     },
                     "stability": "stable",
                     "type": "int",
@@ -1355,6 +1332,8 @@ State {
             "type": "metric",
             "unit": "{row}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -1462,6 +1441,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -1548,7 +1528,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

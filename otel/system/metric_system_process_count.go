@@ -11,40 +11,44 @@ type ProcessCount struct {
 }
 
 func NewProcessCount() ProcessCount {
-	labels := []string{"system_process_status"}
+	labels := []string{AttrProcessStatus("").Key()}
 	return ProcessCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "process_count",
-		Help:      "Total number of processes in each state",
+		Name: "system_process_count",
+		Help: "Total number of processes in each state",
 	}, labels)}
 }
 
-func (m ProcessCount) With(extra interface {
-	AttrSystemProcessStatus() AttrProcessStatus
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ProcessCount) With(extras ...interface{ SystemProcessStatus() AttrProcessStatus }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemProcessStatus()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.SystemProcessStatus().Value())
 }
 
-func (a ProcessCount) WithSystemProcessStatus(attr interface{ AttrSystemProcessStatus() AttrProcessStatus }) ProcessCount {
-	a.extra.SystemProcessStatus = attr.AttrSystemProcessStatus()
+// Deprecated: Use [ProcessCount.With] instead
+func (m ProcessCount) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ProcessCount) WithProcessStatus(attr interface{ SystemProcessStatus() AttrProcessStatus }) ProcessCount {
+	a.extra.AttrProcessStatus = attr.SystemProcessStatus()
 	return a
 }
 
 type ProcessCountExtra struct {
-	// The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)
-	SystemProcessStatus AttrProcessStatus `otel:"system.process.status"`
+	// The process state, e.g., [Linux Process State Codes]
+	//
+	// [Linux Process State Codes]: https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES
+	AttrProcessStatus AttrProcessStatus `otel:"system.process.status"`
 }
 
-func (a ProcessCountExtra) AttrSystemProcessStatus() AttrProcessStatus { return a.SystemProcessStatus }
+func (a ProcessCountExtra) SystemProcessStatus() AttrProcessStatus { return a.AttrProcessStatus }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -68,7 +72,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -117,7 +120,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -188,6 +190,8 @@ State {
             "type": "metric",
             "unit": "{process}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -295,6 +299,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -381,7 +386,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

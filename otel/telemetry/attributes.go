@@ -6,20 +6,39 @@ package telemetry
 // a string starting with `opentelemetry-`, e.g. `opentelemetry-java-instrumentation`
 type AttrDistroName string // telemetry.distro.name
 
-func (AttrDistroName) Development() {}
-func (AttrDistroName) Recommended() {}
+func (AttrDistroName) Development()    {}
+func (AttrDistroName) Recommended()    {}
+func (AttrDistroName) Key() string     { return "telemetry_distro_name" }
+func (a AttrDistroName) Value() string { return string(a) }
 
 // The version string of the auto instrumentation agent or distribution, if used
 type AttrDistroVersion string // telemetry.distro.version
 
-func (AttrDistroVersion) Development() {}
-func (AttrDistroVersion) Recommended() {}
+func (AttrDistroVersion) Development()    {}
+func (AttrDistroVersion) Recommended()    {}
+func (AttrDistroVersion) Key() string     { return "telemetry_distro_version" }
+func (a AttrDistroVersion) Value() string { return string(a) }
 
 // The language of the telemetry SDK
 type AttrSdkLanguage string // telemetry.sdk.language
 
-func (AttrSdkLanguage) Stable()      {}
-func (AttrSdkLanguage) Recommended() {}
+func (AttrSdkLanguage) Stable()         {}
+func (AttrSdkLanguage) Recommended()    {}
+func (AttrSdkLanguage) Key() string     { return "telemetry_sdk_language" }
+func (a AttrSdkLanguage) Value() string { return string(a) }
+
+const SdkLanguageCpp AttrSdkLanguage = "cpp"
+const SdkLanguageDotnet AttrSdkLanguage = "dotnet"
+const SdkLanguageErlang AttrSdkLanguage = "erlang"
+const SdkLanguageGo AttrSdkLanguage = "go"
+const SdkLanguageJava AttrSdkLanguage = "java"
+const SdkLanguageNodejs AttrSdkLanguage = "nodejs"
+const SdkLanguagePhp AttrSdkLanguage = "php"
+const SdkLanguagePython AttrSdkLanguage = "python"
+const SdkLanguageRuby AttrSdkLanguage = "ruby"
+const SdkLanguageRust AttrSdkLanguage = "rust"
+const SdkLanguageSwift AttrSdkLanguage = "swift"
+const SdkLanguageWebjs AttrSdkLanguage = "webjs"
 
 // The name of the telemetry SDK as defined above.
 //
@@ -31,14 +50,18 @@ func (AttrSdkLanguage) Recommended() {}
 // All custom identifiers SHOULD be stable across different versions of an implementation
 type AttrSdkName string // telemetry.sdk.name
 
-func (AttrSdkName) Stable()      {}
-func (AttrSdkName) Recommended() {}
+func (AttrSdkName) Stable()         {}
+func (AttrSdkName) Recommended()    {}
+func (AttrSdkName) Key() string     { return "telemetry_sdk_name" }
+func (a AttrSdkName) Value() string { return string(a) }
 
 // The version string of the telemetry SDK
 type AttrSdkVersion string // telemetry.sdk.version
 
-func (AttrSdkVersion) Stable()      {}
-func (AttrSdkVersion) Recommended() {}
+func (AttrSdkVersion) Stable()         {}
+func (AttrSdkVersion) Recommended()    {}
+func (AttrSdkVersion) Key() string     { return "telemetry_sdk_version" }
+func (a AttrSdkVersion) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -77,7 +100,6 @@ func (AttrSdkVersion) Recommended() {}
                     "root_namespace": "telemetry",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -311,6 +333,7 @@ func (AttrSdkVersion) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

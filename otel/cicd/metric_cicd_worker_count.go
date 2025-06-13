@@ -11,22 +11,20 @@ type WorkerCount struct {
 }
 
 func NewWorkerCount() WorkerCount {
-	labels := []string{"cicd_worker_state"}
+	labels := []string{AttrWorkerState("").Key()}
 	return WorkerCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "cicd",
-		Name:      "worker_count",
-		Help:      "The number of workers on the CICD system by state.",
+		Name: "cicd_worker_count",
+		Help: "The number of workers on the CICD system by state.",
 	}, labels)}
 }
 
-func (m WorkerCount) With(workerState AttrWorkerState, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(workerState),
-	)
+func (m WorkerCount) With(workerState AttrWorkerState, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(workerState.Value())
+}
+
+// Deprecated: Use [WorkerCount.With] instead
+func (m WorkerCount) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type WorkerCountExtra struct {
@@ -34,7 +32,7 @@ type WorkerCountExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -60,7 +58,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The worker is not performing work for the CICD system. It is available to the CICD system to perform work on (online / idle).",
@@ -103,7 +100,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The worker is not performing work for the CICD system. It is available to the CICD system to perform work on (online / idle).",
@@ -165,6 +161,8 @@ State {
             "type": "metric",
             "unit": "{count}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -272,6 +270,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -358,7 +357,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

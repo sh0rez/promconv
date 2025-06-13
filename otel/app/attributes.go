@@ -27,35 +27,45 @@ package app
 // [here]: https://developer.android.com/training/articles/user-data-ids
 type AttrInstallationId string // app.installation.id
 
-func (AttrInstallationId) Development() {}
-func (AttrInstallationId) Recommended() {}
+func (AttrInstallationId) Development()    {}
+func (AttrInstallationId) Recommended()    {}
+func (AttrInstallationId) Key() string     { return "app_installation_id" }
+func (a AttrInstallationId) Value() string { return string(a) }
 
 // The x (horizontal) coordinate of a screen coordinate, in screen pixels
 type AttrScreenCoordinateX string // app.screen.coordinate.x
 
-func (AttrScreenCoordinateX) Development() {}
-func (AttrScreenCoordinateX) Recommended() {}
+func (AttrScreenCoordinateX) Development()    {}
+func (AttrScreenCoordinateX) Recommended()    {}
+func (AttrScreenCoordinateX) Key() string     { return "app_screen_coordinate_x" }
+func (a AttrScreenCoordinateX) Value() string { return string(a) }
 
 // The y (vertical) component of a screen coordinate, in screen pixels
 type AttrScreenCoordinateY string // app.screen.coordinate.y
 
-func (AttrScreenCoordinateY) Development() {}
-func (AttrScreenCoordinateY) Recommended() {}
+func (AttrScreenCoordinateY) Development()    {}
+func (AttrScreenCoordinateY) Recommended()    {}
+func (AttrScreenCoordinateY) Key() string     { return "app_screen_coordinate_y" }
+func (a AttrScreenCoordinateY) Value() string { return string(a) }
 
 // An identifier that uniquely differentiates this widget from other widgets in the same application.
 //
 // A widget is an application component, typically an on-screen visual GUI element
 type AttrWidgetId string // app.widget.id
 
-func (AttrWidgetId) Development() {}
-func (AttrWidgetId) Recommended() {}
+func (AttrWidgetId) Development()    {}
+func (AttrWidgetId) Recommended()    {}
+func (AttrWidgetId) Key() string     { return "app_widget_id" }
+func (a AttrWidgetId) Value() string { return string(a) }
 
 // The name of an application widget.
 // A widget is an application component, typically an on-screen visual GUI element
 type AttrWidgetName string // app.widget.name
 
-func (AttrWidgetName) Development() {}
-func (AttrWidgetName) Recommended() {}
+func (AttrWidgetName) Development()    {}
+func (AttrWidgetName) Recommended()    {}
+func (AttrWidgetName) Key() string     { return "app_widget_name" }
+func (a AttrWidgetName) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -237,6 +247,7 @@ func (AttrWidgetName) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

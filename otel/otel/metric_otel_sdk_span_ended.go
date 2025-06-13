@@ -11,42 +11,44 @@ type SdkSpanEnded struct {
 }
 
 func NewSdkSpanEnded() SdkSpanEnded {
-	labels := []string{"otel_span_sampling_result"}
+	labels := []string{AttrSpanSamplingResult("").Key()}
 	return SdkSpanEnded{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "otel",
-		Name:      "sdk_span_ended",
-		Help:      "The number of created spans for which the end operation was called",
+		Name: "otel_sdk_span_ended",
+		Help: "The number of created spans for which the end operation was called",
 	}, labels)}
 }
 
-func (m SdkSpanEnded) With(extra interface {
-	AttrOtelSpanSamplingResult() AttrSpanSamplingResult
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m SdkSpanEnded) With(extras ...interface{ OtelSpanSamplingResult() AttrSpanSamplingResult }) prometheus.Counter {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrOtelSpanSamplingResult()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.OtelSpanSamplingResult().Value())
 }
 
-func (a SdkSpanEnded) WithOtelSpanSamplingResult(attr interface{ AttrOtelSpanSamplingResult() AttrSpanSamplingResult }) SdkSpanEnded {
-	a.extra.OtelSpanSamplingResult = attr.AttrOtelSpanSamplingResult()
+// Deprecated: Use [SdkSpanEnded.With] instead
+func (m SdkSpanEnded) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a SdkSpanEnded) WithSpanSamplingResult(attr interface{ OtelSpanSamplingResult() AttrSpanSamplingResult }) SdkSpanEnded {
+	a.extra.AttrSpanSamplingResult = attr.OtelSpanSamplingResult()
 	return a
 }
 
 type SdkSpanEndedExtra struct {
 	// The result value of the sampler for this span
-	OtelSpanSamplingResult AttrSpanSamplingResult `otel:"otel.span.sampling_result"`
+	AttrSpanSamplingResult AttrSpanSamplingResult `otel:"otel.span.sampling_result"`
 }
 
-func (a SdkSpanEndedExtra) AttrOtelSpanSamplingResult() AttrSpanSamplingResult {
-	return a.OtelSpanSamplingResult
+func (a SdkSpanEndedExtra) OtelSpanSamplingResult() AttrSpanSamplingResult {
+	return a.AttrSpanSamplingResult
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -67,7 +69,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The span is not sampled and not recording",
@@ -105,7 +106,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The span is not sampled and not recording",
@@ -165,6 +165,8 @@ State {
             "type": "metric",
             "unit": "{span}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -272,6 +274,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -358,7 +361,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

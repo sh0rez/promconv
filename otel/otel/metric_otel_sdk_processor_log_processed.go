@@ -15,62 +15,62 @@ type SdkProcessorLogProcessed struct {
 }
 
 func NewSdkProcessorLogProcessed() SdkProcessorLogProcessed {
-	labels := []string{"error_type", "otel_component_name", "otel_component_type"}
+	labels := []string{error.AttrType("").Key(), AttrComponentName("").Key(), AttrComponentType("").Key()}
 	return SdkProcessorLogProcessed{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "otel",
-		Name:      "sdk_processor_log_processed",
-		Help:      "The number of log records for which the processing has finished, either successful or failed",
+		Name: "otel_sdk_processor_log_processed",
+		Help: "The number of log records for which the processing has finished, either successful or failed",
 	}, labels)}
 }
 
-func (m SdkProcessorLogProcessed) With(extra interface {
-	AttrErrorType() error.AttrType
-	AttrOtelComponentName() AttrComponentName
-	AttrOtelComponentType() AttrComponentType
+func (m SdkProcessorLogProcessed) With(extras ...interface {
+	ErrorType() error.AttrType
+	OtelComponentName() AttrComponentName
+	OtelComponentType() AttrComponentType
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrErrorType()),
-		string(extra.AttrOtelComponentName()),
-		string(extra.AttrOtelComponentType()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.ErrorType().Value(), extra.OtelComponentName().Value(), extra.OtelComponentType().Value())
 }
 
-func (a SdkProcessorLogProcessed) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) SdkProcessorLogProcessed {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [SdkProcessorLogProcessed.With] instead
+func (m SdkProcessorLogProcessed) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a SdkProcessorLogProcessed) WithErrorType(attr interface{ ErrorType() error.AttrType }) SdkProcessorLogProcessed {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a SdkProcessorLogProcessed) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkProcessorLogProcessed {
-	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+func (a SdkProcessorLogProcessed) WithComponentName(attr interface{ OtelComponentName() AttrComponentName }) SdkProcessorLogProcessed {
+	a.extra.AttrComponentName = attr.OtelComponentName()
 	return a
 }
-func (a SdkProcessorLogProcessed) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkProcessorLogProcessed {
-	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+func (a SdkProcessorLogProcessed) WithComponentType(attr interface{ OtelComponentType() AttrComponentType }) SdkProcessorLogProcessed {
+	a.extra.AttrComponentType = attr.OtelComponentType()
 	return a
 }
 
 type SdkProcessorLogProcessedExtra struct {
-	// A low-cardinality description of the failure reason. SDK Batching Log Record Processors MUST use `queue_full` for log records dropped due to a full queue.
-	ErrorType error.AttrType `otel:"error.type"`
-	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
-	OtelComponentName AttrComponentName `otel:"otel.component.name"`
-	// A name identifying the type of the OpenTelemetry component.
-	OtelComponentType AttrComponentType `otel:"otel.component.type"`
+	// A low-cardinality description of the failure reason. SDK Batching Log Record Processors MUST use `queue_full` for log records dropped due to a full queue
+	AttrErrorType     error.AttrType    `otel:"error.type"`          // A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance
+	AttrComponentName AttrComponentName `otel:"otel.component.name"` // A name identifying the type of the OpenTelemetry component
+	AttrComponentType AttrComponentType `otel:"otel.component.type"`
 }
 
-func (a SdkProcessorLogProcessedExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a SdkProcessorLogProcessedExtra) AttrOtelComponentName() AttrComponentName {
-	return a.OtelComponentName
+func (a SdkProcessorLogProcessedExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a SdkProcessorLogProcessedExtra) OtelComponentName() AttrComponentName {
+	return a.AttrComponentName
 }
-func (a SdkProcessorLogProcessedExtra) AttrOtelComponentType() AttrComponentType {
-	return a.OtelComponentType
+func (a SdkProcessorLogProcessedExtra) OtelComponentType() AttrComponentType {
+	return a.AttrComponentType
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -95,7 +95,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -131,7 +130,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The builtin SDK batching span processor\n",
@@ -252,29 +250,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "A low-cardinality description of the failure reason. SDK Batching Log Record Processors MUST use `queue_full` for log records dropped due to a full queue.\n",
-                    "examples": [
-                        "queue_full",
-                    ],
-                    "name": "error.type",
-                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": {
-                        "allow_custom_values": none,
-                        "members": [
-                            {
-                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
-                                "deprecated": none,
-                                "id": "other",
-                                "note": none,
-                                "stability": "stable",
-                                "value": "_OTHER",
-                            },
-                        ],
-                    },
-                },
-                {
                     "brief": "A name identifying the type of the OpenTelemetry component.\n",
                     "examples": [
                         "batching_span_processor",
@@ -285,7 +260,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The builtin SDK batching span processor\n",
@@ -414,6 +388,28 @@ State {
                     "stability": "development",
                     "type": "string",
                 },
+                {
+                    "brief": "A low-cardinality description of the failure reason. SDK Batching Log Record Processors MUST use `queue_full` for log records dropped due to a full queue.\n",
+                    "examples": [
+                        "queue_full",
+                    ],
+                    "name": "error.type",
+                    "note": "The `error.type` SHOULD be predictable, and SHOULD have low cardinality.\n\nWhen `error.type` is set to a type (e.g., an exception type), its\ncanonical class name identifying the type within the artifact SHOULD be used.\n\nInstrumentations SHOULD document the list of errors they report.\n\nThe cardinality of `error.type` within one instrumentation library SHOULD be low.\nTelemetry consumers that aggregate data from multiple instrumentation libraries and applications\nshould be prepared for `error.type` to have high cardinality at query time when no\nadditional filters are applied.\n\nIf the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.\n\nIf a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),\nit's RECOMMENDED to:\n\n- Use a domain-specific attribute\n- Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": {
+                        "members": [
+                            {
+                                "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
+                                "deprecated": none,
+                                "id": "other",
+                                "note": none,
+                                "stability": "stable",
+                                "value": "_OTHER",
+                            },
+                        ],
+                    },
+                },
             ],
             "brief": "The number of log records for which the processing has finished, either successful or failed",
             "events": [],
@@ -468,6 +464,8 @@ State {
             "type": "metric",
             "unit": "{log_record}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -575,6 +573,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -661,7 +660,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -11,22 +11,20 @@ type GcDuration struct {
 }
 
 func NewGcDuration() GcDuration {
-	labels := []string{"v8js_gc_type"}
+	labels := []string{AttrGcType("").Key()}
 	return GcDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "v8js",
-		Name:      "gc_duration",
-		Help:      "Garbage collection duration.",
+		Name: "v8js_gc_duration",
+		Help: "Garbage collection duration.",
 	}, labels)}
 }
 
-func (m GcDuration) With(gcType AttrGcType, extra interface {
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(gcType),
-	)
+func (m GcDuration) With(gcKind AttrGcType, extras ...interface{}) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(gcKind.Value())
+}
+
+// Deprecated: Use [GcDuration.With] instead
+func (m GcDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
 }
 
 type GcDurationExtra struct {
@@ -34,7 +32,7 @@ type GcDurationExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -55,7 +53,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Major (Mark Sweep Compact).",
@@ -101,7 +98,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Major (Mark Sweep Compact).",
@@ -171,6 +167,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -278,6 +276,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -364,7 +363,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

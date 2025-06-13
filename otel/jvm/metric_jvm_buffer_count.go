@@ -11,40 +11,42 @@ type BufferCount struct {
 }
 
 func NewBufferCount() BufferCount {
-	labels := []string{"jvm_buffer_pool_name"}
+	labels := []string{AttrBufferPoolName("").Key()}
 	return BufferCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "buffer_count",
-		Help:      "Number of buffers in the pool.",
+		Name: "jvm_buffer_count",
+		Help: "Number of buffers in the pool.",
 	}, labels)}
 }
 
-func (m BufferCount) With(extra interface {
-	AttrJvmBufferPoolName() AttrBufferPoolName
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m BufferCount) With(extras ...interface{ JvmBufferPoolName() AttrBufferPoolName }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrJvmBufferPoolName()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.JvmBufferPoolName().Value())
 }
 
-func (a BufferCount) WithJvmBufferPoolName(attr interface{ AttrJvmBufferPoolName() AttrBufferPoolName }) BufferCount {
-	a.extra.JvmBufferPoolName = attr.AttrJvmBufferPoolName()
+// Deprecated: Use [BufferCount.With] instead
+func (m BufferCount) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a BufferCount) WithBufferPoolName(attr interface{ JvmBufferPoolName() AttrBufferPoolName }) BufferCount {
+	a.extra.AttrBufferPoolName = attr.JvmBufferPoolName()
 	return a
 }
 
 type BufferCountExtra struct {
-	// Name of the buffer pool.
-	JvmBufferPoolName AttrBufferPoolName `otel:"jvm.buffer.pool.name"`
+	// Name of the buffer pool
+	AttrBufferPoolName AttrBufferPoolName `otel:"jvm.buffer.pool.name"`
 }
 
-func (a BufferCountExtra) AttrJvmBufferPoolName() AttrBufferPoolName { return a.JvmBufferPoolName }
+func (a BufferCountExtra) JvmBufferPoolName() AttrBufferPoolName { return a.AttrBufferPoolName }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -119,6 +121,8 @@ State {
             "type": "metric",
             "unit": "{buffer}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -226,6 +230,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -312,7 +317,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -4,51 +4,34 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Operating frequency of the logical CPU in Hertz.
+// Deprecated. Use `system.cpu.frequency` instead.
 type Frequency struct {
-	*prometheus.GaugeVec
-	extra FrequencyExtra
+	prometheus.Gauge
 }
 
 func NewFrequency() Frequency {
-	labels := []string{"cpu_logical_number"}
-	return Frequency{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "cpu",
-		Name:      "frequency",
-		Help:      "Operating frequency of the logical CPU in Hertz.",
-	}, labels)}
+	return Frequency{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "cpu_frequency",
+		Help: "Deprecated. Use `system.cpu.frequency` instead.",
+	})}
 }
 
-func (m Frequency) With(extra interface {
-	AttrCpuLogicalNumber() AttrLogicalNumber
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m Frequency) Register(regs ...prometheus.Registerer) Frequency {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrCpuLogicalNumber()),
-	)
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
-
-func (a Frequency) WithCpuLogicalNumber(attr interface{ AttrCpuLogicalNumber() AttrLogicalNumber }) Frequency {
-	a.extra.CpuLogicalNumber = attr.AttrCpuLogicalNumber()
-	return a
-}
-
-type FrequencyExtra struct {
-	// The logical CPU number [0..n-1]
-	CpuLogicalNumber AttrLogicalNumber `otel:"cpu.logical_number"`
-}
-
-func (a FrequencyExtra) AttrCpuLogicalNumber() AttrLogicalNumber { return a.CpuLogicalNumber }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "FrequencyExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -58,50 +41,20 @@ State {
         },
         "Name": "frequency",
         "Type": "Frequency",
-        "attributes": [
-            {
-                "brief": "The logical CPU number [0..n-1]",
-                "examples": [
-                    1,
-                ],
-                "name": "cpu.logical_number",
-                "requirement_level": "recommended",
-                "stability": "development",
-                "type": "int",
-            },
-        ],
         "ctx": {
-            "attributes": [
-                {
-                    "brief": "The logical CPU number [0..n-1]",
-                    "examples": [
-                        1,
-                    ],
-                    "name": "cpu.logical_number",
-                    "requirement_level": "recommended",
-                    "stability": "development",
-                    "type": "int",
-                },
-            ],
-            "brief": "Operating frequency of the logical CPU in Hertz.",
+            "attributes": [],
+            "brief": "Deprecated. Use `system.cpu.frequency` instead.",
+            "deprecated": {
+                "note": "Replaced by `system.cpu.frequency`.",
+                "reason": "renamed",
+                "renamed_to": "system.cpu.frequency",
+            },
             "events": [],
             "id": "metric.cpu.frequency",
             "instrument": "gauge",
             "lineage": {
-                "attributes": {
-                    "cpu.logical_number": {
-                        "inherited_fields": [
-                            "brief",
-                            "examples",
-                            "note",
-                            "requirement_level",
-                            "stability",
-                        ],
-                        "source_group": "registry.cpu",
-                    },
-                },
                 "provenance": {
-                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/cpu/metrics.yaml",
+                    "path": "https://github.com/open-telemetry/semantic-conventions.git[model]/cpu/deprecated.yaml",
                     "registry_id": "main",
                 },
             },
@@ -111,7 +64,7 @@ State {
             "span_kind": none,
             "stability": "development",
             "type": "metric",
-            "unit": "Hz",
+            "unit": "{Hz}",
         },
     },
     env: Environment {
@@ -220,6 +173,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -306,7 +260,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

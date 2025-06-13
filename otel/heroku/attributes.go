@@ -3,20 +3,26 @@ package heroku
 // Unique identifier for the application
 type AttrAppId string // heroku.app.id
 
-func (AttrAppId) Development() {}
-func (AttrAppId) Recommended() {}
+func (AttrAppId) Development()    {}
+func (AttrAppId) Recommended()    {}
+func (AttrAppId) Key() string     { return "heroku_app_id" }
+func (a AttrAppId) Value() string { return string(a) }
 
 // Commit hash for the current release
 type AttrReleaseCommit string // heroku.release.commit
 
-func (AttrReleaseCommit) Development() {}
-func (AttrReleaseCommit) Recommended() {}
+func (AttrReleaseCommit) Development()    {}
+func (AttrReleaseCommit) Recommended()    {}
+func (AttrReleaseCommit) Key() string     { return "heroku_release_commit" }
+func (a AttrReleaseCommit) Value() string { return string(a) }
 
 // Time and date the release was created
 type AttrReleaseCreationTimestamp string // heroku.release.creation_timestamp
 
-func (AttrReleaseCreationTimestamp) Development() {}
-func (AttrReleaseCreationTimestamp) Recommended() {}
+func (AttrReleaseCreationTimestamp) Development()    {}
+func (AttrReleaseCreationTimestamp) Recommended()    {}
+func (AttrReleaseCreationTimestamp) Key() string     { return "heroku_release_creation_timestamp" }
+func (a AttrReleaseCreationTimestamp) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -168,6 +174,7 @@ func (AttrReleaseCreationTimestamp) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

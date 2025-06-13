@@ -11,40 +11,42 @@ type InitDuration struct {
 }
 
 func NewInitDuration() InitDuration {
-	labels := []string{"faas_trigger"}
+	labels := []string{AttrTrigger("").Key()}
 	return InitDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "faas",
-		Name:      "init_duration",
-		Help:      "Measures the duration of the function's initialization, such as a cold start",
+		Name: "faas_init_duration",
+		Help: "Measures the duration of the function's initialization, such as a cold start",
 	}, labels)}
 }
 
-func (m InitDuration) With(extra interface {
-	AttrFaasTrigger() AttrTrigger
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+func (m InitDuration) With(extras ...interface{ FaasTrigger() AttrTrigger }) prometheus.Observer {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrFaasTrigger()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(extra.FaasTrigger().Value())
 }
 
-func (a InitDuration) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) InitDuration {
-	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+// Deprecated: Use [InitDuration.With] instead
+func (m InitDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a InitDuration) WithTrigger(attr interface{ FaasTrigger() AttrTrigger }) InitDuration {
+	a.extra.AttrTrigger = attr.FaasTrigger()
 	return a
 }
 
 type InitDurationExtra struct {
-	// Type of the trigger which caused this function invocation.
-	FaasTrigger AttrTrigger `otel:"faas.trigger"`
+	// Type of the trigger which caused this function invocation
+	AttrTrigger AttrTrigger `otel:"faas.trigger"`
 }
 
-func (a InitDurationExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
+func (a InitDurationExtra) FaasTrigger() AttrTrigger { return a.AttrTrigger }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -65,7 +67,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A response to some data source operation such as a database or filesystem read/write",
@@ -119,7 +120,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A response to some data source operation such as a database or filesystem read/write",
@@ -194,6 +194,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -301,6 +303,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -387,7 +390,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

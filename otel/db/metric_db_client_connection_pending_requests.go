@@ -11,22 +11,20 @@ type ClientConnectionPendingRequests struct {
 }
 
 func NewClientConnectionPendingRequests() ClientConnectionPendingRequests {
-	labels := []string{"db_client_connection_pool_name"}
+	labels := []string{AttrClientConnectionPoolName("").Key()}
 	return ClientConnectionPendingRequests{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "db",
-		Name:      "client_connection_pending_requests",
-		Help:      "The number of current pending requests for an open connection",
+		Name: "db_client_connection_pending_requests",
+		Help: "The number of current pending requests for an open connection",
 	}, labels)}
 }
 
-func (m ClientConnectionPendingRequests) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(clientConnectionPoolName),
-	)
+func (m ClientConnectionPendingRequests) With(clientConnectionPoolName AttrClientConnectionPoolName, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(clientConnectionPoolName.Value())
+}
+
+// Deprecated: Use [ClientConnectionPendingRequests.With] instead
+func (m ClientConnectionPendingRequests) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type ClientConnectionPendingRequestsExtra struct {
@@ -34,7 +32,7 @@ type ClientConnectionPendingRequestsExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -105,6 +103,8 @@ State {
             "type": "metric",
             "unit": "{request}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -212,6 +212,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -298,7 +299,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

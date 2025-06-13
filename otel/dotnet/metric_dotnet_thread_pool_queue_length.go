@@ -6,37 +6,32 @@ import (
 
 // The number of work items that are currently queued to be processed by the thread pool.
 type ThreadPoolQueueLength struct {
-	*prometheus.GaugeVec
-	extra ThreadPoolQueueLengthExtra
+	prometheus.Gauge
 }
 
 func NewThreadPoolQueueLength() ThreadPoolQueueLength {
-	labels := []string{}
-	return ThreadPoolQueueLength{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "dotnet",
-		Name:      "thread_pool_queue_length",
-		Help:      "The number of work items that are currently queued to be processed by the thread pool.",
-	}, labels)}
+	return ThreadPoolQueueLength{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "dotnet_thread_pool_queue_length",
+		Help: "The number of work items that are currently queued to be processed by the thread pool.",
+	})}
 }
 
-func (m ThreadPoolQueueLength) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ThreadPoolQueueLength) Register(regs ...prometheus.Registerer) ThreadPoolQueueLength {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ThreadPoolQueueLengthExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ThreadPoolQueueLengthExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "thread_pool.queue.length",
         "Type": "ThreadPoolQueueLength",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of work items that are currently queued to be processed by the thread pool.\n",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

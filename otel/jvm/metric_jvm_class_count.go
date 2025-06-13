@@ -6,37 +6,32 @@ import (
 
 // Number of classes currently loaded.
 type ClassCount struct {
-	*prometheus.GaugeVec
-	extra ClassCountExtra
+	prometheus.Gauge
 }
 
 func NewClassCount() ClassCount {
-	labels := []string{}
-	return ClassCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "class_count",
-		Help:      "Number of classes currently loaded.",
-	}, labels)}
+	return ClassCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "jvm_class_count",
+		Help: "Number of classes currently loaded.",
+	})}
 }
 
-func (m ClassCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ClassCount) Register(regs ...prometheus.Registerer) ClassCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ClassCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ClassCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "class.count",
         "Type": "ClassCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of classes currently loaded.",
@@ -174,6 +168,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -260,7 +255,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

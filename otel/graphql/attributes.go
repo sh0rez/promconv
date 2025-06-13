@@ -4,20 +4,30 @@ package graphql
 // The value may be sanitized to exclude sensitive information
 type AttrDocument string // graphql.document
 
-func (AttrDocument) Development() {}
-func (AttrDocument) Recommended() {}
+func (AttrDocument) Development()    {}
+func (AttrDocument) Recommended()    {}
+func (AttrDocument) Key() string     { return "graphql_document" }
+func (a AttrDocument) Value() string { return string(a) }
 
 // The name of the operation being executed
 type AttrOperationName string // graphql.operation.name
 
-func (AttrOperationName) Development() {}
-func (AttrOperationName) Recommended() {}
+func (AttrOperationName) Development()    {}
+func (AttrOperationName) Recommended()    {}
+func (AttrOperationName) Key() string     { return "graphql_operation_name" }
+func (a AttrOperationName) Value() string { return string(a) }
 
 // The type of the operation being executed
 type AttrOperationType string // graphql.operation.type
 
-func (AttrOperationType) Development() {}
-func (AttrOperationType) Recommended() {}
+func (AttrOperationType) Development()    {}
+func (AttrOperationType) Recommended()    {}
+func (AttrOperationType) Key() string     { return "graphql_operation_type" }
+func (a AttrOperationType) Value() string { return string(a) }
+
+const OperationTypeQuery AttrOperationType = "query"
+const OperationTypeMutation AttrOperationType = "mutation"
+const OperationTypeSubscription AttrOperationType = "subscription"
 
 /* State {
     name: "attr.go.j2",
@@ -57,7 +67,6 @@ func (AttrOperationType) Recommended() {}
                     "root_namespace": "graphql",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "GraphQL query",
@@ -196,6 +205,7 @@ func (AttrOperationType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

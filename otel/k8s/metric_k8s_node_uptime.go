@@ -6,37 +6,32 @@ import (
 
 // The time the Node has been running
 type NodeUptime struct {
-	*prometheus.GaugeVec
-	extra NodeUptimeExtra
+	prometheus.Gauge
 }
 
 func NewNodeUptime() NodeUptime {
-	labels := []string{}
-	return NodeUptime{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "node_uptime",
-		Help:      "The time the Node has been running",
-	}, labels)}
+	return NodeUptime{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_node_uptime",
+		Help: "The time the Node has been running",
+	})}
 }
 
-func (m NodeUptime) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m NodeUptime) Register(regs ...prometheus.Registerer) NodeUptime {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type NodeUptimeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "NodeUptimeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "node.uptime",
         "Type": "NodeUptime",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The time the Node has been running",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

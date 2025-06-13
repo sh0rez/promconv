@@ -14,53 +14,55 @@ type NetworkPackets struct {
 }
 
 func NewNetworkPackets() NetworkPackets {
-	labels := []string{"network_io_direction", "system_device"}
+	labels := []string{network.AttrIoDirection("").Key(), AttrDevice("").Key()}
 	return NetworkPackets{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "system",
-		Name:      "network_packets",
-		Help:      "",
+		Name: "system_network_packets",
+		Help: "",
 	}, labels)}
 }
 
-func (m NetworkPackets) With(extra interface {
-	AttrNetworkIoDirection() network.AttrIoDirection
-	AttrSystemDevice() AttrDevice
+func (m NetworkPackets) With(extras ...interface {
+	NetworkIoDirection() network.AttrIoDirection
+	SystemDevice() AttrDevice
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrNetworkIoDirection()),
-		string(extra.AttrSystemDevice()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.NetworkIoDirection().Value(), extra.SystemDevice().Value())
+}
+
+// Deprecated: Use [NetworkPackets.With] instead
+func (m NetworkPackets) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 func (a NetworkPackets) WithNetworkIoDirection(attr interface {
-	AttrNetworkIoDirection() network.AttrIoDirection
+	NetworkIoDirection() network.AttrIoDirection
 }) NetworkPackets {
-	a.extra.NetworkIoDirection = attr.AttrNetworkIoDirection()
+	a.extra.AttrNetworkIoDirection = attr.NetworkIoDirection()
 	return a
 }
-func (a NetworkPackets) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) NetworkPackets {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+func (a NetworkPackets) WithDevice(attr interface{ SystemDevice() AttrDevice }) NetworkPackets {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
 
 type NetworkPacketsExtra struct {
-	// The network IO operation direction.
-	NetworkIoDirection network.AttrIoDirection `otel:"network.io.direction"`
-	// The device identifier
-	SystemDevice AttrDevice `otel:"system.device"`
+	// The network IO operation direction
+	AttrNetworkIoDirection network.AttrIoDirection `otel:"network.io.direction"` // The device identifier
+	AttrDevice             AttrDevice              `otel:"system.device"`
 }
 
-func (a NetworkPacketsExtra) AttrNetworkIoDirection() network.AttrIoDirection {
-	return a.NetworkIoDirection
+func (a NetworkPacketsExtra) NetworkIoDirection() network.AttrIoDirection {
+	return a.AttrNetworkIoDirection
 }
-func (a NetworkPacketsExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
+func (a NetworkPacketsExtra) SystemDevice() AttrDevice { return a.AttrDevice }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -84,7 +86,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -127,7 +128,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -201,6 +201,8 @@ State {
             "type": "metric",
             "unit": "{packet}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -308,6 +310,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -394,7 +397,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

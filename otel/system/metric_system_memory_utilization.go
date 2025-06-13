@@ -10,40 +10,42 @@ type MemoryUtilization struct {
 }
 
 func NewMemoryUtilization() MemoryUtilization {
-	labels := []string{"system_memory_state"}
+	labels := []string{AttrMemoryState("").Key()}
 	return MemoryUtilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "memory_utilization",
-		Help:      "",
+		Name: "system_memory_utilization",
+		Help: "",
 	}, labels)}
 }
 
-func (m MemoryUtilization) With(extra interface {
-	AttrSystemMemoryState() AttrMemoryState
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryUtilization) With(extras ...interface{ SystemMemoryState() AttrMemoryState }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemMemoryState()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.SystemMemoryState().Value())
 }
 
-func (a MemoryUtilization) WithSystemMemoryState(attr interface{ AttrSystemMemoryState() AttrMemoryState }) MemoryUtilization {
-	a.extra.SystemMemoryState = attr.AttrSystemMemoryState()
+// Deprecated: Use [MemoryUtilization.With] instead
+func (m MemoryUtilization) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a MemoryUtilization) WithMemoryState(attr interface{ SystemMemoryState() AttrMemoryState }) MemoryUtilization {
+	a.extra.AttrMemoryState = attr.SystemMemoryState()
 	return a
 }
 
 type MemoryUtilizationExtra struct {
 	// The memory state
-	SystemMemoryState AttrMemoryState `otel:"system.memory.state"`
+	AttrMemoryState AttrMemoryState `otel:"system.memory.state"`
 }
 
-func (a MemoryUtilizationExtra) AttrSystemMemoryState() AttrMemoryState { return a.SystemMemoryState }
+func (a MemoryUtilizationExtra) SystemMemoryState() AttrMemoryState { return a.AttrMemoryState }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -68,7 +70,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -126,7 +127,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -204,6 +204,8 @@ State {
             "type": "metric",
             "unit": "1",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -311,6 +313,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -397,7 +400,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

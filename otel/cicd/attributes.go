@@ -3,106 +3,168 @@ package cicd
 // The kind of action a pipeline run is performing
 type AttrPipelineActionName string // cicd.pipeline.action.name
 
-func (AttrPipelineActionName) Development() {}
-func (AttrPipelineActionName) Recommended() {}
+func (AttrPipelineActionName) Development()    {}
+func (AttrPipelineActionName) Recommended()    {}
+func (AttrPipelineActionName) Key() string     { return "cicd_pipeline_action_name" }
+func (a AttrPipelineActionName) Value() string { return string(a) }
+
+const PipelineActionNameBuild AttrPipelineActionName = "BUILD"
+const PipelineActionNameRun AttrPipelineActionName = "RUN"
+const PipelineActionNameSync AttrPipelineActionName = "SYNC"
 
 // The human readable name of the pipeline within a CI/CD system
 type AttrPipelineName string // cicd.pipeline.name
 
-func (AttrPipelineName) Development() {}
-func (AttrPipelineName) Recommended() {}
+func (AttrPipelineName) Development()    {}
+func (AttrPipelineName) Recommended()    {}
+func (AttrPipelineName) Key() string     { return "cicd_pipeline_name" }
+func (a AttrPipelineName) Value() string { return string(a) }
 
 // The result of a pipeline run
 type AttrPipelineResult string // cicd.pipeline.result
 
-func (AttrPipelineResult) Development() {}
-func (AttrPipelineResult) Recommended() {}
+func (AttrPipelineResult) Development()    {}
+func (AttrPipelineResult) Recommended()    {}
+func (AttrPipelineResult) Key() string     { return "cicd_pipeline_result" }
+func (a AttrPipelineResult) Value() string { return string(a) }
+
+const PipelineResultSuccess AttrPipelineResult = "success"
+const PipelineResultFailure AttrPipelineResult = "failure"
+const PipelineResultError AttrPipelineResult = "error"
+const PipelineResultTimeout AttrPipelineResult = "timeout"
+const PipelineResultCancellation AttrPipelineResult = "cancellation"
+const PipelineResultSkip AttrPipelineResult = "skip"
 
 // The unique identifier of a pipeline run within a CI/CD system
 type AttrPipelineRunId string // cicd.pipeline.run.id
 
-func (AttrPipelineRunId) Development() {}
-func (AttrPipelineRunId) Recommended() {}
+func (AttrPipelineRunId) Development()    {}
+func (AttrPipelineRunId) Recommended()    {}
+func (AttrPipelineRunId) Key() string     { return "cicd_pipeline_run_id" }
+func (a AttrPipelineRunId) Value() string { return string(a) }
 
 // The pipeline run goes through these states during its lifecycle
 type AttrPipelineRunState string // cicd.pipeline.run.state
 
-func (AttrPipelineRunState) Development() {}
-func (AttrPipelineRunState) Recommended() {}
+func (AttrPipelineRunState) Development()    {}
+func (AttrPipelineRunState) Recommended()    {}
+func (AttrPipelineRunState) Key() string     { return "cicd_pipeline_run_state" }
+func (a AttrPipelineRunState) Value() string { return string(a) }
+
+const PipelineRunStatePending AttrPipelineRunState = "pending"
+const PipelineRunStateExecuting AttrPipelineRunState = "executing"
+const PipelineRunStateFinalizing AttrPipelineRunState = "finalizing"
 
 // The [URL] of the pipeline run, providing the complete address in order to locate and identify the pipeline run
 //
 // [URL]: https://wikipedia.org/wiki/URL
 type AttrPipelineRunUrlFull string // cicd.pipeline.run.url.full
 
-func (AttrPipelineRunUrlFull) Development() {}
-func (AttrPipelineRunUrlFull) Recommended() {}
+func (AttrPipelineRunUrlFull) Development()    {}
+func (AttrPipelineRunUrlFull) Recommended()    {}
+func (AttrPipelineRunUrlFull) Key() string     { return "cicd_pipeline_run_url_full" }
+func (a AttrPipelineRunUrlFull) Value() string { return string(a) }
 
 // The human readable name of a task within a pipeline. Task here most closely aligns with a [computing process] in a pipeline. Other terms for tasks include commands, steps, and procedures
 //
 // [computing process]: https://wikipedia.org/wiki/Pipeline_(computing)
 type AttrPipelineTaskName string // cicd.pipeline.task.name
 
-func (AttrPipelineTaskName) Development() {}
-func (AttrPipelineTaskName) Recommended() {}
+func (AttrPipelineTaskName) Development()    {}
+func (AttrPipelineTaskName) Recommended()    {}
+func (AttrPipelineTaskName) Key() string     { return "cicd_pipeline_task_name" }
+func (a AttrPipelineTaskName) Value() string { return string(a) }
 
 // The unique identifier of a task run within a pipeline
 type AttrPipelineTaskRunId string // cicd.pipeline.task.run.id
 
-func (AttrPipelineTaskRunId) Development() {}
-func (AttrPipelineTaskRunId) Recommended() {}
+func (AttrPipelineTaskRunId) Development()    {}
+func (AttrPipelineTaskRunId) Recommended()    {}
+func (AttrPipelineTaskRunId) Key() string     { return "cicd_pipeline_task_run_id" }
+func (a AttrPipelineTaskRunId) Value() string { return string(a) }
 
 // The result of a task run
 type AttrPipelineTaskRunResult string // cicd.pipeline.task.run.result
 
-func (AttrPipelineTaskRunResult) Development() {}
-func (AttrPipelineTaskRunResult) Recommended() {}
+func (AttrPipelineTaskRunResult) Development()    {}
+func (AttrPipelineTaskRunResult) Recommended()    {}
+func (AttrPipelineTaskRunResult) Key() string     { return "cicd_pipeline_task_run_result" }
+func (a AttrPipelineTaskRunResult) Value() string { return string(a) }
+
+const PipelineTaskRunResultSuccess AttrPipelineTaskRunResult = "success"
+const PipelineTaskRunResultFailure AttrPipelineTaskRunResult = "failure"
+const PipelineTaskRunResultError AttrPipelineTaskRunResult = "error"
+const PipelineTaskRunResultTimeout AttrPipelineTaskRunResult = "timeout"
+const PipelineTaskRunResultCancellation AttrPipelineTaskRunResult = "cancellation"
+const PipelineTaskRunResultSkip AttrPipelineTaskRunResult = "skip"
 
 // The [URL] of the pipeline task run, providing the complete address in order to locate and identify the pipeline task run
 //
 // [URL]: https://wikipedia.org/wiki/URL
 type AttrPipelineTaskRunUrlFull string // cicd.pipeline.task.run.url.full
 
-func (AttrPipelineTaskRunUrlFull) Development() {}
-func (AttrPipelineTaskRunUrlFull) Recommended() {}
+func (AttrPipelineTaskRunUrlFull) Development()    {}
+func (AttrPipelineTaskRunUrlFull) Recommended()    {}
+func (AttrPipelineTaskRunUrlFull) Key() string     { return "cicd_pipeline_task_run_url_full" }
+func (a AttrPipelineTaskRunUrlFull) Value() string { return string(a) }
 
 // The type of the task within a pipeline
 type AttrPipelineTaskType string // cicd.pipeline.task.type
 
-func (AttrPipelineTaskType) Development() {}
-func (AttrPipelineTaskType) Recommended() {}
+func (AttrPipelineTaskType) Development()    {}
+func (AttrPipelineTaskType) Recommended()    {}
+func (AttrPipelineTaskType) Key() string     { return "cicd_pipeline_task_type" }
+func (a AttrPipelineTaskType) Value() string { return string(a) }
+
+const PipelineTaskTypeBuild AttrPipelineTaskType = "build"
+const PipelineTaskTypeTest AttrPipelineTaskType = "test"
+const PipelineTaskTypeDeploy AttrPipelineTaskType = "deploy"
 
 // The name of a component of the CICD system
 type AttrSystemComponent string // cicd.system.component
 
-func (AttrSystemComponent) Development() {}
-func (AttrSystemComponent) Recommended() {}
+func (AttrSystemComponent) Development()    {}
+func (AttrSystemComponent) Recommended()    {}
+func (AttrSystemComponent) Key() string     { return "cicd_system_component" }
+func (a AttrSystemComponent) Value() string { return string(a) }
 
 // The unique identifier of a worker within a CICD system
 type AttrWorkerId string // cicd.worker.id
 
-func (AttrWorkerId) Development() {}
-func (AttrWorkerId) Recommended() {}
+func (AttrWorkerId) Development()    {}
+func (AttrWorkerId) Recommended()    {}
+func (AttrWorkerId) Key() string     { return "cicd_worker_id" }
+func (a AttrWorkerId) Value() string { return string(a) }
 
 // The name of a worker within a CICD system
 type AttrWorkerName string // cicd.worker.name
 
-func (AttrWorkerName) Development() {}
-func (AttrWorkerName) Recommended() {}
+func (AttrWorkerName) Development()    {}
+func (AttrWorkerName) Recommended()    {}
+func (AttrWorkerName) Key() string     { return "cicd_worker_name" }
+func (a AttrWorkerName) Value() string { return string(a) }
 
 // The state of a CICD worker / agent
 type AttrWorkerState string // cicd.worker.state
 
-func (AttrWorkerState) Development() {}
-func (AttrWorkerState) Recommended() {}
+func (AttrWorkerState) Development()    {}
+func (AttrWorkerState) Recommended()    {}
+func (AttrWorkerState) Key() string     { return "cicd_worker_state" }
+func (a AttrWorkerState) Value() string { return string(a) }
+
+const WorkerStateAvailable AttrWorkerState = "available"
+const WorkerStateBusy AttrWorkerState = "busy"
+const WorkerStateOffline AttrWorkerState = "offline"
 
 // The [URL] of the worker, providing the complete address in order to locate and identify the worker
 //
 // [URL]: https://wikipedia.org/wiki/URL
 type AttrWorkerUrlFull string // cicd.worker.url.full
 
-func (AttrWorkerUrlFull) Development() {}
-func (AttrWorkerUrlFull) Recommended() {}
+func (AttrWorkerUrlFull) Development()    {}
+func (AttrWorkerUrlFull) Recommended()    {}
+func (AttrWorkerUrlFull) Key() string     { return "cicd_worker_url_full" }
+func (a AttrWorkerUrlFull) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -123,7 +185,6 @@ func (AttrWorkerUrlFull) Recommended() {}
                     "root_namespace": "cicd",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The pipeline run is executing a build.",
@@ -179,7 +240,6 @@ func (AttrWorkerUrlFull) Recommended() {}
                     "root_namespace": "cicd",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The pipeline run finished successfully.",
@@ -255,7 +315,6 @@ func (AttrWorkerUrlFull) Recommended() {}
                     "root_namespace": "cicd",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The run pending state spans from the event triggering the pipeline run until the execution of the run starts (eg. time spent in a queue, provisioning agents, creating run resources).\n",
@@ -333,7 +392,6 @@ func (AttrWorkerUrlFull) Recommended() {}
                     "root_namespace": "cicd",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The task run finished successfully.",
@@ -409,7 +467,6 @@ func (AttrWorkerUrlFull) Recommended() {}
                     "root_namespace": "cicd",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "build",
@@ -489,7 +546,6 @@ func (AttrWorkerUrlFull) Recommended() {}
                     "root_namespace": "cicd",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The worker is not performing work for the CICD system. It is available to the CICD system to perform work on (online / idle).",
@@ -639,6 +695,7 @@ func (AttrWorkerUrlFull) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

@@ -11,40 +11,42 @@ type Coldstarts struct {
 }
 
 func NewColdstarts() Coldstarts {
-	labels := []string{"faas_trigger"}
+	labels := []string{AttrTrigger("").Key()}
 	return Coldstarts{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "faas",
-		Name:      "coldstarts",
-		Help:      "Number of invocation cold starts",
+		Name: "faas_coldstarts",
+		Help: "Number of invocation cold starts",
 	}, labels)}
 }
 
-func (m Coldstarts) With(extra interface {
-	AttrFaasTrigger() AttrTrigger
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m Coldstarts) With(extras ...interface{ FaasTrigger() AttrTrigger }) prometheus.Counter {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrFaasTrigger()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.FaasTrigger().Value())
 }
 
-func (a Coldstarts) WithFaasTrigger(attr interface{ AttrFaasTrigger() AttrTrigger }) Coldstarts {
-	a.extra.FaasTrigger = attr.AttrFaasTrigger()
+// Deprecated: Use [Coldstarts.With] instead
+func (m Coldstarts) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a Coldstarts) WithTrigger(attr interface{ FaasTrigger() AttrTrigger }) Coldstarts {
+	a.extra.AttrTrigger = attr.FaasTrigger()
 	return a
 }
 
 type ColdstartsExtra struct {
-	// Type of the trigger which caused this function invocation.
-	FaasTrigger AttrTrigger `otel:"faas.trigger"`
+	// Type of the trigger which caused this function invocation
+	AttrTrigger AttrTrigger `otel:"faas.trigger"`
 }
 
-func (a ColdstartsExtra) AttrFaasTrigger() AttrTrigger { return a.FaasTrigger }
+func (a ColdstartsExtra) FaasTrigger() AttrTrigger { return a.AttrTrigger }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -65,7 +67,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A response to some data source operation such as a database or filesystem read/write",
@@ -119,7 +120,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A response to some data source operation such as a database or filesystem read/write",
@@ -194,6 +194,8 @@ State {
             "type": "metric",
             "unit": "{coldstart}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -301,6 +303,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -387,7 +390,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

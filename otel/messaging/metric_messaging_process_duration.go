@@ -16,121 +16,109 @@ type ProcessDuration struct {
 }
 
 func NewProcessDuration() ProcessDuration {
-	labels := []string{"messaging_operation_name", "messaging_system", "error_type", "messaging_consumer_group_name", "messaging_destination_name", "messaging_destination_subscription_name", "messaging_destination_template", "server_address", "messaging_destination_partition_id", "server_port"}
+	labels := []string{AttrOperationName("").Key(), AttrSystem("").Key(), error.AttrType("").Key(), AttrConsumerGroupName("").Key(), AttrDestinationName("").Key(), AttrDestinationSubscriptionName("").Key(), AttrDestinationTemplate("").Key(), server.AttrAddress("").Key(), AttrDestinationPartitionId("").Key(), server.AttrPort("").Key()}
 	return ProcessDuration{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "messaging",
-		Name:      "process_duration",
-		Help:      "Duration of processing operation.",
+		Name: "messaging_process_duration",
+		Help: "Duration of processing operation.",
 	}, labels)}
 }
 
-func (m ProcessDuration) With(operationName AttrOperationName, system AttrSystem, extra interface {
-	AttrErrorType() error.AttrType
-	AttrMessagingConsumerGroupName() AttrConsumerGroupName
-	AttrMessagingDestinationName() AttrDestinationName
-	AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
-	AttrMessagingDestinationTemplate() AttrDestinationTemplate
-	AttrServerAddress() server.AttrAddress
-	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
-	AttrServerPort() server.AttrPort
+func (m ProcessDuration) With(operationName AttrOperationName, system AttrSystem, extras ...interface {
+	ErrorType() error.AttrType
+	MessagingConsumerGroupName() AttrConsumerGroupName
+	MessagingDestinationName() AttrDestinationName
+	MessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
+	MessagingDestinationTemplate() AttrDestinationTemplate
+	ServerAddress() server.AttrAddress
+	MessagingDestinationPartitionId() AttrDestinationPartitionId
+	ServerPort() server.AttrPort
 }) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(operationName),
-		string(system),
-		string(extra.AttrErrorType()),
-		string(extra.AttrMessagingConsumerGroupName()),
-		string(extra.AttrMessagingDestinationName()),
-		string(extra.AttrMessagingDestinationSubscriptionName()),
-		string(extra.AttrMessagingDestinationTemplate()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrMessagingDestinationPartitionId()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.HistogramVec.WithLabelValues(operationName.Value(), system.Value(), extra.ErrorType().Value(), extra.MessagingConsumerGroupName().Value(), extra.MessagingDestinationName().Value(), extra.MessagingDestinationSubscriptionName().Value(), extra.MessagingDestinationTemplate().Value(), extra.ServerAddress().Value(), extra.MessagingDestinationPartitionId().Value(), extra.ServerPort().Value())
 }
 
-func (a ProcessDuration) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ProcessDuration {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [ProcessDuration.With] instead
+func (m ProcessDuration) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
+}
+
+func (a ProcessDuration) WithErrorType(attr interface{ ErrorType() error.AttrType }) ProcessDuration {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a ProcessDuration) WithMessagingConsumerGroupName(attr interface{ AttrMessagingConsumerGroupName() AttrConsumerGroupName }) ProcessDuration {
-	a.extra.MessagingConsumerGroupName = attr.AttrMessagingConsumerGroupName()
+func (a ProcessDuration) WithConsumerGroupName(attr interface{ MessagingConsumerGroupName() AttrConsumerGroupName }) ProcessDuration {
+	a.extra.AttrConsumerGroupName = attr.MessagingConsumerGroupName()
 	return a
 }
-func (a ProcessDuration) WithMessagingDestinationName(attr interface{ AttrMessagingDestinationName() AttrDestinationName }) ProcessDuration {
-	a.extra.MessagingDestinationName = attr.AttrMessagingDestinationName()
+func (a ProcessDuration) WithDestinationName(attr interface{ MessagingDestinationName() AttrDestinationName }) ProcessDuration {
+	a.extra.AttrDestinationName = attr.MessagingDestinationName()
 	return a
 }
-func (a ProcessDuration) WithMessagingDestinationSubscriptionName(attr interface {
-	AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
+func (a ProcessDuration) WithDestinationSubscriptionName(attr interface {
+	MessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
 }) ProcessDuration {
-	a.extra.MessagingDestinationSubscriptionName = attr.AttrMessagingDestinationSubscriptionName()
+	a.extra.AttrDestinationSubscriptionName = attr.MessagingDestinationSubscriptionName()
 	return a
 }
-func (a ProcessDuration) WithMessagingDestinationTemplate(attr interface {
-	AttrMessagingDestinationTemplate() AttrDestinationTemplate
+func (a ProcessDuration) WithDestinationTemplate(attr interface {
+	MessagingDestinationTemplate() AttrDestinationTemplate
 }) ProcessDuration {
-	a.extra.MessagingDestinationTemplate = attr.AttrMessagingDestinationTemplate()
+	a.extra.AttrDestinationTemplate = attr.MessagingDestinationTemplate()
 	return a
 }
-func (a ProcessDuration) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ProcessDuration {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ProcessDuration) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ProcessDuration {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ProcessDuration) WithMessagingDestinationPartitionId(attr interface {
-	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
+func (a ProcessDuration) WithDestinationPartitionId(attr interface {
+	MessagingDestinationPartitionId() AttrDestinationPartitionId
 }) ProcessDuration {
-	a.extra.MessagingDestinationPartitionId = attr.AttrMessagingDestinationPartitionId()
+	a.extra.AttrDestinationPartitionId = attr.MessagingDestinationPartitionId()
 	return a
 }
-func (a ProcessDuration) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ProcessDuration {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ProcessDuration) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ProcessDuration {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type ProcessDurationExtra struct {
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// The name of the consumer group with which a consumer is associated.
-	MessagingConsumerGroupName AttrConsumerGroupName `otel:"messaging.consumer.group.name"`
-	// The message destination name
-	MessagingDestinationName AttrDestinationName `otel:"messaging.destination.name"`
-	// The name of the destination subscription from which a message is consumed.
-	MessagingDestinationSubscriptionName AttrDestinationSubscriptionName `otel:"messaging.destination.subscription.name"`
-	// Low cardinality representation of the messaging destination name
-	MessagingDestinationTemplate AttrDestinationTemplate `otel:"messaging.destination.template"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.
-	MessagingDestinationPartitionId AttrDestinationPartitionId `otel:"messaging.destination.partition.id"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// Describes a class of error the operation ended with
+	AttrErrorType                   error.AttrType                  `otel:"error.type"`                              // The name of the consumer group with which a consumer is associated
+	AttrConsumerGroupName           AttrConsumerGroupName           `otel:"messaging.consumer.group.name"`           // The message destination name
+	AttrDestinationName             AttrDestinationName             `otel:"messaging.destination.name"`              // The name of the destination subscription from which a message is consumed
+	AttrDestinationSubscriptionName AttrDestinationSubscriptionName `otel:"messaging.destination.subscription.name"` // Low cardinality representation of the messaging destination name
+	AttrDestinationTemplate         AttrDestinationTemplate         `otel:"messaging.destination.template"`          // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress               server.AttrAddress              `otel:"server.address"`                          // The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`
+	AttrDestinationPartitionId      AttrDestinationPartitionId      `otel:"messaging.destination.partition.id"`      // Server port number
+	AttrServerPort                  server.AttrPort                 `otel:"server.port"`
 }
 
-func (a ProcessDurationExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a ProcessDurationExtra) AttrMessagingConsumerGroupName() AttrConsumerGroupName {
-	return a.MessagingConsumerGroupName
+func (a ProcessDurationExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a ProcessDurationExtra) MessagingConsumerGroupName() AttrConsumerGroupName {
+	return a.AttrConsumerGroupName
 }
-func (a ProcessDurationExtra) AttrMessagingDestinationName() AttrDestinationName {
-	return a.MessagingDestinationName
+func (a ProcessDurationExtra) MessagingDestinationName() AttrDestinationName {
+	return a.AttrDestinationName
 }
-func (a ProcessDurationExtra) AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName {
-	return a.MessagingDestinationSubscriptionName
+func (a ProcessDurationExtra) MessagingDestinationSubscriptionName() AttrDestinationSubscriptionName {
+	return a.AttrDestinationSubscriptionName
 }
-func (a ProcessDurationExtra) AttrMessagingDestinationTemplate() AttrDestinationTemplate {
-	return a.MessagingDestinationTemplate
+func (a ProcessDurationExtra) MessagingDestinationTemplate() AttrDestinationTemplate {
+	return a.AttrDestinationTemplate
 }
-func (a ProcessDurationExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a ProcessDurationExtra) AttrMessagingDestinationPartitionId() AttrDestinationPartitionId {
-	return a.MessagingDestinationPartitionId
+func (a ProcessDurationExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a ProcessDurationExtra) MessagingDestinationPartitionId() AttrDestinationPartitionId {
+	return a.AttrDestinationPartitionId
 }
-func (a ProcessDurationExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+func (a ProcessDurationExtra) ServerPort() server.AttrPort { return a.AttrServerPort }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -164,7 +152,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Apache ActiveMQ",
@@ -271,7 +258,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -399,7 +385,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -446,7 +431,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Apache ActiveMQ",
@@ -743,6 +727,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -850,6 +836,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -936,7 +923,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

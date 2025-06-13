@@ -6,37 +6,32 @@ import (
 
 // The time the process has been running.
 type Uptime struct {
-	*prometheus.GaugeVec
-	extra UptimeExtra
+	prometheus.Gauge
 }
 
 func NewUptime() Uptime {
-	labels := []string{}
-	return Uptime{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "process",
-		Name:      "uptime",
-		Help:      "The time the process has been running.",
-	}, labels)}
+	return Uptime{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "process_uptime",
+		Help: "The time the process has been running.",
+	})}
 }
 
-func (m Uptime) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m Uptime) Register(regs ...prometheus.Registerer) Uptime {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type UptimeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "UptimeExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "uptime",
         "Type": "Uptime",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The time the process has been running.",
@@ -178,6 +172,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -264,7 +259,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

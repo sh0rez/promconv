@@ -15,40 +15,42 @@ type CpuUsage struct {
 }
 
 func NewCpuUsage() CpuUsage {
-	labels := []string{"cpu_mode"}
+	labels := []string{cpu.AttrMode("").Key()}
 	return CpuUsage{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "container",
-		Name:      "cpu_usage",
-		Help:      "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs",
+		Name: "container_cpu_usage",
+		Help: "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs",
 	}, labels)}
 }
 
-func (m CpuUsage) With(extra interface {
-	AttrCpuMode() cpu.AttrMode
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m CpuUsage) With(extras ...interface{ CpuMode() cpu.AttrMode }) prometheus.Gauge {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrCpuMode()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.CpuMode().Value())
 }
 
-func (a CpuUsage) WithCpuMode(attr interface{ AttrCpuMode() cpu.AttrMode }) CpuUsage {
-	a.extra.CpuMode = attr.AttrCpuMode()
+// Deprecated: Use [CpuUsage.With] instead
+func (m CpuUsage) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a CpuUsage) WithCpuMode(attr interface{ CpuMode() cpu.AttrMode }) CpuUsage {
+	a.extra.AttrCpuMode = attr.CpuMode()
 	return a
 }
 
 type CpuUsageExtra struct {
-	// The CPU mode for this data point. A container's CPU metric SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
-	CpuMode cpu.AttrMode `otel:"cpu.mode"`
+	// The CPU mode for this data point. A container's CPU metric SHOULD be characterized *either* by data points with no `mode` labels, *or only* data points with `mode` labels
+	AttrCpuMode cpu.AttrMode `otel:"cpu.mode"`
 }
 
-func (a CpuUsageExtra) AttrCpuMode() cpu.AttrMode { return a.CpuMode }
+func (a CpuUsageExtra) CpuMode() cpu.AttrMode { return a.AttrCpuMode }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -76,7 +78,6 @@ State {
                 },
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -161,7 +162,6 @@ State {
                     },
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -264,6 +264,8 @@ State {
             "type": "metric",
             "unit": "{cpu}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -371,6 +373,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -457,7 +460,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

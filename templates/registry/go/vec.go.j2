@@ -40,12 +40,13 @@ type {{Type}} struct {
         {%- set attr.id = attr.name -%}
         {%- set attr.namespace = attr.name | attribute_namespace -%}
         {%- set attr.name = attr.name | attribute_id | pascal_case -%}
-        {%- set attr.arg = attr.name | snake_case -%}
-        {%- set attr.fullname = attr.id | pascal_case -%}
+        {%- set attr.arg = attr.name | replace("Type", "Kind") | camel_case -%}
+        {%- set attr.fullname = (attr.id | pascal_case) if attr.namespace != ctx.root_namespace else attr.name -%}
         {%- set attr.pkg = attr.namespace+"." if attr.namespace != ctx.root_namespace else "" -%}
         {%- set attr.type = "Attr"+(attr.name|pascal_case) -%}
         {%- set attr.ref = attr.pkg+attr.type -%}
-        {%- set attr.getter = "Attr"+attr.id|pascal_case -%}
+        {%- set attr.getter = attr.id|pascal_case -%}
+        {%- set attr.field = "Attr"+attr.fullname -%}
         {{ caller(attr) }}
     {%- endfor -%}
 {% endmacro%}
@@ -68,7 +69,7 @@ func (m {{Type}}) With(
 {%- endcall -%}
 extras ...interface {
 {%- call(attr) for_each_attr(attributes|not_required) -%}
-    {{attr.type}}() {{attr.ref}};
+    {{attr.getter}}() {{attr.ref}};
 {%- endcall -%}
 }) prometheus.{{Instr | replace("Histogram", "Observer")}} {
     {%- if attributes | not_required | length > 0 %} 
@@ -77,10 +78,10 @@ extras ...interface {
     {% endif %}
     return m.{{Instr}}Vec.WithLabelValues(
         {%- call(attr) for_each_attr(attributes|required) -%}
-            string({{attr.arg}}),
+            {{attr.arg}}.Value(),
         {%- endcall -%}
         {%- call(attr) for_each_attr(attributes|not_required) -%}
-            string(extra.{{attr.type}}()),
+            extra.{{attr.getter}}().Value(),
         {%- endcall -%}
      )
 }
@@ -92,21 +93,21 @@ func (m {{Type}}) WithLabelValues(lvs ...string) prometheus.{{Instr | replace("H
 
 {% call(attr) for_each_attr(attributes|not_required) -%}
 func (a {{Type}}) With{{attr.fullname}} (attr interface { {{ attr.getter }}() {{attr.ref}} } ) {{Type}} {
-    a.extra.{{attr.name}} = attr.{{attr.getter}}()
+    a.extra.{{attr.field}} = attr.{{attr.getter}}()
     return a
 }
-{%- endcall %}
+{% endcall %}
 
 type {{AttrExtra}} struct {
 {% call(attr) for_each_attr(attributes|not_required) -%}
     {{attr.brief | comment}}
-    {{attr.fullname}} {{attr.type}} `otel:"{{attr.id}}"`
+    {{attr.field}} {{attr.ref}} `otel:"{{attr.id}}"`
 {%- endcall %}
 }
 
 {% call(attr) for_each_attr(attributes|not_required) -%}
-    func (a {{AttrExtra}}) {{attr.getter}}() {{attr.ref}} {return a.{{attr.id|pascal_case}}}
-{%- endcall %}
+    func (a {{AttrExtra}}) {{attr.getter}}() {{attr.ref}} {return a.{{attr.field}}}
+{% endcall %}
 
 /*
 {{ debug() }}

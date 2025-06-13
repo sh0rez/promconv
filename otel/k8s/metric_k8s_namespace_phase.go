@@ -11,22 +11,20 @@ type NamespacePhase struct {
 }
 
 func NewNamespacePhase() NamespacePhase {
-	labels := []string{"k8s_namespace_phase"}
+	labels := []string{AttrNamespacePhase("").Key()}
 	return NamespacePhase{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "namespace_phase",
-		Help:      "Describes number of K8s namespaces that are currently in a given phase.",
+		Name: "k8s_namespace_phase",
+		Help: "Describes number of K8s namespaces that are currently in a given phase.",
 	}, labels)}
 }
 
-func (m NamespacePhase) With(namespacePhase AttrNamespacePhase, extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(namespacePhase),
-	)
+func (m NamespacePhase) With(namespacePhase AttrNamespacePhase, extras ...interface{}) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(namespacePhase.Value())
+}
+
+// Deprecated: Use [NamespacePhase.With] instead
+func (m NamespacePhase) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
 }
 
 type NamespacePhaseExtra struct {
@@ -34,7 +32,7 @@ type NamespacePhaseExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -60,7 +58,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Active namespace phase as described by [K8s API](https://pkg.go.dev/k8s.io/api@v0.31.3/core/v1#NamespacePhase)",
@@ -95,7 +92,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Active namespace phase as described by [K8s API](https://pkg.go.dev/k8s.io/api@v0.31.3/core/v1#NamespacePhase)",
@@ -150,6 +146,8 @@ State {
             "type": "metric",
             "unit": "{namespace}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -257,6 +255,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -343,7 +342,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

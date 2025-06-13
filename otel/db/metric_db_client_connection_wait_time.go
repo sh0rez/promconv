@@ -11,22 +11,20 @@ type ClientConnectionWaitTime struct {
 }
 
 func NewClientConnectionWaitTime() ClientConnectionWaitTime {
-	labels := []string{"db_client_connection_pool_name"}
+	labels := []string{AttrClientConnectionPoolName("").Key()}
 	return ClientConnectionWaitTime{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "db",
-		Name:      "client_connection_wait_time",
-		Help:      "The time it took to obtain an open connection from the pool",
+		Name: "db_client_connection_wait_time",
+		Help: "The time it took to obtain an open connection from the pool",
 	}, labels)}
 }
 
-func (m ClientConnectionWaitTime) With(clientConnectionPoolName AttrClientConnectionPoolName, extra interface {
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(clientConnectionPoolName),
-	)
+func (m ClientConnectionWaitTime) With(clientConnectionPoolName AttrClientConnectionPoolName, extras ...interface{}) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(clientConnectionPoolName.Value())
+}
+
+// Deprecated: Use [ClientConnectionWaitTime.With] instead
+func (m ClientConnectionWaitTime) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
 }
 
 type ClientConnectionWaitTimeExtra struct {
@@ -34,7 +32,7 @@ type ClientConnectionWaitTimeExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -105,6 +103,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -212,6 +212,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -298,7 +299,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

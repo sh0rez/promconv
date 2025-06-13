@@ -11,22 +11,20 @@ type ClientConnectionsCreateTime struct {
 }
 
 func NewClientConnectionsCreateTime() ClientConnectionsCreateTime {
-	labels := []string{"db_client_connections_pool_name"}
+	labels := []string{AttrClientConnectionsPoolName("").Key()}
 	return ClientConnectionsCreateTime{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "db",
-		Name:      "client_connections_create_time",
-		Help:      "Deprecated, use `db.client.connection.create_time` instead. Note: the unit also changed from `ms` to `s`.",
+		Name: "db_client_connections_create_time",
+		Help: "Deprecated, use `db.client.connection.create_time` instead. Note: the unit also changed from `ms` to `s`.",
 	}, labels)}
 }
 
-func (m ClientConnectionsCreateTime) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extra interface {
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(clientConnectionsPoolName),
-	)
+func (m ClientConnectionsCreateTime) With(clientConnectionsPoolName AttrClientConnectionsPoolName, extras ...interface{}) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(clientConnectionsPoolName.Value())
+}
+
+// Deprecated: Use [ClientConnectionsCreateTime.With] instead
+func (m ClientConnectionsCreateTime) WithLabelValues(lvs ...string) prometheus.Observer {
+	return m.HistogramVec.WithLabelValues(lvs...)
 }
 
 type ClientConnectionsCreateTimeExtra struct {
@@ -34,7 +32,7 @@ type ClientConnectionsCreateTimeExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -120,6 +118,8 @@ State {
             "type": "metric",
             "unit": "ms",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -227,6 +227,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -313,7 +314,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

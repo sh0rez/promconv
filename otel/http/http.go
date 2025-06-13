@@ -51,19 +51,19 @@ func Instrument(m Metrics, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var attrs Attributes
 		addrport := r.Context().Value(http.LocalAddrContextKey).(net.Addr)
-		attrs.ServerAddress, attrs.ServerPort = server.AddrPort(addrport)
+		attrs.AttrServerAddress, attrs.AttrServerPort = server.AddrPort(addrport)
 
-		attrs.HttpRoute = AttrRoute(r.URL.Path)
-		attrs.NetworkProtocolName = "http"
+		attrs.AttrRoute = AttrRoute(r.URL.Path)
+		attrs.AttrNetworkProtocolName = "http"
 		if _, v, ok := strings.Cut(r.Proto, "/"); ok {
-			attrs.NetworkProtocolVersion = network.AttrProtocolVersion(v)
+			attrs.AttrNetworkProtocolVersion = network.AttrProtocolVersion(v)
 		}
 
 		if mux, ok := h.(interface {
 			Handler(r *http.Request) (http.Handler, string)
 		}); ok {
 			_, route := mux.Handler(r)
-			attrs.HttpRoute = AttrRoute(route)
+			attrs.AttrRoute = AttrRoute(route)
 		}
 
 		active := m.Active.With(Method(r), Scheme(r), attrs)
@@ -78,7 +78,7 @@ func Instrument(m Metrics, h http.Handler) http.Handler {
 		res := countWriter{ResponseWriter: w, code: http.StatusOK}
 		h.ServeHTTP(&res, r)
 
-		attrs.HttpResponseStatusCode = AttrResponseStatusCode(strconv.Itoa(res.code))
+		attrs.AttrResponseStatusCode = AttrResponseStatusCode(strconv.Itoa(res.code))
 
 		m.RequestSize.With(Method(r), Scheme(r), attrs).Observe(float64(body.size))
 		m.ResponseSize.With(Method(r), Scheme(r), attrs).Observe(float64(res.size))

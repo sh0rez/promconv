@@ -5,40 +5,50 @@ package cloudevents
 // [event_id]: https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id
 type AttrEventId string // cloudevents.event_id
 
-func (AttrEventId) Development() {}
-func (AttrEventId) Recommended() {}
+func (AttrEventId) Development()    {}
+func (AttrEventId) Recommended()    {}
+func (AttrEventId) Key() string     { return "cloudevents_event_id" }
+func (a AttrEventId) Value() string { return string(a) }
 
 // The [source] identifies the context in which an event happened
 //
 // [source]: https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1
 type AttrEventSource string // cloudevents.event_source
 
-func (AttrEventSource) Development() {}
-func (AttrEventSource) Recommended() {}
+func (AttrEventSource) Development()    {}
+func (AttrEventSource) Recommended()    {}
+func (AttrEventSource) Key() string     { return "cloudevents_event_source" }
+func (a AttrEventSource) Value() string { return string(a) }
 
 // The [version of the CloudEvents specification] which the event uses
 //
 // [version of the CloudEvents specification]: https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#specversion
 type AttrEventSpecVersion string // cloudevents.event_spec_version
 
-func (AttrEventSpecVersion) Development() {}
-func (AttrEventSpecVersion) Recommended() {}
+func (AttrEventSpecVersion) Development()    {}
+func (AttrEventSpecVersion) Recommended()    {}
+func (AttrEventSpecVersion) Key() string     { return "cloudevents_event_spec_version" }
+func (a AttrEventSpecVersion) Value() string { return string(a) }
 
 // The [subject] of the event in the context of the event producer (identified by source)
 //
 // [subject]: https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#subject
 type AttrEventSubject string // cloudevents.event_subject
 
-func (AttrEventSubject) Development() {}
-func (AttrEventSubject) Recommended() {}
+func (AttrEventSubject) Development()    {}
+func (AttrEventSubject) Recommended()    {}
+func (AttrEventSubject) Key() string     { return "cloudevents_event_subject" }
+func (a AttrEventSubject) Value() string { return string(a) }
 
 // The [event_type] contains a value describing the type of event related to the originating occurrence
 //
 // [event_type]: https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type
 type AttrEventType string // cloudevents.event_type
 
-func (AttrEventType) Development() {}
-func (AttrEventType) Recommended() {}
+func (AttrEventType) Development()    {}
+func (AttrEventType) Recommended()    {}
+func (AttrEventType) Key() string     { return "cloudevents_event_type" }
+func (a AttrEventType) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -212,6 +222,7 @@ func (AttrEventType) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

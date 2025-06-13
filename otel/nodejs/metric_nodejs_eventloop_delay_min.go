@@ -6,37 +6,32 @@ import (
 
 // Event loop minimum delay.
 type EventloopDelayMin struct {
-	*prometheus.GaugeVec
-	extra EventloopDelayMinExtra
+	prometheus.Gauge
 }
 
 func NewEventloopDelayMin() EventloopDelayMin {
-	labels := []string{}
-	return EventloopDelayMin{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "nodejs",
-		Name:      "eventloop_delay_min",
-		Help:      "Event loop minimum delay.",
-	}, labels)}
+	return EventloopDelayMin{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "nodejs_eventloop_delay_min",
+		Help: "Event loop minimum delay.",
+	})}
 }
 
-func (m EventloopDelayMin) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m EventloopDelayMin) Register(regs ...prometheus.Registerer) EventloopDelayMin {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type EventloopDelayMinExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopDelayMinExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "eventloop.delay.min",
         "Type": "EventloopDelayMin",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Event loop minimum delay.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

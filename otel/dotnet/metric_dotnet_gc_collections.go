@@ -11,22 +11,20 @@ type GcCollections struct {
 }
 
 func NewGcCollections() GcCollections {
-	labels := []string{"dotnet_gc_heap_generation"}
+	labels := []string{AttrGcHeapGeneration("").Key()}
 	return GcCollections{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "dotnet",
-		Name:      "gc_collections",
-		Help:      "The number of garbage collections that have occurred since the process has started.",
+		Name: "dotnet_gc_collections",
+		Help: "The number of garbage collections that have occurred since the process has started.",
 	}, labels)}
 }
 
-func (m GcCollections) With(gcHeapGeneration AttrGcHeapGeneration, extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(gcHeapGeneration),
-	)
+func (m GcCollections) With(gcHeapGeneration AttrGcHeapGeneration, extras ...interface{}) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(gcHeapGeneration.Value())
+}
+
+// Deprecated: Use [GcCollections.With] instead
+func (m GcCollections) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 type GcCollectionsExtra struct {
@@ -34,7 +32,7 @@ type GcCollectionsExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -60,7 +58,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Generation 0",
@@ -119,7 +116,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Generation 0",
@@ -198,6 +194,8 @@ State {
             "type": "metric",
             "unit": "{collection}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -305,6 +303,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -391,7 +390,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

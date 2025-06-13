@@ -6,37 +6,32 @@ import (
 
 // Deprecated, use `k8s.replicationcontroller.desired_pods` instead.
 type ReplicationControllerDesiredPods struct {
-	*prometheus.GaugeVec
-	extra ReplicationControllerDesiredPodsExtra
+	prometheus.Gauge
 }
 
 func NewReplicationControllerDesiredPods() ReplicationControllerDesiredPods {
-	labels := []string{}
-	return ReplicationControllerDesiredPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "replication_controller_desired_pods",
-		Help:      "Deprecated, use `k8s.replicationcontroller.desired_pods` instead.",
-	}, labels)}
+	return ReplicationControllerDesiredPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_replication_controller_desired_pods",
+		Help: "Deprecated, use `k8s.replicationcontroller.desired_pods` instead.",
+	})}
 }
 
-func (m ReplicationControllerDesiredPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ReplicationControllerDesiredPods) Register(regs ...prometheus.Registerer) ReplicationControllerDesiredPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ReplicationControllerDesiredPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ReplicationControllerDesiredPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "replication_controller.desired_pods",
         "Type": "ReplicationControllerDesiredPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Deprecated, use `k8s.replicationcontroller.desired_pods` instead.",
@@ -179,6 +173,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -265,7 +260,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

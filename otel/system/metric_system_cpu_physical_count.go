@@ -6,37 +6,32 @@ import (
 
 // Reports the number of actual physical processor cores on the hardware
 type CpuPhysicalCount struct {
-	*prometheus.GaugeVec
-	extra CpuPhysicalCountExtra
+	prometheus.Gauge
 }
 
 func NewCpuPhysicalCount() CpuPhysicalCount {
-	labels := []string{}
-	return CpuPhysicalCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "cpu_physical_count",
-		Help:      "Reports the number of actual physical processor cores on the hardware",
-	}, labels)}
+	return CpuPhysicalCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "system_cpu_physical_count",
+		Help: "Reports the number of actual physical processor cores on the hardware",
+	})}
 }
 
-func (m CpuPhysicalCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m CpuPhysicalCount) Register(regs ...prometheus.Registerer) CpuPhysicalCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type CpuPhysicalCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuPhysicalCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "cpu.physical.count",
         "Type": "CpuPhysicalCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Reports the number of actual physical processor cores on the hardware",
@@ -178,6 +172,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -264,7 +259,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

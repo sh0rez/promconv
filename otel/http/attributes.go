@@ -3,40 +3,62 @@ package http
 // Deprecated, use `client.address` instead
 type AttrClientIp string // http.client_ip
 
-func (AttrClientIp) Development() {}
-func (AttrClientIp) Recommended() {}
+func (AttrClientIp) Development()    {}
+func (AttrClientIp) Recommended()    {}
+func (AttrClientIp) Key() string     { return "http_client_ip" }
+func (a AttrClientIp) Value() string { return string(a) }
 
 // State of the HTTP connection in the HTTP connection pool
 type AttrConnectionState string // http.connection.state
 
-func (AttrConnectionState) Development() {}
-func (AttrConnectionState) Recommended() {}
+func (AttrConnectionState) Development()    {}
+func (AttrConnectionState) Recommended()    {}
+func (AttrConnectionState) Key() string     { return "http_connection_state" }
+func (a AttrConnectionState) Value() string { return string(a) }
+
+const ConnectionStateActive AttrConnectionState = "active"
+const ConnectionStateIdle AttrConnectionState = "idle"
 
 // Deprecated, use `network.protocol.name` instead
 type AttrFlavor string // http.flavor
 
-func (AttrFlavor) Development() {}
-func (AttrFlavor) Recommended() {}
+func (AttrFlavor) Development()    {}
+func (AttrFlavor) Recommended()    {}
+func (AttrFlavor) Key() string     { return "http_flavor" }
+func (a AttrFlavor) Value() string { return string(a) }
+
+const FlavorHttp10 AttrFlavor = "1.0"
+const FlavorHttp11 AttrFlavor = "1.1"
+const FlavorHttp20 AttrFlavor = "2.0"
+const FlavorHttp30 AttrFlavor = "3.0"
+const FlavorSpdy AttrFlavor = "SPDY"
+const FlavorQuic AttrFlavor = "QUIC"
 
 // Deprecated, use one of `server.address`, `client.address` or `http.request.header.host` instead, depending on the usage
 type AttrHost string // http.host
 
-func (AttrHost) Development() {}
-func (AttrHost) Recommended() {}
+func (AttrHost) Development()    {}
+func (AttrHost) Recommended()    {}
+func (AttrHost) Key() string     { return "http_host" }
+func (a AttrHost) Value() string { return string(a) }
 
 // Deprecated, use `http.request.method` instead
 type AttrMethod string // http.method
 
-func (AttrMethod) Development() {}
-func (AttrMethod) Recommended() {}
+func (AttrMethod) Development()    {}
+func (AttrMethod) Recommended()    {}
+func (AttrMethod) Key() string     { return "http_method" }
+func (a AttrMethod) Value() string { return string(a) }
 
 // The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length] header. For requests using transport encoding, this should be the compressed size
 //
 // [Content-Length]: https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length
 type AttrRequestBodySize string // http.request.body.size
 
-func (AttrRequestBodySize) Development() {}
-func (AttrRequestBodySize) Recommended() {}
+func (AttrRequestBodySize) Development()    {}
+func (AttrRequestBodySize) Recommended()    {}
+func (AttrRequestBodySize) Key() string     { return "http_request_body_size" }
+func (a AttrRequestBodySize) Value() string { return string(a) }
 
 // HTTP request headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.
 //
@@ -58,8 +80,10 @@ func (AttrRequestBodySize) Recommended() {}
 //     attribute with value `["1.2.3.4", "1.2.3.5"]` or `["1.2.3.4, 1.2.3.5"]` depending on the HTTP library
 type AttrRequestHeader string // http.request.header
 
-func (AttrRequestHeader) Stable()      {}
-func (AttrRequestHeader) Recommended() {}
+func (AttrRequestHeader) Stable()         {}
+func (AttrRequestHeader) Recommended()    {}
+func (AttrRequestHeader) Key() string     { return "http_request_header" }
+func (a AttrRequestHeader) Value() string { return string(a) }
 
 // HTTP request method.
 // HTTP request method value SHOULD be "known" to the instrumentation.
@@ -81,48 +105,75 @@ func (AttrRequestHeader) Recommended() {}
 // [RFC5789]: https://www.rfc-editor.org/rfc/rfc5789.html
 type AttrRequestMethod string // http.request.method
 
-func (AttrRequestMethod) Stable()      {}
-func (AttrRequestMethod) Recommended() {}
+func (AttrRequestMethod) Stable()         {}
+func (AttrRequestMethod) Recommended()    {}
+func (AttrRequestMethod) Key() string     { return "http_request_method" }
+func (a AttrRequestMethod) Value() string { return string(a) }
+
+const RequestMethodConnect AttrRequestMethod = "CONNECT"
+const RequestMethodDelete AttrRequestMethod = "DELETE"
+const RequestMethodGet AttrRequestMethod = "GET"
+const RequestMethodHead AttrRequestMethod = "HEAD"
+const RequestMethodOptions AttrRequestMethod = "OPTIONS"
+const RequestMethodPatch AttrRequestMethod = "PATCH"
+const RequestMethodPost AttrRequestMethod = "POST"
+const RequestMethodPut AttrRequestMethod = "PUT"
+const RequestMethodTrace AttrRequestMethod = "TRACE"
+const RequestMethodOther AttrRequestMethod = "_OTHER"
 
 // Original HTTP method sent by the client in the request line
 type AttrRequestMethodOriginal string // http.request.method_original
 
-func (AttrRequestMethodOriginal) Stable()      {}
-func (AttrRequestMethodOriginal) Recommended() {}
+func (AttrRequestMethodOriginal) Stable()         {}
+func (AttrRequestMethodOriginal) Recommended()    {}
+func (AttrRequestMethodOriginal) Key() string     { return "http_request_method_original" }
+func (a AttrRequestMethodOriginal) Value() string { return string(a) }
 
 // The ordinal number of request resending attempt (for any reason, including redirects).
 //
 // The resend count SHOULD be updated each time an HTTP request gets resent by the client, regardless of what was the cause of the resending (e.g. redirection, authorization failure, 503 Server Unavailable, network issues, or any other)
 type AttrRequestResendCount string // http.request.resend_count
 
-func (AttrRequestResendCount) Stable()      {}
-func (AttrRequestResendCount) Recommended() {}
+func (AttrRequestResendCount) Stable()         {}
+func (AttrRequestResendCount) Recommended()    {}
+func (AttrRequestResendCount) Key() string     { return "http_request_resend_count" }
+func (a AttrRequestResendCount) Value() string { return string(a) }
 
 // The total size of the request in bytes. This should be the total number of bytes sent over the wire, including the request line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and request body if any
 type AttrRequestSize string // http.request.size
 
-func (AttrRequestSize) Development() {}
-func (AttrRequestSize) Recommended() {}
+func (AttrRequestSize) Development()    {}
+func (AttrRequestSize) Recommended()    {}
+func (AttrRequestSize) Key() string     { return "http_request_size" }
+func (a AttrRequestSize) Value() string { return string(a) }
 
 // Deprecated, use `http.request.header.content-length` instead
 type AttrRequestContentLength string // http.request_content_length
 
-func (AttrRequestContentLength) Development() {}
-func (AttrRequestContentLength) Recommended() {}
+func (AttrRequestContentLength) Development()    {}
+func (AttrRequestContentLength) Recommended()    {}
+func (AttrRequestContentLength) Key() string     { return "http_request_content_length" }
+func (a AttrRequestContentLength) Value() string { return string(a) }
 
 // Deprecated, use `http.request.body.size` instead
 type AttrRequestContentLengthUncompressed string // http.request_content_length_uncompressed
 
 func (AttrRequestContentLengthUncompressed) Development() {}
 func (AttrRequestContentLengthUncompressed) Recommended() {}
+func (AttrRequestContentLengthUncompressed) Key() string {
+	return "http_request_content_length_uncompressed"
+}
+func (a AttrRequestContentLengthUncompressed) Value() string { return string(a) }
 
 // The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length] header. For requests using transport encoding, this should be the compressed size
 //
 // [Content-Length]: https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length
 type AttrResponseBodySize string // http.response.body.size
 
-func (AttrResponseBodySize) Development() {}
-func (AttrResponseBodySize) Recommended() {}
+func (AttrResponseBodySize) Development()    {}
+func (AttrResponseBodySize) Recommended()    {}
+func (AttrResponseBodySize) Key() string     { return "http_response_body_size" }
+func (a AttrResponseBodySize) Value() string { return string(a) }
 
 // HTTP response headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.
 //
@@ -143,34 +194,46 @@ func (AttrResponseBodySize) Recommended() {}
 //     attribute with value `["abc", "def"]` or `["abc, def"]` depending on the HTTP library
 type AttrResponseHeader string // http.response.header
 
-func (AttrResponseHeader) Stable()      {}
-func (AttrResponseHeader) Recommended() {}
+func (AttrResponseHeader) Stable()         {}
+func (AttrResponseHeader) Recommended()    {}
+func (AttrResponseHeader) Key() string     { return "http_response_header" }
+func (a AttrResponseHeader) Value() string { return string(a) }
 
 // The total size of the response in bytes. This should be the total number of bytes sent over the wire, including the status line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and response body and trailers if any
 type AttrResponseSize string // http.response.size
 
-func (AttrResponseSize) Development() {}
-func (AttrResponseSize) Recommended() {}
+func (AttrResponseSize) Development()    {}
+func (AttrResponseSize) Recommended()    {}
+func (AttrResponseSize) Key() string     { return "http_response_size" }
+func (a AttrResponseSize) Value() string { return string(a) }
 
 // [HTTP response status code]
 //
 // [HTTP response status code]: https://tools.ietf.org/html/rfc7231#section-6
 type AttrResponseStatusCode string // http.response.status_code
 
-func (AttrResponseStatusCode) Stable()      {}
-func (AttrResponseStatusCode) Recommended() {}
+func (AttrResponseStatusCode) Stable()         {}
+func (AttrResponseStatusCode) Recommended()    {}
+func (AttrResponseStatusCode) Key() string     { return "http_response_status_code" }
+func (a AttrResponseStatusCode) Value() string { return string(a) }
 
 // Deprecated, use `http.response.header.content-length` instead
 type AttrResponseContentLength string // http.response_content_length
 
-func (AttrResponseContentLength) Development() {}
-func (AttrResponseContentLength) Recommended() {}
+func (AttrResponseContentLength) Development()    {}
+func (AttrResponseContentLength) Recommended()    {}
+func (AttrResponseContentLength) Key() string     { return "http_response_content_length" }
+func (a AttrResponseContentLength) Value() string { return string(a) }
 
 // Deprecated, use `http.response.body.size` instead
 type AttrResponseContentLengthUncompressed string // http.response_content_length_uncompressed
 
 func (AttrResponseContentLengthUncompressed) Development() {}
 func (AttrResponseContentLengthUncompressed) Recommended() {}
+func (AttrResponseContentLengthUncompressed) Key() string {
+	return "http_response_content_length_uncompressed"
+}
+func (a AttrResponseContentLengthUncompressed) Value() string { return string(a) }
 
 // The matched route, that is, the path template in the format used by the respective server framework.
 //
@@ -180,44 +243,58 @@ func (AttrResponseContentLengthUncompressed) Recommended() {}
 // [application root]: /docs/http/http-spans.md#http-server-definitions
 type AttrRoute string // http.route
 
-func (AttrRoute) Stable()      {}
-func (AttrRoute) Recommended() {}
+func (AttrRoute) Stable()         {}
+func (AttrRoute) Recommended()    {}
+func (AttrRoute) Key() string     { return "http_route" }
+func (a AttrRoute) Value() string { return string(a) }
 
 // Deprecated, use `url.scheme` instead
 type AttrScheme string // http.scheme
 
-func (AttrScheme) Development() {}
-func (AttrScheme) Recommended() {}
+func (AttrScheme) Development()    {}
+func (AttrScheme) Recommended()    {}
+func (AttrScheme) Key() string     { return "http_scheme" }
+func (a AttrScheme) Value() string { return string(a) }
 
 // Deprecated, use `server.address` instead
 type AttrServerName string // http.server_name
 
-func (AttrServerName) Development() {}
-func (AttrServerName) Recommended() {}
+func (AttrServerName) Development()    {}
+func (AttrServerName) Recommended()    {}
+func (AttrServerName) Key() string     { return "http_server_name" }
+func (a AttrServerName) Value() string { return string(a) }
 
 // Deprecated, use `http.response.status_code` instead
 type AttrStatusCode string // http.status_code
 
-func (AttrStatusCode) Development() {}
-func (AttrStatusCode) Recommended() {}
+func (AttrStatusCode) Development()    {}
+func (AttrStatusCode) Recommended()    {}
+func (AttrStatusCode) Key() string     { return "http_status_code" }
+func (a AttrStatusCode) Value() string { return string(a) }
 
 // Deprecated, use `url.path` and `url.query` instead
 type AttrTarget string // http.target
 
-func (AttrTarget) Development() {}
-func (AttrTarget) Recommended() {}
+func (AttrTarget) Development()    {}
+func (AttrTarget) Recommended()    {}
+func (AttrTarget) Key() string     { return "http_target" }
+func (a AttrTarget) Value() string { return string(a) }
 
 // Deprecated, use `url.full` instead
 type AttrUrl string // http.url
 
-func (AttrUrl) Development() {}
-func (AttrUrl) Recommended() {}
+func (AttrUrl) Development()    {}
+func (AttrUrl) Recommended()    {}
+func (AttrUrl) Key() string     { return "http_url" }
+func (a AttrUrl) Value() string { return string(a) }
 
 // Deprecated, use `user_agent.original` instead
 type AttrUserAgent string // http.user_agent
 
-func (AttrUserAgent) Development() {}
-func (AttrUserAgent) Recommended() {}
+func (AttrUserAgent) Development()    {}
+func (AttrUserAgent) Recommended()    {}
+func (AttrUserAgent) Key() string     { return "http_user_agent" }
+func (a AttrUserAgent) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -251,7 +328,6 @@ func (AttrUserAgent) Recommended() {}
                     "root_namespace": "http",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "active state.",
@@ -284,7 +360,6 @@ func (AttrUserAgent) Recommended() {}
                     "root_namespace": "http",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "HTTP/1.0",
@@ -410,7 +485,6 @@ func (AttrUserAgent) Recommended() {}
                     "root_namespace": "http",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "CONNECT method.",
@@ -848,6 +922,7 @@ func (AttrUserAgent) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

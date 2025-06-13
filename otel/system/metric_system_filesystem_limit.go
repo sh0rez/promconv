@@ -11,75 +11,69 @@ type FilesystemLimit struct {
 }
 
 func NewFilesystemLimit() FilesystemLimit {
-	labels := []string{"system_device", "system_filesystem_mode", "system_filesystem_mountpoint", "system_filesystem_type"}
+	labels := []string{AttrDevice("").Key(), AttrFilesystemMode("").Key(), AttrFilesystemMountpoint("").Key(), AttrFilesystemType("").Key()}
 	return FilesystemLimit{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "system",
-		Name:      "filesystem_limit",
-		Help:      "The total storage capacity of the filesystem",
+		Name: "system_filesystem_limit",
+		Help: "The total storage capacity of the filesystem",
 	}, labels)}
 }
 
-func (m FilesystemLimit) With(extra interface {
-	AttrSystemDevice() AttrDevice
-	AttrSystemFilesystemMode() AttrFilesystemMode
-	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
-	AttrSystemFilesystemType() AttrFilesystemType
+func (m FilesystemLimit) With(extras ...interface {
+	SystemDevice() AttrDevice
+	SystemFilesystemMode() AttrFilesystemMode
+	SystemFilesystemMountpoint() AttrFilesystemMountpoint
+	SystemFilesystemType() AttrFilesystemType
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSystemDevice()),
-		string(extra.AttrSystemFilesystemMode()),
-		string(extra.AttrSystemFilesystemMountpoint()),
-		string(extra.AttrSystemFilesystemType()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.SystemDevice().Value(), extra.SystemFilesystemMode().Value(), extra.SystemFilesystemMountpoint().Value(), extra.SystemFilesystemType().Value())
 }
 
-func (a FilesystemLimit) WithSystemDevice(attr interface{ AttrSystemDevice() AttrDevice }) FilesystemLimit {
-	a.extra.SystemDevice = attr.AttrSystemDevice()
+// Deprecated: Use [FilesystemLimit.With] instead
+func (m FilesystemLimit) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a FilesystemLimit) WithDevice(attr interface{ SystemDevice() AttrDevice }) FilesystemLimit {
+	a.extra.AttrDevice = attr.SystemDevice()
 	return a
 }
-func (a FilesystemLimit) WithSystemFilesystemMode(attr interface{ AttrSystemFilesystemMode() AttrFilesystemMode }) FilesystemLimit {
-	a.extra.SystemFilesystemMode = attr.AttrSystemFilesystemMode()
+func (a FilesystemLimit) WithFilesystemMode(attr interface{ SystemFilesystemMode() AttrFilesystemMode }) FilesystemLimit {
+	a.extra.AttrFilesystemMode = attr.SystemFilesystemMode()
 	return a
 }
-func (a FilesystemLimit) WithSystemFilesystemMountpoint(attr interface {
-	AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint
+func (a FilesystemLimit) WithFilesystemMountpoint(attr interface {
+	SystemFilesystemMountpoint() AttrFilesystemMountpoint
 }) FilesystemLimit {
-	a.extra.SystemFilesystemMountpoint = attr.AttrSystemFilesystemMountpoint()
+	a.extra.AttrFilesystemMountpoint = attr.SystemFilesystemMountpoint()
 	return a
 }
-func (a FilesystemLimit) WithSystemFilesystemType(attr interface{ AttrSystemFilesystemType() AttrFilesystemType }) FilesystemLimit {
-	a.extra.SystemFilesystemType = attr.AttrSystemFilesystemType()
+func (a FilesystemLimit) WithFilesystemType(attr interface{ SystemFilesystemType() AttrFilesystemType }) FilesystemLimit {
+	a.extra.AttrFilesystemType = attr.SystemFilesystemType()
 	return a
 }
 
 type FilesystemLimitExtra struct {
-	// Identifier for the device where the filesystem resides.
-	SystemDevice AttrDevice `otel:"system.device"`
-	// The filesystem mode
-	SystemFilesystemMode AttrFilesystemMode `otel:"system.filesystem.mode"`
-	// The filesystem mount path
-	SystemFilesystemMountpoint AttrFilesystemMountpoint `otel:"system.filesystem.mountpoint"`
-	// The filesystem type
-	SystemFilesystemType AttrFilesystemType `otel:"system.filesystem.type"`
+	// Identifier for the device where the filesystem resides
+	AttrDevice               AttrDevice               `otel:"system.device"`                // The filesystem mode
+	AttrFilesystemMode       AttrFilesystemMode       `otel:"system.filesystem.mode"`       // The filesystem mount path
+	AttrFilesystemMountpoint AttrFilesystemMountpoint `otel:"system.filesystem.mountpoint"` // The filesystem type
+	AttrFilesystemType       AttrFilesystemType       `otel:"system.filesystem.type"`
 }
 
-func (a FilesystemLimitExtra) AttrSystemDevice() AttrDevice { return a.SystemDevice }
-func (a FilesystemLimitExtra) AttrSystemFilesystemMode() AttrFilesystemMode {
-	return a.SystemFilesystemMode
+func (a FilesystemLimitExtra) SystemDevice() AttrDevice                 { return a.AttrDevice }
+func (a FilesystemLimitExtra) SystemFilesystemMode() AttrFilesystemMode { return a.AttrFilesystemMode }
+func (a FilesystemLimitExtra) SystemFilesystemMountpoint() AttrFilesystemMountpoint {
+	return a.AttrFilesystemMountpoint
 }
-func (a FilesystemLimitExtra) AttrSystemFilesystemMountpoint() AttrFilesystemMountpoint {
-	return a.SystemFilesystemMountpoint
-}
-func (a FilesystemLimitExtra) AttrSystemFilesystemType() AttrFilesystemType {
-	return a.SystemFilesystemType
-}
+func (a FilesystemLimitExtra) SystemFilesystemType() AttrFilesystemType { return a.AttrFilesystemType }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -134,7 +128,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -199,7 +192,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -349,6 +341,8 @@ State {
             "type": "metric",
             "unit": "By",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -456,6 +450,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -542,7 +537,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

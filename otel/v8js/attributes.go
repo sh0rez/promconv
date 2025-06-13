@@ -3,8 +3,15 @@ package v8js
 // The type of garbage collection
 type AttrGcType string // v8js.gc.type
 
-func (AttrGcType) Development() {}
-func (AttrGcType) Recommended() {}
+func (AttrGcType) Development()    {}
+func (AttrGcType) Recommended()    {}
+func (AttrGcType) Key() string     { return "v8js_gc_type" }
+func (a AttrGcType) Value() string { return string(a) }
+
+const GcTypeMajor AttrGcType = "major"
+const GcTypeMinor AttrGcType = "minor"
+const GcTypeIncremental AttrGcType = "incremental"
+const GcTypeWeakcb AttrGcType = "weakcb"
 
 // The name of the space type of heap memory.
 // Value can be retrieved from value `space_name` of [`v8.getHeapSpaceStatistics()`]
@@ -12,8 +19,16 @@ func (AttrGcType) Recommended() {}
 // [`v8.getHeapSpaceStatistics()`]: https://nodejs.org/api/v8.html#v8getheapspacestatistics
 type AttrHeapSpaceName string // v8js.heap.space.name
 
-func (AttrHeapSpaceName) Development() {}
-func (AttrHeapSpaceName) Recommended() {}
+func (AttrHeapSpaceName) Development()    {}
+func (AttrHeapSpaceName) Recommended()    {}
+func (AttrHeapSpaceName) Key() string     { return "v8js_heap_space_name" }
+func (a AttrHeapSpaceName) Value() string { return string(a) }
+
+const HeapSpaceNameNewSpace AttrHeapSpaceName = "new_space"
+const HeapSpaceNameOldSpace AttrHeapSpaceName = "old_space"
+const HeapSpaceNameCodeSpace AttrHeapSpaceName = "code_space"
+const HeapSpaceNameMapSpace AttrHeapSpaceName = "map_space"
+const HeapSpaceNameLargeObjectSpace AttrHeapSpaceName = "large_object_space"
 
 /* State {
     name: "attr.go.j2",
@@ -29,7 +44,6 @@ func (AttrHeapSpaceName) Recommended() {}
                     "root_namespace": "v8js",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Major (Mark Sweep Compact).",
@@ -74,7 +88,6 @@ func (AttrHeapSpaceName) Recommended() {}
                     "root_namespace": "v8js",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "New memory space.",
@@ -229,6 +242,7 @@ func (AttrHeapSpaceName) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

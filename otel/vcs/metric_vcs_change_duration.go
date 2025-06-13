@@ -11,61 +11,58 @@ type ChangeDuration struct {
 }
 
 func NewChangeDuration() ChangeDuration {
-	labels := []string{"vcs_change_state", "vcs_ref_head_name", "vcs_repository_url_full", "vcs_owner_name", "vcs_repository_name", "vcs_provider_name"}
+	labels := []string{AttrChangeState("").Key(), AttrRefHeadName("").Key(), AttrRepositoryUrlFull("").Key(), AttrOwnerName("").Key(), AttrRepositoryName("").Key(), AttrProviderName("").Key()}
 	return ChangeDuration{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "vcs",
-		Name:      "change_duration",
-		Help:      "The time duration a change (pull request/merge request/changelist) has been in a given state.",
+		Name: "vcs_change_duration",
+		Help: "The time duration a change (pull request/merge request/changelist) has been in a given state.",
 	}, labels)}
 }
 
-func (m ChangeDuration) With(changeState AttrChangeState, refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
-	AttrVcsOwnerName() AttrOwnerName
-	AttrVcsRepositoryName() AttrRepositoryName
-	AttrVcsProviderName() AttrProviderName
+func (m ChangeDuration) With(changeState AttrChangeState, refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extras ...interface {
+	VcsOwnerName() AttrOwnerName
+	VcsRepositoryName() AttrRepositoryName
+	VcsProviderName() AttrProviderName
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(changeState),
-		string(refHeadName),
-		string(repositoryUrlFull),
-		string(extra.AttrVcsOwnerName()),
-		string(extra.AttrVcsRepositoryName()),
-		string(extra.AttrVcsProviderName()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(changeState.Value(), refHeadName.Value(), repositoryUrlFull.Value(), extra.VcsOwnerName().Value(), extra.VcsRepositoryName().Value(), extra.VcsProviderName().Value())
 }
 
-func (a ChangeDuration) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) ChangeDuration {
-	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+// Deprecated: Use [ChangeDuration.With] instead
+func (m ChangeDuration) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ChangeDuration) WithOwnerName(attr interface{ VcsOwnerName() AttrOwnerName }) ChangeDuration {
+	a.extra.AttrOwnerName = attr.VcsOwnerName()
 	return a
 }
-func (a ChangeDuration) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) ChangeDuration {
-	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+func (a ChangeDuration) WithRepositoryName(attr interface{ VcsRepositoryName() AttrRepositoryName }) ChangeDuration {
+	a.extra.AttrRepositoryName = attr.VcsRepositoryName()
 	return a
 }
-func (a ChangeDuration) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) ChangeDuration {
-	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+func (a ChangeDuration) WithProviderName(attr interface{ VcsProviderName() AttrProviderName }) ChangeDuration {
+	a.extra.AttrProviderName = attr.VcsProviderName()
 	return a
 }
 
 type ChangeDurationExtra struct {
-	// The group owner within the version control system.
-	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
-	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
-	VcsRepositoryName AttrRepositoryName `otel:"vcs.repository.name"`
-	// The name of the version control system provider.
-	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
+	// The group owner within the version control system
+	AttrOwnerName      AttrOwnerName      `otel:"vcs.owner.name"`      // The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub
+	AttrRepositoryName AttrRepositoryName `otel:"vcs.repository.name"` // The name of the version control system provider
+	AttrProviderName   AttrProviderName   `otel:"vcs.provider.name"`
 }
 
-func (a ChangeDurationExtra) AttrVcsOwnerName() AttrOwnerName           { return a.VcsOwnerName }
-func (a ChangeDurationExtra) AttrVcsRepositoryName() AttrRepositoryName { return a.VcsRepositoryName }
-func (a ChangeDurationExtra) AttrVcsProviderName() AttrProviderName     { return a.VcsProviderName }
+func (a ChangeDurationExtra) VcsOwnerName() AttrOwnerName           { return a.AttrOwnerName }
+func (a ChangeDurationExtra) VcsRepositoryName() AttrRepositoryName { return a.AttrRepositoryName }
+func (a ChangeDurationExtra) VcsProviderName() AttrProviderName     { return a.AttrProviderName }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -91,7 +88,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Open means the change is currently active and under review. It hasn't been merged into the target branch yet, and it's still possible to make changes or add comments.",
@@ -188,7 +184,6 @@ State {
                 "requirement_level": "opt_in",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "[GitHub](https://github.com)",
@@ -271,7 +266,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Open means the change is currently active and under review. It hasn't been merged into the target branch yet, and it's still possible to make changes or add comments.",
@@ -332,7 +326,6 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[GitHub](https://github.com)",
@@ -485,6 +478,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -592,6 +587,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -678,7 +674,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

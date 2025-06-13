@@ -3,20 +3,26 @@ package gcp
 // The container within GCP where the AppHub application is defined
 type AttrApphubApplicationContainer string // gcp.apphub.application.container
 
-func (AttrApphubApplicationContainer) Development() {}
-func (AttrApphubApplicationContainer) Recommended() {}
+func (AttrApphubApplicationContainer) Development()    {}
+func (AttrApphubApplicationContainer) Recommended()    {}
+func (AttrApphubApplicationContainer) Key() string     { return "gcp_apphub_application_container" }
+func (a AttrApphubApplicationContainer) Value() string { return string(a) }
 
 // The name of the application as configured in AppHub
 type AttrApphubApplicationId string // gcp.apphub.application.id
 
-func (AttrApphubApplicationId) Development() {}
-func (AttrApphubApplicationId) Recommended() {}
+func (AttrApphubApplicationId) Development()    {}
+func (AttrApphubApplicationId) Recommended()    {}
+func (AttrApphubApplicationId) Key() string     { return "gcp_apphub_application_id" }
+func (a AttrApphubApplicationId) Value() string { return string(a) }
 
 // The GCP zone or region where the application is defined
 type AttrApphubApplicationLocation string // gcp.apphub.application.location
 
-func (AttrApphubApplicationLocation) Development() {}
-func (AttrApphubApplicationLocation) Recommended() {}
+func (AttrApphubApplicationLocation) Development()    {}
+func (AttrApphubApplicationLocation) Recommended()    {}
+func (AttrApphubApplicationLocation) Key() string     { return "gcp_apphub_application_location" }
+func (a AttrApphubApplicationLocation) Value() string { return string(a) }
 
 // Criticality of a service indicates its importance to the business.
 //
@@ -25,8 +31,15 @@ func (AttrApphubApplicationLocation) Recommended() {}
 // [See AppHub type enum]: https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type
 type AttrApphubServiceCriticalityType string // gcp.apphub.service.criticality_type
 
-func (AttrApphubServiceCriticalityType) Development() {}
-func (AttrApphubServiceCriticalityType) Recommended() {}
+func (AttrApphubServiceCriticalityType) Development()    {}
+func (AttrApphubServiceCriticalityType) Recommended()    {}
+func (AttrApphubServiceCriticalityType) Key() string     { return "gcp_apphub_service_criticality_type" }
+func (a AttrApphubServiceCriticalityType) Value() string { return string(a) }
+
+const ApphubServiceCriticalityTypeMissionCritical AttrApphubServiceCriticalityType = "MISSION_CRITICAL"
+const ApphubServiceCriticalityTypeHigh AttrApphubServiceCriticalityType = "HIGH"
+const ApphubServiceCriticalityTypeMedium AttrApphubServiceCriticalityType = "MEDIUM"
+const ApphubServiceCriticalityTypeLow AttrApphubServiceCriticalityType = "LOW"
 
 // Environment of a service is the stage of a software lifecycle.
 //
@@ -35,14 +48,23 @@ func (AttrApphubServiceCriticalityType) Recommended() {}
 // [See AppHub environment type]: https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type_1
 type AttrApphubServiceEnvironmentType string // gcp.apphub.service.environment_type
 
-func (AttrApphubServiceEnvironmentType) Development() {}
-func (AttrApphubServiceEnvironmentType) Recommended() {}
+func (AttrApphubServiceEnvironmentType) Development()    {}
+func (AttrApphubServiceEnvironmentType) Recommended()    {}
+func (AttrApphubServiceEnvironmentType) Key() string     { return "gcp_apphub_service_environment_type" }
+func (a AttrApphubServiceEnvironmentType) Value() string { return string(a) }
+
+const ApphubServiceEnvironmentTypeProduction AttrApphubServiceEnvironmentType = "PRODUCTION"
+const ApphubServiceEnvironmentTypeStaging AttrApphubServiceEnvironmentType = "STAGING"
+const ApphubServiceEnvironmentTypeTest AttrApphubServiceEnvironmentType = "TEST"
+const ApphubServiceEnvironmentTypeDevelopment AttrApphubServiceEnvironmentType = "DEVELOPMENT"
 
 // The name of the service as configured in AppHub
 type AttrApphubServiceId string // gcp.apphub.service.id
 
-func (AttrApphubServiceId) Development() {}
-func (AttrApphubServiceId) Recommended() {}
+func (AttrApphubServiceId) Development()    {}
+func (AttrApphubServiceId) Recommended()    {}
+func (AttrApphubServiceId) Key() string     { return "gcp_apphub_service_id" }
+func (a AttrApphubServiceId) Value() string { return string(a) }
 
 // Criticality of a workload indicates its importance to the business.
 //
@@ -51,8 +73,15 @@ func (AttrApphubServiceId) Recommended() {}
 // [See AppHub type enum]: https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type
 type AttrApphubWorkloadCriticalityType string // gcp.apphub.workload.criticality_type
 
-func (AttrApphubWorkloadCriticalityType) Development() {}
-func (AttrApphubWorkloadCriticalityType) Recommended() {}
+func (AttrApphubWorkloadCriticalityType) Development()    {}
+func (AttrApphubWorkloadCriticalityType) Recommended()    {}
+func (AttrApphubWorkloadCriticalityType) Key() string     { return "gcp_apphub_workload_criticality_type" }
+func (a AttrApphubWorkloadCriticalityType) Value() string { return string(a) }
+
+const ApphubWorkloadCriticalityTypeMissionCritical AttrApphubWorkloadCriticalityType = "MISSION_CRITICAL"
+const ApphubWorkloadCriticalityTypeHigh AttrApphubWorkloadCriticalityType = "HIGH"
+const ApphubWorkloadCriticalityTypeMedium AttrApphubWorkloadCriticalityType = "MEDIUM"
+const ApphubWorkloadCriticalityTypeLow AttrApphubWorkloadCriticalityType = "LOW"
 
 // Environment of a workload is the stage of a software lifecycle.
 //
@@ -61,21 +90,32 @@ func (AttrApphubWorkloadCriticalityType) Recommended() {}
 // [See AppHub environment type]: https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type_1
 type AttrApphubWorkloadEnvironmentType string // gcp.apphub.workload.environment_type
 
-func (AttrApphubWorkloadEnvironmentType) Development() {}
-func (AttrApphubWorkloadEnvironmentType) Recommended() {}
+func (AttrApphubWorkloadEnvironmentType) Development()    {}
+func (AttrApphubWorkloadEnvironmentType) Recommended()    {}
+func (AttrApphubWorkloadEnvironmentType) Key() string     { return "gcp_apphub_workload_environment_type" }
+func (a AttrApphubWorkloadEnvironmentType) Value() string { return string(a) }
+
+const ApphubWorkloadEnvironmentTypeProduction AttrApphubWorkloadEnvironmentType = "PRODUCTION"
+const ApphubWorkloadEnvironmentTypeStaging AttrApphubWorkloadEnvironmentType = "STAGING"
+const ApphubWorkloadEnvironmentTypeTest AttrApphubWorkloadEnvironmentType = "TEST"
+const ApphubWorkloadEnvironmentTypeDevelopment AttrApphubWorkloadEnvironmentType = "DEVELOPMENT"
 
 // The name of the workload as configured in AppHub
 type AttrApphubWorkloadId string // gcp.apphub.workload.id
 
-func (AttrApphubWorkloadId) Development() {}
-func (AttrApphubWorkloadId) Recommended() {}
+func (AttrApphubWorkloadId) Development()    {}
+func (AttrApphubWorkloadId) Recommended()    {}
+func (AttrApphubWorkloadId) Key() string     { return "gcp_apphub_workload_id" }
+func (a AttrApphubWorkloadId) Value() string { return string(a) }
 
 // Identifies the Google Cloud service for which the official client library is intended.
 // Intended to be a stable identifier for Google Cloud client libraries that is uniform across implementation languages. The value should be derived from the canonical service domain for the service; for example, 'foo.googleapis.com' should result in a value of 'foo'
 type AttrClientService string // gcp.client.service
 
-func (AttrClientService) Development() {}
-func (AttrClientService) Recommended() {}
+func (AttrClientService) Development()    {}
+func (AttrClientService) Recommended()    {}
+func (AttrClientService) Key() string     { return "gcp_client_service" }
+func (a AttrClientService) Value() string { return string(a) }
 
 // The name of the Cloud Run [execution] being run for the Job, as set by the [`CLOUD_RUN_EXECUTION`] environment variable
 //
@@ -83,32 +123,40 @@ func (AttrClientService) Recommended() {}
 // [`CLOUD_RUN_EXECUTION`]: https://cloud.google.com/run/docs/container-contract#jobs-env-vars
 type AttrCloudRunJobExecution string // gcp.cloud_run.job.execution
 
-func (AttrCloudRunJobExecution) Development() {}
-func (AttrCloudRunJobExecution) Recommended() {}
+func (AttrCloudRunJobExecution) Development()    {}
+func (AttrCloudRunJobExecution) Recommended()    {}
+func (AttrCloudRunJobExecution) Key() string     { return "gcp_cloud_run_job_execution" }
+func (a AttrCloudRunJobExecution) Value() string { return string(a) }
 
 // The index for a task within an execution as provided by the [`CLOUD_RUN_TASK_INDEX`] environment variable
 //
 // [`CLOUD_RUN_TASK_INDEX`]: https://cloud.google.com/run/docs/container-contract#jobs-env-vars
 type AttrCloudRunJobTaskIndex string // gcp.cloud_run.job.task_index
 
-func (AttrCloudRunJobTaskIndex) Development() {}
-func (AttrCloudRunJobTaskIndex) Recommended() {}
+func (AttrCloudRunJobTaskIndex) Development()    {}
+func (AttrCloudRunJobTaskIndex) Recommended()    {}
+func (AttrCloudRunJobTaskIndex) Key() string     { return "gcp_cloud_run_job_task_index" }
+func (a AttrCloudRunJobTaskIndex) Value() string { return string(a) }
 
 // The hostname of a GCE instance. This is the full value of the default or [custom hostname]
 //
 // [custom hostname]: https://cloud.google.com/compute/docs/instances/custom-hostname-vm
 type AttrGceInstanceHostname string // gcp.gce.instance.hostname
 
-func (AttrGceInstanceHostname) Development() {}
-func (AttrGceInstanceHostname) Recommended() {}
+func (AttrGceInstanceHostname) Development()    {}
+func (AttrGceInstanceHostname) Recommended()    {}
+func (AttrGceInstanceHostname) Key() string     { return "gcp_gce_instance_hostname" }
+func (a AttrGceInstanceHostname) Value() string { return string(a) }
 
 // The instance name of a GCE instance. This is the value provided by `host.name`, the visible name of the instance in the Cloud Console UI, and the prefix for the default hostname of the instance as defined by the [default internal DNS name]
 //
 // [default internal DNS name]: https://cloud.google.com/compute/docs/internal-dns#instance-fully-qualified-domain-names
 type AttrGceInstanceName string // gcp.gce.instance.name
 
-func (AttrGceInstanceName) Development() {}
-func (AttrGceInstanceName) Recommended() {}
+func (AttrGceInstanceName) Development()    {}
+func (AttrGceInstanceName) Recommended()    {}
+func (AttrGceInstanceName) Key() string     { return "gcp_gce_instance_name" }
+func (a AttrGceInstanceName) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -158,7 +206,6 @@ func (AttrGceInstanceName) Recommended() {}
                     "root_namespace": "gcp",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Mission critical service.",
@@ -203,7 +250,6 @@ func (AttrGceInstanceName) Recommended() {}
                     "root_namespace": "gcp",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Production environment.",
@@ -259,7 +305,6 @@ func (AttrGceInstanceName) Recommended() {}
                     "root_namespace": "gcp",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Mission critical service.",
@@ -304,7 +349,6 @@ func (AttrGceInstanceName) Recommended() {}
                     "root_namespace": "gcp",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Production environment.",
@@ -526,6 +570,7 @@ func (AttrGceInstanceName) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

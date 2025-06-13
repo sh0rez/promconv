@@ -15,23 +15,20 @@ type PipelineRunErrors struct {
 }
 
 func NewPipelineRunErrors() PipelineRunErrors {
-	labels := []string{"cicd_pipeline_name", "error_type"}
+	labels := []string{AttrPipelineName("").Key(), error.AttrType("").Key()}
 	return PipelineRunErrors{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "cicd",
-		Name:      "pipeline_run_errors",
-		Help:      "The number of errors encountered in pipeline runs (eg. compile, test failures).",
+		Name: "cicd_pipeline_run_errors",
+		Help: "The number of errors encountered in pipeline runs (eg. compile, test failures).",
 	}, labels)}
 }
 
-func (m PipelineRunErrors) With(pipelineName AttrPipelineName, kind error.AttrType, extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
-	}
-	return m.WithLabelValues(
-		string(pipelineName),
-		string(kind),
-	)
+func (m PipelineRunErrors) With(pipelineName AttrPipelineName, kind error.AttrType, extras ...interface{}) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(pipelineName.Value(), kind.Value())
+}
+
+// Deprecated: Use [PipelineRunErrors.With] instead
+func (m PipelineRunErrors) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
 }
 
 type PipelineRunErrorsExtra struct {
@@ -39,7 +36,7 @@ type PipelineRunErrorsExtra struct {
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -80,7 +77,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -122,7 +118,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -184,6 +179,8 @@ State {
             "type": "metric",
             "unit": "{error}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -291,6 +288,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -377,7 +375,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

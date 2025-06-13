@@ -6,37 +6,32 @@ import (
 
 // Memory allocated to the heap by the application.
 type MemoryAllocated struct {
-	*prometheus.CounterVec
-	extra MemoryAllocatedExtra
+	prometheus.Counter
 }
 
 func NewMemoryAllocated() MemoryAllocated {
-	labels := []string{}
-	return MemoryAllocated{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "go",
-		Name:      "memory_allocated",
-		Help:      "Memory allocated to the heap by the application.",
-	}, labels)}
+	return MemoryAllocated{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "go_memory_allocated",
+		Help: "Memory allocated to the heap by the application.",
+	})}
 }
 
-func (m MemoryAllocated) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m MemoryAllocated) Register(regs ...prometheus.Registerer) MemoryAllocated {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type MemoryAllocatedExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "MemoryAllocatedExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "memory.allocated",
         "Type": "MemoryAllocated",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Memory allocated to the heap by the application.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

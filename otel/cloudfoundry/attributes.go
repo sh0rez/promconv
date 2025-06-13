@@ -7,8 +7,10 @@ package cloudfoundry
 // reported by `cf app <app-name> --guid`
 type AttrAppId string // cloudfoundry.app.id
 
-func (AttrAppId) Development() {}
-func (AttrAppId) Recommended() {}
+func (AttrAppId) Development()    {}
+func (AttrAppId) Recommended()    {}
+func (AttrAppId) Key() string     { return "cloudfoundry_app_id" }
+func (a AttrAppId) Value() string { return string(a) }
 
 // The index of the application instance. 0 when just one instance is active.
 //
@@ -23,8 +25,10 @@ func (AttrAppId) Recommended() {}
 // [Loggregator v2 envelope]: https://github.com/cloudfoundry/loggregator-api#v2-envelope
 type AttrAppInstanceId string // cloudfoundry.app.instance.id
 
-func (AttrAppInstanceId) Development() {}
-func (AttrAppInstanceId) Recommended() {}
+func (AttrAppInstanceId) Development()    {}
+func (AttrAppInstanceId) Recommended()    {}
+func (AttrAppInstanceId) Key() string     { return "cloudfoundry_app_instance_id" }
+func (a AttrAppInstanceId) Value() string { return string(a) }
 
 // The name of the application.
 //
@@ -33,8 +37,10 @@ func (AttrAppInstanceId) Recommended() {}
 // as reported by `cf apps`
 type AttrAppName string // cloudfoundry.app.name
 
-func (AttrAppName) Development() {}
-func (AttrAppName) Recommended() {}
+func (AttrAppName) Development()    {}
+func (AttrAppName) Recommended()    {}
+func (AttrAppName) Key() string     { return "cloudfoundry_app_name" }
+func (a AttrAppName) Value() string { return string(a) }
 
 // The guid of the CloudFoundry org the application is running in.
 //
@@ -43,8 +49,10 @@ func (AttrAppName) Recommended() {}
 // reported by `cf org <org-name> --guid`
 type AttrOrgId string // cloudfoundry.org.id
 
-func (AttrOrgId) Development() {}
-func (AttrOrgId) Recommended() {}
+func (AttrOrgId) Development()    {}
+func (AttrOrgId) Recommended()    {}
+func (AttrOrgId) Key() string     { return "cloudfoundry_org_id" }
+func (a AttrOrgId) Value() string { return string(a) }
 
 // The name of the CloudFoundry organization the app is running in.
 //
@@ -53,8 +61,10 @@ func (AttrOrgId) Recommended() {}
 // reported by `cf orgs`
 type AttrOrgName string // cloudfoundry.org.name
 
-func (AttrOrgName) Development() {}
-func (AttrOrgName) Recommended() {}
+func (AttrOrgName) Development()    {}
+func (AttrOrgName) Recommended()    {}
+func (AttrOrgName) Key() string     { return "cloudfoundry_org_name" }
+func (a AttrOrgName) Value() string { return string(a) }
 
 // The UID identifying the process.
 //
@@ -64,8 +74,10 @@ func (AttrOrgName) Recommended() {}
 // For system components, this could be the actual PID
 type AttrProcessId string // cloudfoundry.process.id
 
-func (AttrProcessId) Development() {}
-func (AttrProcessId) Recommended() {}
+func (AttrProcessId) Development()    {}
+func (AttrProcessId) Recommended()    {}
+func (AttrProcessId) Key() string     { return "cloudfoundry_process_id" }
+func (a AttrProcessId) Value() string { return string(a) }
 
 // The type of process.
 //
@@ -74,8 +86,10 @@ func (AttrProcessId) Recommended() {}
 // tasks or side-cars with different process types
 type AttrProcessType string // cloudfoundry.process.type
 
-func (AttrProcessType) Development() {}
-func (AttrProcessType) Recommended() {}
+func (AttrProcessType) Development()    {}
+func (AttrProcessType) Recommended()    {}
+func (AttrProcessType) Key() string     { return "cloudfoundry_process_type" }
+func (a AttrProcessType) Value() string { return string(a) }
 
 // The guid of the CloudFoundry space the application is running in.
 //
@@ -84,8 +98,10 @@ func (AttrProcessType) Recommended() {}
 // reported by `cf space <space-name> --guid`
 type AttrSpaceId string // cloudfoundry.space.id
 
-func (AttrSpaceId) Development() {}
-func (AttrSpaceId) Recommended() {}
+func (AttrSpaceId) Development()    {}
+func (AttrSpaceId) Recommended()    {}
+func (AttrSpaceId) Key() string     { return "cloudfoundry_space_id" }
+func (a AttrSpaceId) Value() string { return string(a) }
 
 // The name of the CloudFoundry space the application is running in.
 //
@@ -94,8 +110,10 @@ func (AttrSpaceId) Recommended() {}
 // reported by `cf spaces`
 type AttrSpaceName string // cloudfoundry.space.name
 
-func (AttrSpaceName) Development() {}
-func (AttrSpaceName) Recommended() {}
+func (AttrSpaceName) Development()    {}
+func (AttrSpaceName) Recommended()    {}
+func (AttrSpaceName) Key() string     { return "cloudfoundry_space_name" }
+func (a AttrSpaceName) Value() string { return string(a) }
 
 // A guid or another name describing the event source.
 //
@@ -113,8 +131,10 @@ func (AttrSpaceName) Recommended() {}
 // [Bosh spec]: https://bosh.io/docs/jobs/#properties-spec
 type AttrSystemId string // cloudfoundry.system.id
 
-func (AttrSystemId) Development() {}
-func (AttrSystemId) Recommended() {}
+func (AttrSystemId) Development()    {}
+func (AttrSystemId) Recommended()    {}
+func (AttrSystemId) Key() string     { return "cloudfoundry_system_id" }
+func (a AttrSystemId) Value() string { return string(a) }
 
 // A guid describing the concrete instance of the event source.
 //
@@ -130,8 +150,10 @@ func (AttrSystemId) Recommended() {}
 // [Bosh spec]: https://bosh.io/docs/jobs/#properties-spec
 type AttrSystemInstanceId string // cloudfoundry.system.instance.id
 
-func (AttrSystemInstanceId) Development() {}
-func (AttrSystemInstanceId) Recommended() {}
+func (AttrSystemInstanceId) Development()    {}
+func (AttrSystemInstanceId) Recommended()    {}
+func (AttrSystemInstanceId) Key() string     { return "cloudfoundry_system_instance_id" }
+func (a AttrSystemInstanceId) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -383,6 +405,7 @@ func (AttrSystemInstanceId) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

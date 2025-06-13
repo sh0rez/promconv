@@ -15,46 +15,50 @@ type DiagnosticsExceptions struct {
 }
 
 func NewDiagnosticsExceptions() DiagnosticsExceptions {
-	labels := []string{"aspnetcore_diagnostics_exception_result", "error_type", "aspnetcore_diagnostics_handler_type"}
+	labels := []string{AttrDiagnosticsExceptionResult("").Key(), error.AttrType("").Key(), AttrDiagnosticsHandlerType("").Key()}
 	return DiagnosticsExceptions{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "aspnetcore",
-		Name:      "diagnostics_exceptions",
-		Help:      "Number of exceptions caught by exception handling middleware.",
+		Name: "aspnetcore_diagnostics_exceptions",
+		Help: "Number of exceptions caught by exception handling middleware.",
 	}, labels)}
 }
 
-func (m DiagnosticsExceptions) With(diagnosticsExceptionResult AttrDiagnosticsExceptionResult, kind error.AttrType, extra interface {
-	AttrAspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType
+func (m DiagnosticsExceptions) With(diagnosticsExceptionResult AttrDiagnosticsExceptionResult, kind error.AttrType, extras ...interface {
+	AspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(diagnosticsExceptionResult),
-		string(kind),
-		string(extra.AttrAspnetcoreDiagnosticsHandlerType()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(diagnosticsExceptionResult.Value(), kind.Value(), extra.AspnetcoreDiagnosticsHandlerType().Value())
 }
 
-func (a DiagnosticsExceptions) WithAspnetcoreDiagnosticsHandlerType(attr interface {
-	AttrAspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType
+// Deprecated: Use [DiagnosticsExceptions.With] instead
+func (m DiagnosticsExceptions) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a DiagnosticsExceptions) WithDiagnosticsHandlerType(attr interface {
+	AspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType
 }) DiagnosticsExceptions {
-	a.extra.AspnetcoreDiagnosticsHandlerType = attr.AttrAspnetcoreDiagnosticsHandlerType()
+	a.extra.AttrDiagnosticsHandlerType = attr.AspnetcoreDiagnosticsHandlerType()
 	return a
 }
 
 type DiagnosticsExceptionsExtra struct {
-	// Full type name of the [`IExceptionHandler`](https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) implementation that handled the exception.
-	AspnetcoreDiagnosticsHandlerType AttrDiagnosticsHandlerType `otel:"aspnetcore.diagnostics.handler.type"`
+	// Full type name of the [`IExceptionHandler`] implementation that handled the exception
+	//
+	// [`IExceptionHandler`]: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler
+	AttrDiagnosticsHandlerType AttrDiagnosticsHandlerType `otel:"aspnetcore.diagnostics.handler.type"`
 }
 
-func (a DiagnosticsExceptionsExtra) AttrAspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType {
-	return a.AspnetcoreDiagnosticsHandlerType
+func (a DiagnosticsExceptionsExtra) AspnetcoreDiagnosticsHandlerType() AttrDiagnosticsHandlerType {
+	return a.AttrDiagnosticsHandlerType
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -79,7 +83,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Exception was handled by the exception handling middleware.",
@@ -127,7 +130,6 @@ State {
                 "requirement_level": "required",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -166,7 +168,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -201,7 +202,6 @@ State {
                     "requirement_level": "required",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Exception was handled by the exception handling middleware.",
@@ -296,6 +296,8 @@ State {
             "type": "metric",
             "unit": "{exception}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -403,6 +405,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -489,7 +492,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -15,71 +15,69 @@ type SdkExporterLogInflight struct {
 }
 
 func NewSdkExporterLogInflight() SdkExporterLogInflight {
-	labels := []string{"otel_component_name", "otel_component_type", "server_address", "server_port"}
+	labels := []string{AttrComponentName("").Key(), AttrComponentType("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key()}
 	return SdkExporterLogInflight{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "otel",
-		Name:      "sdk_exporter_log_inflight",
-		Help:      "The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed)",
+		Name: "otel_sdk_exporter_log_inflight",
+		Help: "The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed)",
 	}, labels)}
 }
 
-func (m SdkExporterLogInflight) With(extra interface {
-	AttrOtelComponentName() AttrComponentName
-	AttrOtelComponentType() AttrComponentType
-	AttrServerAddress() server.AttrAddress
-	AttrServerPort() server.AttrPort
+func (m SdkExporterLogInflight) With(extras ...interface {
+	OtelComponentName() AttrComponentName
+	OtelComponentType() AttrComponentType
+	ServerAddress() server.AttrAddress
+	ServerPort() server.AttrPort
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrOtelComponentName()),
-		string(extra.AttrOtelComponentType()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.OtelComponentName().Value(), extra.OtelComponentType().Value(), extra.ServerAddress().Value(), extra.ServerPort().Value())
 }
 
-func (a SdkExporterLogInflight) WithOtelComponentName(attr interface{ AttrOtelComponentName() AttrComponentName }) SdkExporterLogInflight {
-	a.extra.OtelComponentName = attr.AttrOtelComponentName()
+// Deprecated: Use [SdkExporterLogInflight.With] instead
+func (m SdkExporterLogInflight) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a SdkExporterLogInflight) WithComponentName(attr interface{ OtelComponentName() AttrComponentName }) SdkExporterLogInflight {
+	a.extra.AttrComponentName = attr.OtelComponentName()
 	return a
 }
-func (a SdkExporterLogInflight) WithOtelComponentType(attr interface{ AttrOtelComponentType() AttrComponentType }) SdkExporterLogInflight {
-	a.extra.OtelComponentType = attr.AttrOtelComponentType()
+func (a SdkExporterLogInflight) WithComponentType(attr interface{ OtelComponentType() AttrComponentType }) SdkExporterLogInflight {
+	a.extra.AttrComponentType = attr.OtelComponentType()
 	return a
 }
-func (a SdkExporterLogInflight) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) SdkExporterLogInflight {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a SdkExporterLogInflight) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) SdkExporterLogInflight {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a SdkExporterLogInflight) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) SdkExporterLogInflight {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a SdkExporterLogInflight) WithServerPort(attr interface{ ServerPort() server.AttrPort }) SdkExporterLogInflight {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type SdkExporterLogInflightExtra struct {
-	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.
-	OtelComponentName AttrComponentName `otel:"otel.component.name"`
-	// A name identifying the type of the OpenTelemetry component.
-	OtelComponentType AttrComponentType `otel:"otel.component.type"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance
+	AttrComponentName AttrComponentName  `otel:"otel.component.name"` // A name identifying the type of the OpenTelemetry component
+	AttrComponentType AttrComponentType  `otel:"otel.component.type"` // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress server.AttrAddress `otel:"server.address"`      // Server port number
+	AttrServerPort    server.AttrPort    `otel:"server.port"`
 }
 
-func (a SdkExporterLogInflightExtra) AttrOtelComponentName() AttrComponentName {
-	return a.OtelComponentName
+func (a SdkExporterLogInflightExtra) OtelComponentName() AttrComponentName {
+	return a.AttrComponentName
 }
-func (a SdkExporterLogInflightExtra) AttrOtelComponentType() AttrComponentType {
-	return a.OtelComponentType
+func (a SdkExporterLogInflightExtra) OtelComponentType() AttrComponentType {
+	return a.AttrComponentType
 }
-func (a SdkExporterLogInflightExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a SdkExporterLogInflightExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+func (a SdkExporterLogInflightExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a SdkExporterLogInflightExtra) ServerPort() server.AttrPort       { return a.AttrServerPort }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -117,7 +115,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The builtin SDK batching span processor\n",
@@ -278,7 +275,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The builtin SDK batching span processor\n",
@@ -503,6 +499,8 @@ State {
             "type": "metric",
             "unit": "{log_record}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -610,6 +608,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -696,7 +695,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

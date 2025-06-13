@@ -6,37 +6,32 @@ import (
 
 // Event loop 50 percentile delay.
 type EventloopDelayP50 struct {
-	*prometheus.GaugeVec
-	extra EventloopDelayP50Extra
+	prometheus.Gauge
 }
 
 func NewEventloopDelayP50() EventloopDelayP50 {
-	labels := []string{}
-	return EventloopDelayP50{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "nodejs",
-		Name:      "eventloop_delay_p50",
-		Help:      "Event loop 50 percentile delay.",
-	}, labels)}
+	return EventloopDelayP50{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "nodejs_eventloop_delay_p50",
+		Help: "Event loop 50 percentile delay.",
+	})}
 }
 
-func (m EventloopDelayP50) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m EventloopDelayP50) Register(regs ...prometheus.Registerer) EventloopDelayP50 {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type EventloopDelayP50Extra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopDelayP50Extra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "eventloop.delay.p50",
         "Type": "EventloopDelayP50",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Event loop 50 percentile delay.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

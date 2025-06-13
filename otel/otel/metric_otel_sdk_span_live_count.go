@@ -6,37 +6,32 @@ import (
 
 // Deprecated, use `otel.sdk.span.live` instead.
 type SdkSpanLiveCount struct {
-	*prometheus.GaugeVec
-	extra SdkSpanLiveCountExtra
+	prometheus.Gauge
 }
 
 func NewSdkSpanLiveCount() SdkSpanLiveCount {
-	labels := []string{}
-	return SdkSpanLiveCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "otel",
-		Name:      "sdk_span_live_count",
-		Help:      "Deprecated, use `otel.sdk.span.live` instead.",
-	}, labels)}
+	return SdkSpanLiveCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "otel_sdk_span_live_count",
+		Help: "Deprecated, use `otel.sdk.span.live` instead.",
+	})}
 }
 
-func (m SdkSpanLiveCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m SdkSpanLiveCount) Register(regs ...prometheus.Registerer) SdkSpanLiveCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type SdkSpanLiveCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkSpanLiveCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "sdk.span.live.count",
         "Type": "SdkSpanLiveCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Deprecated, use `otel.sdk.span.live` instead.",
@@ -179,6 +173,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -265,7 +260,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

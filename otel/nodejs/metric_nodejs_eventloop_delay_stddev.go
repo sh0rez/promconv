@@ -6,37 +6,32 @@ import (
 
 // Event loop standard deviation delay.
 type EventloopDelayStddev struct {
-	*prometheus.GaugeVec
-	extra EventloopDelayStddevExtra
+	prometheus.Gauge
 }
 
 func NewEventloopDelayStddev() EventloopDelayStddev {
-	labels := []string{}
-	return EventloopDelayStddev{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "nodejs",
-		Name:      "eventloop_delay_stddev",
-		Help:      "Event loop standard deviation delay.",
-	}, labels)}
+	return EventloopDelayStddev{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "nodejs_eventloop_delay_stddev",
+		Help: "Event loop standard deviation delay.",
+	})}
 }
 
-func (m EventloopDelayStddev) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m EventloopDelayStddev) Register(regs ...prometheus.Registerer) EventloopDelayStddev {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type EventloopDelayStddevExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "EventloopDelayStddevExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "eventloop.delay.stddev",
         "Type": "EventloopDelayStddev",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Event loop standard deviation delay.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

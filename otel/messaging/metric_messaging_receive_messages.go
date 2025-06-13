@@ -16,59 +16,58 @@ type ReceiveMessages struct {
 }
 
 func NewReceiveMessages() ReceiveMessages {
-	labels := []string{"messaging_operation_name", "error_type", "server_address", "server_port"}
+	labels := []string{AttrOperationName("").Key(), error.AttrType("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key()}
 	return ReceiveMessages{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "messaging",
-		Name:      "receive_messages",
-		Help:      "Deprecated. Use `messaging.client.consumed.messages` instead.",
+		Name: "messaging_receive_messages",
+		Help: "Deprecated. Use `messaging.client.consumed.messages` instead.",
 	}, labels)}
 }
 
-func (m ReceiveMessages) With(operationName AttrOperationName, extra interface {
-	AttrErrorType() error.AttrType
-	AttrServerAddress() server.AttrAddress
-	AttrServerPort() server.AttrPort
+func (m ReceiveMessages) With(operationName AttrOperationName, extras ...interface {
+	ErrorType() error.AttrType
+	ServerAddress() server.AttrAddress
+	ServerPort() server.AttrPort
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(operationName),
-		string(extra.AttrErrorType()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(operationName.Value(), extra.ErrorType().Value(), extra.ServerAddress().Value(), extra.ServerPort().Value())
 }
 
-func (a ReceiveMessages) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ReceiveMessages {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [ReceiveMessages.With] instead
+func (m ReceiveMessages) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a ReceiveMessages) WithErrorType(attr interface{ ErrorType() error.AttrType }) ReceiveMessages {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a ReceiveMessages) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ReceiveMessages {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ReceiveMessages) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ReceiveMessages {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ReceiveMessages) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ReceiveMessages {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ReceiveMessages) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ReceiveMessages {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type ReceiveMessagesExtra struct {
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// Describes a class of error the operation ended with
+	AttrErrorType     error.AttrType     `otel:"error.type"`     // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress server.AttrAddress `otel:"server.address"` // Server port number
+	AttrServerPort    server.AttrPort    `otel:"server.port"`
 }
 
-func (a ReceiveMessagesExtra) AttrErrorType() error.AttrType         { return a.ErrorType }
-func (a ReceiveMessagesExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a ReceiveMessagesExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+func (a ReceiveMessagesExtra) ErrorType() error.AttrType         { return a.AttrErrorType }
+func (a ReceiveMessagesExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a ReceiveMessagesExtra) ServerPort() server.AttrPort       { return a.AttrServerPort }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -109,7 +108,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -154,18 +152,6 @@ State {
         "ctx": {
             "attributes": [
                 {
-                    "brief": "The system-specific name of the messaging operation.\n",
-                    "examples": [
-                        "ack",
-                        "nack",
-                        "send",
-                    ],
-                    "name": "messaging.operation.name",
-                    "requirement_level": "required",
-                    "stability": "development",
-                    "type": "string",
-                },
-                {
                     "brief": "Describes a class of error the operation ended with.\n",
                     "examples": [
                         "amqp:decode-error",
@@ -179,7 +165,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -191,6 +176,18 @@ State {
                             },
                         ],
                     },
+                },
+                {
+                    "brief": "The system-specific name of the messaging operation.\n",
+                    "examples": [
+                        "ack",
+                        "nack",
+                        "send",
+                    ],
+                    "name": "messaging.operation.name",
+                    "requirement_level": "required",
+                    "stability": "development",
+                    "type": "string",
                 },
                 {
                     "brief": "Server port number.",
@@ -292,6 +289,8 @@ State {
             "type": "metric",
             "unit": "{message}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -399,6 +398,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -485,7 +485,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

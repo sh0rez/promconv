@@ -7,8 +7,10 @@ package enduser
 // > This field contains sensitive (PII) information
 type AttrId string // enduser.id
 
-func (AttrId) Development() {}
-func (AttrId) Recommended() {}
+func (AttrId) Development()    {}
+func (AttrId) Recommended()    {}
+func (AttrId) Key() string     { return "enduser_id" }
+func (a AttrId) Value() string { return string(a) }
 
 // Pseudonymous identifier of an end user. This identifier should be a random value that is not directly linked or associated with the end user's actual identity.
 //
@@ -18,20 +20,26 @@ func (AttrId) Recommended() {}
 // > This field contains sensitive (linkable PII) information
 type AttrPseudoId string // enduser.pseudo.id
 
-func (AttrPseudoId) Development() {}
-func (AttrPseudoId) Recommended() {}
+func (AttrPseudoId) Development()    {}
+func (AttrPseudoId) Recommended()    {}
+func (AttrPseudoId) Key() string     { return "enduser_pseudo_id" }
+func (a AttrPseudoId) Value() string { return string(a) }
 
 // Deprecated, use `user.roles` instead
 type AttrRole string // enduser.role
 
-func (AttrRole) Development() {}
-func (AttrRole) Recommended() {}
+func (AttrRole) Development()    {}
+func (AttrRole) Recommended()    {}
+func (AttrRole) Key() string     { return "enduser_role" }
+func (a AttrRole) Value() string { return string(a) }
 
 // Deprecated, no replacement at this time
 type AttrScope string // enduser.scope
 
-func (AttrScope) Development() {}
-func (AttrScope) Recommended() {}
+func (AttrScope) Development()    {}
+func (AttrScope) Recommended()    {}
+func (AttrScope) Key() string     { return "enduser_scope" }
+func (a AttrScope) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -200,6 +208,7 @@ func (AttrScope) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

@@ -16,97 +16,89 @@ type ClientSentMessages struct {
 }
 
 func NewClientSentMessages() ClientSentMessages {
-	labels := []string{"messaging_operation_name", "messaging_system", "error_type", "messaging_destination_name", "messaging_destination_template", "server_address", "messaging_destination_partition_id", "server_port"}
+	labels := []string{AttrOperationName("").Key(), AttrSystem("").Key(), error.AttrType("").Key(), AttrDestinationName("").Key(), AttrDestinationTemplate("").Key(), server.AttrAddress("").Key(), AttrDestinationPartitionId("").Key(), server.AttrPort("").Key()}
 	return ClientSentMessages{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "messaging",
-		Name:      "client_sent_messages",
-		Help:      "Number of messages producer attempted to send to the broker.",
+		Name: "messaging_client_sent_messages",
+		Help: "Number of messages producer attempted to send to the broker.",
 	}, labels)}
 }
 
-func (m ClientSentMessages) With(operationName AttrOperationName, system AttrSystem, extra interface {
-	AttrErrorType() error.AttrType
-	AttrMessagingDestinationName() AttrDestinationName
-	AttrMessagingDestinationTemplate() AttrDestinationTemplate
-	AttrServerAddress() server.AttrAddress
-	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
-	AttrServerPort() server.AttrPort
+func (m ClientSentMessages) With(operationName AttrOperationName, system AttrSystem, extras ...interface {
+	ErrorType() error.AttrType
+	MessagingDestinationName() AttrDestinationName
+	MessagingDestinationTemplate() AttrDestinationTemplate
+	ServerAddress() server.AttrAddress
+	MessagingDestinationPartitionId() AttrDestinationPartitionId
+	ServerPort() server.AttrPort
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(operationName),
-		string(system),
-		string(extra.AttrErrorType()),
-		string(extra.AttrMessagingDestinationName()),
-		string(extra.AttrMessagingDestinationTemplate()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrMessagingDestinationPartitionId()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(operationName.Value(), system.Value(), extra.ErrorType().Value(), extra.MessagingDestinationName().Value(), extra.MessagingDestinationTemplate().Value(), extra.ServerAddress().Value(), extra.MessagingDestinationPartitionId().Value(), extra.ServerPort().Value())
 }
 
-func (a ClientSentMessages) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientSentMessages {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [ClientSentMessages.With] instead
+func (m ClientSentMessages) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a ClientSentMessages) WithErrorType(attr interface{ ErrorType() error.AttrType }) ClientSentMessages {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a ClientSentMessages) WithMessagingDestinationName(attr interface{ AttrMessagingDestinationName() AttrDestinationName }) ClientSentMessages {
-	a.extra.MessagingDestinationName = attr.AttrMessagingDestinationName()
+func (a ClientSentMessages) WithDestinationName(attr interface{ MessagingDestinationName() AttrDestinationName }) ClientSentMessages {
+	a.extra.AttrDestinationName = attr.MessagingDestinationName()
 	return a
 }
-func (a ClientSentMessages) WithMessagingDestinationTemplate(attr interface {
-	AttrMessagingDestinationTemplate() AttrDestinationTemplate
+func (a ClientSentMessages) WithDestinationTemplate(attr interface {
+	MessagingDestinationTemplate() AttrDestinationTemplate
 }) ClientSentMessages {
-	a.extra.MessagingDestinationTemplate = attr.AttrMessagingDestinationTemplate()
+	a.extra.AttrDestinationTemplate = attr.MessagingDestinationTemplate()
 	return a
 }
-func (a ClientSentMessages) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientSentMessages {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ClientSentMessages) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ClientSentMessages {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ClientSentMessages) WithMessagingDestinationPartitionId(attr interface {
-	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
+func (a ClientSentMessages) WithDestinationPartitionId(attr interface {
+	MessagingDestinationPartitionId() AttrDestinationPartitionId
 }) ClientSentMessages {
-	a.extra.MessagingDestinationPartitionId = attr.AttrMessagingDestinationPartitionId()
+	a.extra.AttrDestinationPartitionId = attr.MessagingDestinationPartitionId()
 	return a
 }
-func (a ClientSentMessages) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientSentMessages {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ClientSentMessages) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ClientSentMessages {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type ClientSentMessagesExtra struct {
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// The message destination name
-	MessagingDestinationName AttrDestinationName `otel:"messaging.destination.name"`
-	// Low cardinality representation of the messaging destination name
-	MessagingDestinationTemplate AttrDestinationTemplate `otel:"messaging.destination.template"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.
-	MessagingDestinationPartitionId AttrDestinationPartitionId `otel:"messaging.destination.partition.id"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// Describes a class of error the operation ended with
+	AttrErrorType              error.AttrType             `otel:"error.type"`                         // The message destination name
+	AttrDestinationName        AttrDestinationName        `otel:"messaging.destination.name"`         // Low cardinality representation of the messaging destination name
+	AttrDestinationTemplate    AttrDestinationTemplate    `otel:"messaging.destination.template"`     // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress          server.AttrAddress         `otel:"server.address"`                     // The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`
+	AttrDestinationPartitionId AttrDestinationPartitionId `otel:"messaging.destination.partition.id"` // Server port number
+	AttrServerPort             server.AttrPort            `otel:"server.port"`
 }
 
-func (a ClientSentMessagesExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a ClientSentMessagesExtra) AttrMessagingDestinationName() AttrDestinationName {
-	return a.MessagingDestinationName
+func (a ClientSentMessagesExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a ClientSentMessagesExtra) MessagingDestinationName() AttrDestinationName {
+	return a.AttrDestinationName
 }
-func (a ClientSentMessagesExtra) AttrMessagingDestinationTemplate() AttrDestinationTemplate {
-	return a.MessagingDestinationTemplate
+func (a ClientSentMessagesExtra) MessagingDestinationTemplate() AttrDestinationTemplate {
+	return a.AttrDestinationTemplate
 }
-func (a ClientSentMessagesExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a ClientSentMessagesExtra) AttrMessagingDestinationPartitionId() AttrDestinationPartitionId {
-	return a.MessagingDestinationPartitionId
+func (a ClientSentMessagesExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a ClientSentMessagesExtra) MessagingDestinationPartitionId() AttrDestinationPartitionId {
+	return a.AttrDestinationPartitionId
 }
-func (a ClientSentMessagesExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+func (a ClientSentMessagesExtra) ServerPort() server.AttrPort { return a.AttrServerPort }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -140,7 +132,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Apache ActiveMQ",
@@ -247,7 +238,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -348,7 +338,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -395,7 +384,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Apache ActiveMQ",
@@ -641,6 +629,8 @@ State {
             "type": "metric",
             "unit": "{message}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -748,6 +738,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -834,7 +825,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

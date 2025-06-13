@@ -15,51 +15,53 @@ type CosmosdbClientActiveInstanceCount struct {
 }
 
 func NewCosmosdbClientActiveInstanceCount() CosmosdbClientActiveInstanceCount {
-	labels := []string{"server_port", "server_address"}
+	labels := []string{server.AttrPort("").Key(), server.AttrAddress("").Key()}
 	return CosmosdbClientActiveInstanceCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "azure",
-		Name:      "cosmosdb_client_active_instance_count",
-		Help:      "Number of active client instances",
+		Name: "azure_cosmosdb_client_active_instance_count",
+		Help: "Number of active client instances",
 	}, labels)}
 }
 
-func (m CosmosdbClientActiveInstanceCount) With(extra interface {
-	AttrServerPort() server.AttrPort
-	AttrServerAddress() server.AttrAddress
+func (m CosmosdbClientActiveInstanceCount) With(extras ...interface {
+	ServerPort() server.AttrPort
+	ServerAddress() server.AttrAddress
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrServerPort()),
-		string(extra.AttrServerAddress()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.ServerPort().Value(), extra.ServerAddress().Value())
 }
 
-func (a CosmosdbClientActiveInstanceCount) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) CosmosdbClientActiveInstanceCount {
-	a.extra.ServerPort = attr.AttrServerPort()
+// Deprecated: Use [CosmosdbClientActiveInstanceCount.With] instead
+func (m CosmosdbClientActiveInstanceCount) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a CosmosdbClientActiveInstanceCount) WithServerPort(attr interface{ ServerPort() server.AttrPort }) CosmosdbClientActiveInstanceCount {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
-func (a CosmosdbClientActiveInstanceCount) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) CosmosdbClientActiveInstanceCount {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a CosmosdbClientActiveInstanceCount) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) CosmosdbClientActiveInstanceCount {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
 
 type CosmosdbClientActiveInstanceCountExtra struct {
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
-	// Name of the database host.
-	ServerAddress server.AttrAddress `otel:"server.address"`
+	// Server port number
+	AttrServerPort    server.AttrPort    `otel:"server.port"` // Name of the database host
+	AttrServerAddress server.AttrAddress `otel:"server.address"`
 }
 
-func (a CosmosdbClientActiveInstanceCountExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
-func (a CosmosdbClientActiveInstanceCountExtra) AttrServerAddress() server.AttrAddress {
-	return a.ServerAddress
+func (a CosmosdbClientActiveInstanceCountExtra) ServerPort() server.AttrPort { return a.AttrServerPort }
+func (a CosmosdbClientActiveInstanceCountExtra) ServerAddress() server.AttrAddress {
+	return a.AttrServerAddress
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -178,6 +180,8 @@ State {
             "type": "metric",
             "unit": "{instance}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -285,6 +289,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -371,7 +376,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

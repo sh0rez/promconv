@@ -6,37 +6,32 @@ import (
 
 // CPU time used by the process as reported by the JVM.
 type CpuTime struct {
-	*prometheus.CounterVec
-	extra CpuTimeExtra
+	prometheus.Counter
 }
 
 func NewCpuTime() CpuTime {
-	labels := []string{}
-	return CpuTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "jvm",
-		Name:      "cpu_time",
-		Help:      "CPU time used by the process as reported by the JVM.",
-	}, labels)}
+	return CpuTime{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "jvm_cpu_time",
+		Help: "CPU time used by the process as reported by the JVM.",
+	})}
 }
 
-func (m CpuTime) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m CpuTime) Register(regs ...prometheus.Registerer) CpuTime {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type CpuTimeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "CpuTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "cpu.time",
         "Type": "CpuTime",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "CPU time used by the process as reported by the JVM.",
@@ -174,6 +168,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -260,7 +255,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

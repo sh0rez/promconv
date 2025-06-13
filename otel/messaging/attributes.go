@@ -4,148 +4,202 @@ package messaging
 // Instrumentations SHOULD NOT set `messaging.batch.message_count` on spans that operate with a single message. When a messaging client library supports both batch and single-message API for the same operation, instrumentations SHOULD use `messaging.batch.message_count` for batching APIs and SHOULD NOT use it for single-message APIs
 type AttrBatchMessageCount string // messaging.batch.message_count
 
-func (AttrBatchMessageCount) Development() {}
-func (AttrBatchMessageCount) Recommended() {}
+func (AttrBatchMessageCount) Development()    {}
+func (AttrBatchMessageCount) Recommended()    {}
+func (AttrBatchMessageCount) Key() string     { return "messaging_batch_message_count" }
+func (a AttrBatchMessageCount) Value() string { return string(a) }
 
 // A unique identifier for the client that consumes or produces a message
 type AttrClientId string // messaging.client.id
 
-func (AttrClientId) Development() {}
-func (AttrClientId) Recommended() {}
+func (AttrClientId) Development()    {}
+func (AttrClientId) Recommended()    {}
+func (AttrClientId) Key() string     { return "messaging_client_id" }
+func (a AttrClientId) Value() string { return string(a) }
 
 // The name of the consumer group with which a consumer is associated.
 //
 // Semantic conventions for individual messaging systems SHOULD document whether `messaging.consumer.group.name` is applicable and what it means in the context of that system
 type AttrConsumerGroupName string // messaging.consumer.group.name
 
-func (AttrConsumerGroupName) Development() {}
-func (AttrConsumerGroupName) Recommended() {}
+func (AttrConsumerGroupName) Development()    {}
+func (AttrConsumerGroupName) Recommended()    {}
+func (AttrConsumerGroupName) Key() string     { return "messaging_consumer_group_name" }
+func (a AttrConsumerGroupName) Value() string { return string(a) }
 
 // A boolean that is true if the message destination is anonymous (could be unnamed or have auto-generated name)
 type AttrDestinationAnonymous string // messaging.destination.anonymous
 
-func (AttrDestinationAnonymous) Development() {}
-func (AttrDestinationAnonymous) Recommended() {}
+func (AttrDestinationAnonymous) Development()    {}
+func (AttrDestinationAnonymous) Recommended()    {}
+func (AttrDestinationAnonymous) Key() string     { return "messaging_destination_anonymous" }
+func (a AttrDestinationAnonymous) Value() string { return string(a) }
 
 // The message destination name
 // Destination name SHOULD uniquely identify a specific queue, topic or other entity within the broker. If
 // the broker doesn't have such notion, the destination name SHOULD uniquely identify the broker
 type AttrDestinationName string // messaging.destination.name
 
-func (AttrDestinationName) Development() {}
-func (AttrDestinationName) Recommended() {}
+func (AttrDestinationName) Development()    {}
+func (AttrDestinationName) Recommended()    {}
+func (AttrDestinationName) Key() string     { return "messaging_destination_name" }
+func (a AttrDestinationName) Value() string { return string(a) }
 
 // The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`
 type AttrDestinationPartitionId string // messaging.destination.partition.id
 
-func (AttrDestinationPartitionId) Development() {}
-func (AttrDestinationPartitionId) Recommended() {}
+func (AttrDestinationPartitionId) Development()    {}
+func (AttrDestinationPartitionId) Recommended()    {}
+func (AttrDestinationPartitionId) Key() string     { return "messaging_destination_partition_id" }
+func (a AttrDestinationPartitionId) Value() string { return string(a) }
 
 // The name of the destination subscription from which a message is consumed.
 // Semantic conventions for individual messaging systems SHOULD document whether `messaging.destination.subscription.name` is applicable and what it means in the context of that system
 type AttrDestinationSubscriptionName string // messaging.destination.subscription.name
 
-func (AttrDestinationSubscriptionName) Development() {}
-func (AttrDestinationSubscriptionName) Recommended() {}
+func (AttrDestinationSubscriptionName) Development()    {}
+func (AttrDestinationSubscriptionName) Recommended()    {}
+func (AttrDestinationSubscriptionName) Key() string     { return "messaging_destination_subscription_name" }
+func (a AttrDestinationSubscriptionName) Value() string { return string(a) }
 
 // Low cardinality representation of the messaging destination name
 // Destination names could be constructed from templates. An example would be a destination name involving a user name or product id. Although the destination name in this case is of high cardinality, the underlying template is of low cardinality and can be effectively used for grouping and aggregation
 type AttrDestinationTemplate string // messaging.destination.template
 
-func (AttrDestinationTemplate) Development() {}
-func (AttrDestinationTemplate) Recommended() {}
+func (AttrDestinationTemplate) Development()    {}
+func (AttrDestinationTemplate) Recommended()    {}
+func (AttrDestinationTemplate) Key() string     { return "messaging_destination_template" }
+func (a AttrDestinationTemplate) Value() string { return string(a) }
 
 // A boolean that is true if the message destination is temporary and might not exist anymore after messages are processed
 type AttrDestinationTemporary string // messaging.destination.temporary
 
-func (AttrDestinationTemporary) Development() {}
-func (AttrDestinationTemporary) Recommended() {}
+func (AttrDestinationTemporary) Development()    {}
+func (AttrDestinationTemporary) Recommended()    {}
+func (AttrDestinationTemporary) Key() string     { return "messaging_destination_temporary" }
+func (a AttrDestinationTemporary) Value() string { return string(a) }
 
 // Deprecated, no replacement at this time
 type AttrDestinationPublishAnonymous string // messaging.destination_publish.anonymous
 
-func (AttrDestinationPublishAnonymous) Development() {}
-func (AttrDestinationPublishAnonymous) Recommended() {}
+func (AttrDestinationPublishAnonymous) Development()    {}
+func (AttrDestinationPublishAnonymous) Recommended()    {}
+func (AttrDestinationPublishAnonymous) Key() string     { return "messaging_destination_publish_anonymous" }
+func (a AttrDestinationPublishAnonymous) Value() string { return string(a) }
 
 // Deprecated, no replacement at this time
 type AttrDestinationPublishName string // messaging.destination_publish.name
 
-func (AttrDestinationPublishName) Development() {}
-func (AttrDestinationPublishName) Recommended() {}
+func (AttrDestinationPublishName) Development()    {}
+func (AttrDestinationPublishName) Recommended()    {}
+func (AttrDestinationPublishName) Key() string     { return "messaging_destination_publish_name" }
+func (a AttrDestinationPublishName) Value() string { return string(a) }
 
 // Deprecated, use `messaging.consumer.group.name` instead
 type AttrEventhubsConsumerGroup string // messaging.eventhubs.consumer.group
 
-func (AttrEventhubsConsumerGroup) Development() {}
-func (AttrEventhubsConsumerGroup) Recommended() {}
+func (AttrEventhubsConsumerGroup) Development()    {}
+func (AttrEventhubsConsumerGroup) Recommended()    {}
+func (AttrEventhubsConsumerGroup) Key() string     { return "messaging_eventhubs_consumer_group" }
+func (a AttrEventhubsConsumerGroup) Value() string { return string(a) }
 
 // The UTC epoch seconds at which the message has been accepted and stored in the entity
 type AttrEventhubsMessageEnqueuedTime string // messaging.eventhubs.message.enqueued_time
 
 func (AttrEventhubsMessageEnqueuedTime) Development() {}
 func (AttrEventhubsMessageEnqueuedTime) Recommended() {}
+func (AttrEventhubsMessageEnqueuedTime) Key() string {
+	return "messaging_eventhubs_message_enqueued_time"
+}
+func (a AttrEventhubsMessageEnqueuedTime) Value() string { return string(a) }
 
 // The ack deadline in seconds set for the modify ack deadline request
 type AttrGcpPubsubMessageAckDeadline string // messaging.gcp_pubsub.message.ack_deadline
 
 func (AttrGcpPubsubMessageAckDeadline) Development() {}
 func (AttrGcpPubsubMessageAckDeadline) Recommended() {}
+func (AttrGcpPubsubMessageAckDeadline) Key() string {
+	return "messaging_gcp_pubsub_message_ack_deadline"
+}
+func (a AttrGcpPubsubMessageAckDeadline) Value() string { return string(a) }
 
 // The ack id for a given message
 type AttrGcpPubsubMessageAckId string // messaging.gcp_pubsub.message.ack_id
 
-func (AttrGcpPubsubMessageAckId) Development() {}
-func (AttrGcpPubsubMessageAckId) Recommended() {}
+func (AttrGcpPubsubMessageAckId) Development()    {}
+func (AttrGcpPubsubMessageAckId) Recommended()    {}
+func (AttrGcpPubsubMessageAckId) Key() string     { return "messaging_gcp_pubsub_message_ack_id" }
+func (a AttrGcpPubsubMessageAckId) Value() string { return string(a) }
 
 // The delivery attempt for a given message
 type AttrGcpPubsubMessageDeliveryAttempt string // messaging.gcp_pubsub.message.delivery_attempt
 
 func (AttrGcpPubsubMessageDeliveryAttempt) Development() {}
 func (AttrGcpPubsubMessageDeliveryAttempt) Recommended() {}
+func (AttrGcpPubsubMessageDeliveryAttempt) Key() string {
+	return "messaging_gcp_pubsub_message_delivery_attempt"
+}
+func (a AttrGcpPubsubMessageDeliveryAttempt) Value() string { return string(a) }
 
 // The ordering key for a given message. If the attribute is not present, the message does not have an ordering key
 type AttrGcpPubsubMessageOrderingKey string // messaging.gcp_pubsub.message.ordering_key
 
 func (AttrGcpPubsubMessageOrderingKey) Development() {}
 func (AttrGcpPubsubMessageOrderingKey) Recommended() {}
+func (AttrGcpPubsubMessageOrderingKey) Key() string {
+	return "messaging_gcp_pubsub_message_ordering_key"
+}
+func (a AttrGcpPubsubMessageOrderingKey) Value() string { return string(a) }
 
 // Deprecated, use `messaging.consumer.group.name` instead
 type AttrKafkaConsumerGroup string // messaging.kafka.consumer.group
 
-func (AttrKafkaConsumerGroup) Development() {}
-func (AttrKafkaConsumerGroup) Recommended() {}
+func (AttrKafkaConsumerGroup) Development()    {}
+func (AttrKafkaConsumerGroup) Recommended()    {}
+func (AttrKafkaConsumerGroup) Key() string     { return "messaging_kafka_consumer_group" }
+func (a AttrKafkaConsumerGroup) Value() string { return string(a) }
 
 // Deprecated, use `messaging.destination.partition.id` instead
 type AttrKafkaDestinationPartition string // messaging.kafka.destination.partition
 
-func (AttrKafkaDestinationPartition) Development() {}
-func (AttrKafkaDestinationPartition) Recommended() {}
+func (AttrKafkaDestinationPartition) Development()    {}
+func (AttrKafkaDestinationPartition) Recommended()    {}
+func (AttrKafkaDestinationPartition) Key() string     { return "messaging_kafka_destination_partition" }
+func (a AttrKafkaDestinationPartition) Value() string { return string(a) }
 
 // Message keys in Kafka are used for grouping alike messages to ensure they're processed on the same partition. They differ from `messaging.message.id` in that they're not unique. If the key is `null`, the attribute MUST NOT be set.
 //
 // If the key type is not string, it's string representation has to be supplied for the attribute. If the key has no unambiguous, canonical string form, don't include its value
 type AttrKafkaMessageKey string // messaging.kafka.message.key
 
-func (AttrKafkaMessageKey) Development() {}
-func (AttrKafkaMessageKey) Recommended() {}
+func (AttrKafkaMessageKey) Development()    {}
+func (AttrKafkaMessageKey) Recommended()    {}
+func (AttrKafkaMessageKey) Key() string     { return "messaging_kafka_message_key" }
+func (a AttrKafkaMessageKey) Value() string { return string(a) }
 
 // Deprecated, use `messaging.kafka.offset` instead
 type AttrKafkaMessageOffset string // messaging.kafka.message.offset
 
-func (AttrKafkaMessageOffset) Development() {}
-func (AttrKafkaMessageOffset) Recommended() {}
+func (AttrKafkaMessageOffset) Development()    {}
+func (AttrKafkaMessageOffset) Recommended()    {}
+func (AttrKafkaMessageOffset) Key() string     { return "messaging_kafka_message_offset" }
+func (a AttrKafkaMessageOffset) Value() string { return string(a) }
 
 // A boolean that is true if the message is a tombstone
 type AttrKafkaMessageTombstone string // messaging.kafka.message.tombstone
 
-func (AttrKafkaMessageTombstone) Development() {}
-func (AttrKafkaMessageTombstone) Recommended() {}
+func (AttrKafkaMessageTombstone) Development()    {}
+func (AttrKafkaMessageTombstone) Recommended()    {}
+func (AttrKafkaMessageTombstone) Key() string     { return "messaging_kafka_message_tombstone" }
+func (a AttrKafkaMessageTombstone) Value() string { return string(a) }
 
 // The offset of a record in the corresponding Kafka partition
 type AttrKafkaOffset string // messaging.kafka.offset
 
-func (AttrKafkaOffset) Development() {}
-func (AttrKafkaOffset) Recommended() {}
+func (AttrKafkaOffset) Development()    {}
+func (AttrKafkaOffset) Recommended()    {}
+func (AttrKafkaOffset) Key() string     { return "messaging_kafka_offset" }
+func (a AttrKafkaOffset) Value() string { return string(a) }
 
 // The size of the message body in bytes.
 //
@@ -153,14 +207,18 @@ func (AttrKafkaOffset) Recommended() {}
 // body size should be used
 type AttrMessageBodySize string // messaging.message.body.size
 
-func (AttrMessageBodySize) Development() {}
-func (AttrMessageBodySize) Recommended() {}
+func (AttrMessageBodySize) Development()    {}
+func (AttrMessageBodySize) Recommended()    {}
+func (AttrMessageBodySize) Key() string     { return "messaging_message_body_size" }
+func (a AttrMessageBodySize) Value() string { return string(a) }
 
 // The conversation ID identifying the conversation to which the message belongs, represented as a string. Sometimes called "Correlation ID"
 type AttrMessageConversationId string // messaging.message.conversation_id
 
-func (AttrMessageConversationId) Development() {}
-func (AttrMessageConversationId) Recommended() {}
+func (AttrMessageConversationId) Development()    {}
+func (AttrMessageConversationId) Recommended()    {}
+func (AttrMessageConversationId) Key() string     { return "messaging_message_conversation_id" }
+func (a AttrMessageConversationId) Value() string { return string(a) }
 
 // The size of the message body and metadata in bytes.
 //
@@ -168,133 +226,220 @@ func (AttrMessageConversationId) Recommended() {}
 // size should be used
 type AttrMessageEnvelopeSize string // messaging.message.envelope.size
 
-func (AttrMessageEnvelopeSize) Development() {}
-func (AttrMessageEnvelopeSize) Recommended() {}
+func (AttrMessageEnvelopeSize) Development()    {}
+func (AttrMessageEnvelopeSize) Recommended()    {}
+func (AttrMessageEnvelopeSize) Key() string     { return "messaging_message_envelope_size" }
+func (a AttrMessageEnvelopeSize) Value() string { return string(a) }
 
 // A value used by the messaging system as an identifier for the message, represented as a string
 type AttrMessageId string // messaging.message.id
 
-func (AttrMessageId) Development() {}
-func (AttrMessageId) Recommended() {}
+func (AttrMessageId) Development()    {}
+func (AttrMessageId) Recommended()    {}
+func (AttrMessageId) Key() string     { return "messaging_message_id" }
+func (a AttrMessageId) Value() string { return string(a) }
 
 // Deprecated, use `messaging.operation.type` instead
 type AttrOperation string // messaging.operation
 
-func (AttrOperation) Development() {}
-func (AttrOperation) Recommended() {}
+func (AttrOperation) Development()    {}
+func (AttrOperation) Recommended()    {}
+func (AttrOperation) Key() string     { return "messaging_operation" }
+func (a AttrOperation) Value() string { return string(a) }
 
 // The system-specific name of the messaging operation
 type AttrOperationName string // messaging.operation.name
 
-func (AttrOperationName) Development() {}
-func (AttrOperationName) Recommended() {}
+func (AttrOperationName) Development()    {}
+func (AttrOperationName) Recommended()    {}
+func (AttrOperationName) Key() string     { return "messaging_operation_name" }
+func (a AttrOperationName) Value() string { return string(a) }
 
 // A string identifying the type of the messaging operation.
 //
 // If a custom value is used, it MUST be of low cardinality
 type AttrOperationType string // messaging.operation.type
 
-func (AttrOperationType) Development() {}
-func (AttrOperationType) Recommended() {}
+func (AttrOperationType) Development()    {}
+func (AttrOperationType) Recommended()    {}
+func (AttrOperationType) Key() string     { return "messaging_operation_type" }
+func (a AttrOperationType) Value() string { return string(a) }
+
+const OperationTypeCreate AttrOperationType = "create"
+const OperationTypeSend AttrOperationType = "send"
+const OperationTypeReceive AttrOperationType = "receive"
+const OperationTypeProcess AttrOperationType = "process"
+const OperationTypeSettle AttrOperationType = "settle"
+const OperationTypeDeliver AttrOperationType = "deliver"
+const OperationTypePublish AttrOperationType = "publish"
 
 // RabbitMQ message routing key
 type AttrRabbitmqDestinationRoutingKey string // messaging.rabbitmq.destination.routing_key
 
 func (AttrRabbitmqDestinationRoutingKey) Development() {}
 func (AttrRabbitmqDestinationRoutingKey) Recommended() {}
+func (AttrRabbitmqDestinationRoutingKey) Key() string {
+	return "messaging_rabbitmq_destination_routing_key"
+}
+func (a AttrRabbitmqDestinationRoutingKey) Value() string { return string(a) }
 
 // RabbitMQ message delivery tag
 type AttrRabbitmqMessageDeliveryTag string // messaging.rabbitmq.message.delivery_tag
 
-func (AttrRabbitmqMessageDeliveryTag) Development() {}
-func (AttrRabbitmqMessageDeliveryTag) Recommended() {}
+func (AttrRabbitmqMessageDeliveryTag) Development()    {}
+func (AttrRabbitmqMessageDeliveryTag) Recommended()    {}
+func (AttrRabbitmqMessageDeliveryTag) Key() string     { return "messaging_rabbitmq_message_delivery_tag" }
+func (a AttrRabbitmqMessageDeliveryTag) Value() string { return string(a) }
 
 // Deprecated, use `messaging.consumer.group.name` instead
 type AttrRocketmqClientGroup string // messaging.rocketmq.client_group
 
-func (AttrRocketmqClientGroup) Development() {}
-func (AttrRocketmqClientGroup) Recommended() {}
+func (AttrRocketmqClientGroup) Development()    {}
+func (AttrRocketmqClientGroup) Recommended()    {}
+func (AttrRocketmqClientGroup) Key() string     { return "messaging_rocketmq_client_group" }
+func (a AttrRocketmqClientGroup) Value() string { return string(a) }
 
 // Model of message consumption. This only applies to consumer spans
 type AttrRocketmqConsumptionModel string // messaging.rocketmq.consumption_model
 
-func (AttrRocketmqConsumptionModel) Development() {}
-func (AttrRocketmqConsumptionModel) Recommended() {}
+func (AttrRocketmqConsumptionModel) Development()    {}
+func (AttrRocketmqConsumptionModel) Recommended()    {}
+func (AttrRocketmqConsumptionModel) Key() string     { return "messaging_rocketmq_consumption_model" }
+func (a AttrRocketmqConsumptionModel) Value() string { return string(a) }
+
+const RocketmqConsumptionModelClustering AttrRocketmqConsumptionModel = "clustering"
+const RocketmqConsumptionModelBroadcasting AttrRocketmqConsumptionModel = "broadcasting"
 
 // The delay time level for delay message, which determines the message delay time
 type AttrRocketmqMessageDelayTimeLevel string // messaging.rocketmq.message.delay_time_level
 
 func (AttrRocketmqMessageDelayTimeLevel) Development() {}
 func (AttrRocketmqMessageDelayTimeLevel) Recommended() {}
+func (AttrRocketmqMessageDelayTimeLevel) Key() string {
+	return "messaging_rocketmq_message_delay_time_level"
+}
+func (a AttrRocketmqMessageDelayTimeLevel) Value() string { return string(a) }
 
 // The timestamp in milliseconds that the delay message is expected to be delivered to consumer
 type AttrRocketmqMessageDeliveryTimestamp string // messaging.rocketmq.message.delivery_timestamp
 
 func (AttrRocketmqMessageDeliveryTimestamp) Development() {}
 func (AttrRocketmqMessageDeliveryTimestamp) Recommended() {}
+func (AttrRocketmqMessageDeliveryTimestamp) Key() string {
+	return "messaging_rocketmq_message_delivery_timestamp"
+}
+func (a AttrRocketmqMessageDeliveryTimestamp) Value() string { return string(a) }
 
 // It is essential for FIFO message. Messages that belong to the same message group are always processed one by one within the same consumer group
 type AttrRocketmqMessageGroup string // messaging.rocketmq.message.group
 
-func (AttrRocketmqMessageGroup) Development() {}
-func (AttrRocketmqMessageGroup) Recommended() {}
+func (AttrRocketmqMessageGroup) Development()    {}
+func (AttrRocketmqMessageGroup) Recommended()    {}
+func (AttrRocketmqMessageGroup) Key() string     { return "messaging_rocketmq_message_group" }
+func (a AttrRocketmqMessageGroup) Value() string { return string(a) }
 
 // Key(s) of message, another way to mark message besides message id
 type AttrRocketmqMessageKeys string // messaging.rocketmq.message.keys
 
-func (AttrRocketmqMessageKeys) Development() {}
-func (AttrRocketmqMessageKeys) Recommended() {}
+func (AttrRocketmqMessageKeys) Development()    {}
+func (AttrRocketmqMessageKeys) Recommended()    {}
+func (AttrRocketmqMessageKeys) Key() string     { return "messaging_rocketmq_message_keys" }
+func (a AttrRocketmqMessageKeys) Value() string { return string(a) }
 
 // The secondary classifier of message besides topic
 type AttrRocketmqMessageTag string // messaging.rocketmq.message.tag
 
-func (AttrRocketmqMessageTag) Development() {}
-func (AttrRocketmqMessageTag) Recommended() {}
+func (AttrRocketmqMessageTag) Development()    {}
+func (AttrRocketmqMessageTag) Recommended()    {}
+func (AttrRocketmqMessageTag) Key() string     { return "messaging_rocketmq_message_tag" }
+func (a AttrRocketmqMessageTag) Value() string { return string(a) }
 
 // Type of message
 type AttrRocketmqMessageType string // messaging.rocketmq.message.type
 
-func (AttrRocketmqMessageType) Development() {}
-func (AttrRocketmqMessageType) Recommended() {}
+func (AttrRocketmqMessageType) Development()    {}
+func (AttrRocketmqMessageType) Recommended()    {}
+func (AttrRocketmqMessageType) Key() string     { return "messaging_rocketmq_message_type" }
+func (a AttrRocketmqMessageType) Value() string { return string(a) }
+
+const RocketmqMessageTypeNormal AttrRocketmqMessageType = "normal"
+const RocketmqMessageTypeFifo AttrRocketmqMessageType = "fifo"
+const RocketmqMessageTypeDelay AttrRocketmqMessageType = "delay"
+const RocketmqMessageTypeTransaction AttrRocketmqMessageType = "transaction"
 
 // Namespace of RocketMQ resources, resources in different namespaces are individual
 type AttrRocketmqNamespace string // messaging.rocketmq.namespace
 
-func (AttrRocketmqNamespace) Development() {}
-func (AttrRocketmqNamespace) Recommended() {}
+func (AttrRocketmqNamespace) Development()    {}
+func (AttrRocketmqNamespace) Recommended()    {}
+func (AttrRocketmqNamespace) Key() string     { return "messaging_rocketmq_namespace" }
+func (a AttrRocketmqNamespace) Value() string { return string(a) }
 
 // Deprecated, use `messaging.destination.subscription.name` instead
 type AttrServicebusDestinationSubscriptionName string // messaging.servicebus.destination.subscription_name
 
 func (AttrServicebusDestinationSubscriptionName) Development() {}
 func (AttrServicebusDestinationSubscriptionName) Recommended() {}
+func (AttrServicebusDestinationSubscriptionName) Key() string {
+	return "messaging_servicebus_destination_subscription_name"
+}
+func (a AttrServicebusDestinationSubscriptionName) Value() string { return string(a) }
 
 // Describes the [settlement type]
 //
 // [settlement type]: https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement#peeklock
 type AttrServicebusDispositionStatus string // messaging.servicebus.disposition_status
 
-func (AttrServicebusDispositionStatus) Development() {}
-func (AttrServicebusDispositionStatus) Recommended() {}
+func (AttrServicebusDispositionStatus) Development()    {}
+func (AttrServicebusDispositionStatus) Recommended()    {}
+func (AttrServicebusDispositionStatus) Key() string     { return "messaging_servicebus_disposition_status" }
+func (a AttrServicebusDispositionStatus) Value() string { return string(a) }
+
+const ServicebusDispositionStatusComplete AttrServicebusDispositionStatus = "complete"
+const ServicebusDispositionStatusAbandon AttrServicebusDispositionStatus = "abandon"
+const ServicebusDispositionStatusDeadLetter AttrServicebusDispositionStatus = "dead_letter"
+const ServicebusDispositionStatusDefer AttrServicebusDispositionStatus = "defer"
 
 // Number of deliveries that have been attempted for this message
 type AttrServicebusMessageDeliveryCount string // messaging.servicebus.message.delivery_count
 
 func (AttrServicebusMessageDeliveryCount) Development() {}
 func (AttrServicebusMessageDeliveryCount) Recommended() {}
+func (AttrServicebusMessageDeliveryCount) Key() string {
+	return "messaging_servicebus_message_delivery_count"
+}
+func (a AttrServicebusMessageDeliveryCount) Value() string { return string(a) }
 
 // The UTC epoch seconds at which the message has been accepted and stored in the entity
 type AttrServicebusMessageEnqueuedTime string // messaging.servicebus.message.enqueued_time
 
 func (AttrServicebusMessageEnqueuedTime) Development() {}
 func (AttrServicebusMessageEnqueuedTime) Recommended() {}
+func (AttrServicebusMessageEnqueuedTime) Key() string {
+	return "messaging_servicebus_message_enqueued_time"
+}
+func (a AttrServicebusMessageEnqueuedTime) Value() string { return string(a) }
 
 // The messaging system as identified by the client instrumentation.
 // The actual messaging system may differ from the one known by the client. For example, when using Kafka client libraries to communicate with Azure Event Hubs, the `messaging.system` is set to `kafka` based on the instrumentation's best knowledge
 type AttrSystem string // messaging.system
 
-func (AttrSystem) Development() {}
-func (AttrSystem) Recommended() {}
+func (AttrSystem) Development()    {}
+func (AttrSystem) Recommended()    {}
+func (AttrSystem) Key() string     { return "messaging_system" }
+func (a AttrSystem) Value() string { return string(a) }
+
+const SystemActivemq AttrSystem = "activemq"
+const SystemAwsSqs AttrSystem = "aws_sqs"
+const SystemEventgrid AttrSystem = "eventgrid"
+const SystemEventhubs AttrSystem = "eventhubs"
+const SystemServicebus AttrSystem = "servicebus"
+const SystemGcpPubsub AttrSystem = "gcp_pubsub"
+const SystemJms AttrSystem = "jms"
+const SystemKafka AttrSystem = "kafka"
+const SystemRabbitmq AttrSystem = "rabbitmq"
+const SystemRocketmq AttrSystem = "rocketmq"
+const SystemPulsar AttrSystem = "pulsar"
 
 /* State {
     name: "attr.go.j2",
@@ -637,7 +782,6 @@ func (AttrSystem) Recommended() {}
                     "root_namespace": "messaging",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A message is created. \"Create\" spans always refer to a single message and are used to provide a unique creation context for messages in batch sending scenarios.\n",
@@ -736,7 +880,6 @@ func (AttrSystem) Recommended() {}
                     "root_namespace": "messaging",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Clustering consumption model",
@@ -814,7 +957,6 @@ func (AttrSystem) Recommended() {}
                     "root_namespace": "messaging",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Normal message",
@@ -881,7 +1023,6 @@ func (AttrSystem) Recommended() {}
                     "root_namespace": "messaging",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Message is completed",
@@ -944,7 +1085,6 @@ func (AttrSystem) Recommended() {}
                     "root_namespace": "messaging",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Apache ActiveMQ",
@@ -1147,6 +1287,7 @@ func (AttrSystem) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

@@ -6,37 +6,32 @@ import (
 
 // The total amount of time paused in GC since the process has started.
 type GcPauseTime struct {
-	*prometheus.CounterVec
-	extra GcPauseTimeExtra
+	prometheus.Counter
 }
 
 func NewGcPauseTime() GcPauseTime {
-	labels := []string{}
-	return GcPauseTime{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "dotnet",
-		Name:      "gc_pause_time",
-		Help:      "The total amount of time paused in GC since the process has started.",
-	}, labels)}
+	return GcPauseTime{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "dotnet_gc_pause_time",
+		Help: "The total amount of time paused in GC since the process has started.",
+	})}
 }
 
-func (m GcPauseTime) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m GcPauseTime) Register(regs ...prometheus.Registerer) GcPauseTime {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type GcPauseTimeExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "GcPauseTimeExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "gc.pause.time",
         "Type": "GcPauseTime",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The total amount of time paused in GC since the process has started.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

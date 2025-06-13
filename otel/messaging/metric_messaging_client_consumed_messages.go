@@ -16,121 +16,109 @@ type ClientConsumedMessages struct {
 }
 
 func NewClientConsumedMessages() ClientConsumedMessages {
-	labels := []string{"messaging_operation_name", "messaging_system", "error_type", "messaging_consumer_group_name", "messaging_destination_name", "messaging_destination_subscription_name", "messaging_destination_template", "server_address", "messaging_destination_partition_id", "server_port"}
+	labels := []string{AttrOperationName("").Key(), AttrSystem("").Key(), error.AttrType("").Key(), AttrConsumerGroupName("").Key(), AttrDestinationName("").Key(), AttrDestinationSubscriptionName("").Key(), AttrDestinationTemplate("").Key(), server.AttrAddress("").Key(), AttrDestinationPartitionId("").Key(), server.AttrPort("").Key()}
 	return ClientConsumedMessages{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "messaging",
-		Name:      "client_consumed_messages",
-		Help:      "Number of messages that were delivered to the application.",
+		Name: "messaging_client_consumed_messages",
+		Help: "Number of messages that were delivered to the application.",
 	}, labels)}
 }
 
-func (m ClientConsumedMessages) With(operationName AttrOperationName, system AttrSystem, extra interface {
-	AttrErrorType() error.AttrType
-	AttrMessagingConsumerGroupName() AttrConsumerGroupName
-	AttrMessagingDestinationName() AttrDestinationName
-	AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
-	AttrMessagingDestinationTemplate() AttrDestinationTemplate
-	AttrServerAddress() server.AttrAddress
-	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
-	AttrServerPort() server.AttrPort
+func (m ClientConsumedMessages) With(operationName AttrOperationName, system AttrSystem, extras ...interface {
+	ErrorType() error.AttrType
+	MessagingConsumerGroupName() AttrConsumerGroupName
+	MessagingDestinationName() AttrDestinationName
+	MessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
+	MessagingDestinationTemplate() AttrDestinationTemplate
+	ServerAddress() server.AttrAddress
+	MessagingDestinationPartitionId() AttrDestinationPartitionId
+	ServerPort() server.AttrPort
 }) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(operationName),
-		string(system),
-		string(extra.AttrErrorType()),
-		string(extra.AttrMessagingConsumerGroupName()),
-		string(extra.AttrMessagingDestinationName()),
-		string(extra.AttrMessagingDestinationSubscriptionName()),
-		string(extra.AttrMessagingDestinationTemplate()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrMessagingDestinationPartitionId()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(operationName.Value(), system.Value(), extra.ErrorType().Value(), extra.MessagingConsumerGroupName().Value(), extra.MessagingDestinationName().Value(), extra.MessagingDestinationSubscriptionName().Value(), extra.MessagingDestinationTemplate().Value(), extra.ServerAddress().Value(), extra.MessagingDestinationPartitionId().Value(), extra.ServerPort().Value())
 }
 
-func (a ClientConsumedMessages) WithErrorType(attr interface{ AttrErrorType() error.AttrType }) ClientConsumedMessages {
-	a.extra.ErrorType = attr.AttrErrorType()
+// Deprecated: Use [ClientConsumedMessages.With] instead
+func (m ClientConsumedMessages) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a ClientConsumedMessages) WithErrorType(attr interface{ ErrorType() error.AttrType }) ClientConsumedMessages {
+	a.extra.AttrErrorType = attr.ErrorType()
 	return a
 }
-func (a ClientConsumedMessages) WithMessagingConsumerGroupName(attr interface{ AttrMessagingConsumerGroupName() AttrConsumerGroupName }) ClientConsumedMessages {
-	a.extra.MessagingConsumerGroupName = attr.AttrMessagingConsumerGroupName()
+func (a ClientConsumedMessages) WithConsumerGroupName(attr interface{ MessagingConsumerGroupName() AttrConsumerGroupName }) ClientConsumedMessages {
+	a.extra.AttrConsumerGroupName = attr.MessagingConsumerGroupName()
 	return a
 }
-func (a ClientConsumedMessages) WithMessagingDestinationName(attr interface{ AttrMessagingDestinationName() AttrDestinationName }) ClientConsumedMessages {
-	a.extra.MessagingDestinationName = attr.AttrMessagingDestinationName()
+func (a ClientConsumedMessages) WithDestinationName(attr interface{ MessagingDestinationName() AttrDestinationName }) ClientConsumedMessages {
+	a.extra.AttrDestinationName = attr.MessagingDestinationName()
 	return a
 }
-func (a ClientConsumedMessages) WithMessagingDestinationSubscriptionName(attr interface {
-	AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
+func (a ClientConsumedMessages) WithDestinationSubscriptionName(attr interface {
+	MessagingDestinationSubscriptionName() AttrDestinationSubscriptionName
 }) ClientConsumedMessages {
-	a.extra.MessagingDestinationSubscriptionName = attr.AttrMessagingDestinationSubscriptionName()
+	a.extra.AttrDestinationSubscriptionName = attr.MessagingDestinationSubscriptionName()
 	return a
 }
-func (a ClientConsumedMessages) WithMessagingDestinationTemplate(attr interface {
-	AttrMessagingDestinationTemplate() AttrDestinationTemplate
+func (a ClientConsumedMessages) WithDestinationTemplate(attr interface {
+	MessagingDestinationTemplate() AttrDestinationTemplate
 }) ClientConsumedMessages {
-	a.extra.MessagingDestinationTemplate = attr.AttrMessagingDestinationTemplate()
+	a.extra.AttrDestinationTemplate = attr.MessagingDestinationTemplate()
 	return a
 }
-func (a ClientConsumedMessages) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ClientConsumedMessages {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ClientConsumedMessages) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ClientConsumedMessages {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ClientConsumedMessages) WithMessagingDestinationPartitionId(attr interface {
-	AttrMessagingDestinationPartitionId() AttrDestinationPartitionId
+func (a ClientConsumedMessages) WithDestinationPartitionId(attr interface {
+	MessagingDestinationPartitionId() AttrDestinationPartitionId
 }) ClientConsumedMessages {
-	a.extra.MessagingDestinationPartitionId = attr.AttrMessagingDestinationPartitionId()
+	a.extra.AttrDestinationPartitionId = attr.MessagingDestinationPartitionId()
 	return a
 }
-func (a ClientConsumedMessages) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ClientConsumedMessages {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ClientConsumedMessages) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ClientConsumedMessages {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type ClientConsumedMessagesExtra struct {
-	// Describes a class of error the operation ended with.
-	ErrorType error.AttrType `otel:"error.type"`
-	// The name of the consumer group with which a consumer is associated.
-	MessagingConsumerGroupName AttrConsumerGroupName `otel:"messaging.consumer.group.name"`
-	// The message destination name
-	MessagingDestinationName AttrDestinationName `otel:"messaging.destination.name"`
-	// The name of the destination subscription from which a message is consumed.
-	MessagingDestinationSubscriptionName AttrDestinationSubscriptionName `otel:"messaging.destination.subscription.name"`
-	// Low cardinality representation of the messaging destination name
-	MessagingDestinationTemplate AttrDestinationTemplate `otel:"messaging.destination.template"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.
-	MessagingDestinationPartitionId AttrDestinationPartitionId `otel:"messaging.destination.partition.id"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// Describes a class of error the operation ended with
+	AttrErrorType                   error.AttrType                  `otel:"error.type"`                              // The name of the consumer group with which a consumer is associated
+	AttrConsumerGroupName           AttrConsumerGroupName           `otel:"messaging.consumer.group.name"`           // The message destination name
+	AttrDestinationName             AttrDestinationName             `otel:"messaging.destination.name"`              // The name of the destination subscription from which a message is consumed
+	AttrDestinationSubscriptionName AttrDestinationSubscriptionName `otel:"messaging.destination.subscription.name"` // Low cardinality representation of the messaging destination name
+	AttrDestinationTemplate         AttrDestinationTemplate         `otel:"messaging.destination.template"`          // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress               server.AttrAddress              `otel:"server.address"`                          // The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`
+	AttrDestinationPartitionId      AttrDestinationPartitionId      `otel:"messaging.destination.partition.id"`      // Server port number
+	AttrServerPort                  server.AttrPort                 `otel:"server.port"`
 }
 
-func (a ClientConsumedMessagesExtra) AttrErrorType() error.AttrType { return a.ErrorType }
-func (a ClientConsumedMessagesExtra) AttrMessagingConsumerGroupName() AttrConsumerGroupName {
-	return a.MessagingConsumerGroupName
+func (a ClientConsumedMessagesExtra) ErrorType() error.AttrType { return a.AttrErrorType }
+func (a ClientConsumedMessagesExtra) MessagingConsumerGroupName() AttrConsumerGroupName {
+	return a.AttrConsumerGroupName
 }
-func (a ClientConsumedMessagesExtra) AttrMessagingDestinationName() AttrDestinationName {
-	return a.MessagingDestinationName
+func (a ClientConsumedMessagesExtra) MessagingDestinationName() AttrDestinationName {
+	return a.AttrDestinationName
 }
-func (a ClientConsumedMessagesExtra) AttrMessagingDestinationSubscriptionName() AttrDestinationSubscriptionName {
-	return a.MessagingDestinationSubscriptionName
+func (a ClientConsumedMessagesExtra) MessagingDestinationSubscriptionName() AttrDestinationSubscriptionName {
+	return a.AttrDestinationSubscriptionName
 }
-func (a ClientConsumedMessagesExtra) AttrMessagingDestinationTemplate() AttrDestinationTemplate {
-	return a.MessagingDestinationTemplate
+func (a ClientConsumedMessagesExtra) MessagingDestinationTemplate() AttrDestinationTemplate {
+	return a.AttrDestinationTemplate
 }
-func (a ClientConsumedMessagesExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a ClientConsumedMessagesExtra) AttrMessagingDestinationPartitionId() AttrDestinationPartitionId {
-	return a.MessagingDestinationPartitionId
+func (a ClientConsumedMessagesExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a ClientConsumedMessagesExtra) MessagingDestinationPartitionId() AttrDestinationPartitionId {
+	return a.AttrDestinationPartitionId
 }
-func (a ClientConsumedMessagesExtra) AttrServerPort() server.AttrPort { return a.ServerPort }
+func (a ClientConsumedMessagesExtra) ServerPort() server.AttrPort { return a.AttrServerPort }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -165,7 +153,6 @@ State {
                 "requirement_level": "required",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "Apache ActiveMQ",
@@ -272,7 +259,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -400,7 +386,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "A fallback error value to be used when the instrumentation doesn't define a custom value.\n",
@@ -447,7 +432,6 @@ State {
                     "requirement_level": "required",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "Apache ActiveMQ",
@@ -745,6 +729,8 @@ State {
             "type": "metric",
             "unit": "{message}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -852,6 +838,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -938,7 +925,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

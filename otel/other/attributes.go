@@ -1,10 +1,15 @@
 package other
 
 // Deprecated, use `db.client.connection.state` instead
-type Attr string // state
+type AttrState string // state
 
-func (Attr) Development() {}
-func (Attr) Recommended() {}
+func (AttrState) Development()    {}
+func (AttrState) Recommended()    {}
+func (AttrState) Key() string     { return "state" }
+func (a AttrState) Value() string { return string(a) }
+
+const StateIdle AttrState = "idle"
+const StateUsed AttrState = "used"
 
 /* State {
     name: "attr.go.j2",
@@ -28,7 +33,6 @@ func (Attr) Recommended() {}
                     "root_namespace": "other",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -159,6 +163,7 @@ func (Attr) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

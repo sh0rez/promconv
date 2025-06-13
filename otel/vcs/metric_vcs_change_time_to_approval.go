@@ -11,93 +11,91 @@ type ChangeTimeToApproval struct {
 }
 
 func NewChangeTimeToApproval() ChangeTimeToApproval {
-	labels := []string{"vcs_ref_head_name", "vcs_repository_url_full", "vcs_owner_name", "vcs_ref_base_name", "vcs_repository_name", "vcs_provider_name", "vcs_ref_base_revision", "vcs_ref_head_revision"}
+	labels := []string{AttrRefHeadName("").Key(), AttrRepositoryUrlFull("").Key(), AttrOwnerName("").Key(), AttrRefBaseName("").Key(), AttrRepositoryName("").Key(), AttrProviderName("").Key(), AttrRefBaseRevision("").Key(), AttrRefHeadRevision("").Key()}
 	return ChangeTimeToApproval{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "vcs",
-		Name:      "change_time_to_approval",
-		Help:      "The amount of time since its creation it took a change (pull request/merge request/changelist) to get the first approval.",
+		Name: "vcs_change_time_to_approval",
+		Help: "The amount of time since its creation it took a change (pull request/merge request/changelist) to get the first approval.",
 	}, labels)}
 }
 
-func (m ChangeTimeToApproval) With(refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extra interface {
-	AttrVcsOwnerName() AttrOwnerName
-	AttrVcsRefBaseName() AttrRefBaseName
-	AttrVcsRepositoryName() AttrRepositoryName
-	AttrVcsProviderName() AttrProviderName
-	AttrVcsRefBaseRevision() AttrRefBaseRevision
-	AttrVcsRefHeadRevision() AttrRefHeadRevision
+func (m ChangeTimeToApproval) With(refHeadName AttrRefHeadName, repositoryUrlFull AttrRepositoryUrlFull, extras ...interface {
+	VcsOwnerName() AttrOwnerName
+	VcsRefBaseName() AttrRefBaseName
+	VcsRepositoryName() AttrRepositoryName
+	VcsProviderName() AttrProviderName
+	VcsRefBaseRevision() AttrRefBaseRevision
+	VcsRefHeadRevision() AttrRefHeadRevision
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(refHeadName),
-		string(repositoryUrlFull),
-		string(extra.AttrVcsOwnerName()),
-		string(extra.AttrVcsRefBaseName()),
-		string(extra.AttrVcsRepositoryName()),
-		string(extra.AttrVcsProviderName()),
-		string(extra.AttrVcsRefBaseRevision()),
-		string(extra.AttrVcsRefHeadRevision()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(refHeadName.Value(), repositoryUrlFull.Value(), extra.VcsOwnerName().Value(), extra.VcsRefBaseName().Value(), extra.VcsRepositoryName().Value(), extra.VcsProviderName().Value(), extra.VcsRefBaseRevision().Value(), extra.VcsRefHeadRevision().Value())
 }
 
-func (a ChangeTimeToApproval) WithVcsOwnerName(attr interface{ AttrVcsOwnerName() AttrOwnerName }) ChangeTimeToApproval {
-	a.extra.VcsOwnerName = attr.AttrVcsOwnerName()
+// Deprecated: Use [ChangeTimeToApproval.With] instead
+func (m ChangeTimeToApproval) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ChangeTimeToApproval) WithOwnerName(attr interface{ VcsOwnerName() AttrOwnerName }) ChangeTimeToApproval {
+	a.extra.AttrOwnerName = attr.VcsOwnerName()
 	return a
 }
-func (a ChangeTimeToApproval) WithVcsRefBaseName(attr interface{ AttrVcsRefBaseName() AttrRefBaseName }) ChangeTimeToApproval {
-	a.extra.VcsRefBaseName = attr.AttrVcsRefBaseName()
+func (a ChangeTimeToApproval) WithRefBaseName(attr interface{ VcsRefBaseName() AttrRefBaseName }) ChangeTimeToApproval {
+	a.extra.AttrRefBaseName = attr.VcsRefBaseName()
 	return a
 }
-func (a ChangeTimeToApproval) WithVcsRepositoryName(attr interface{ AttrVcsRepositoryName() AttrRepositoryName }) ChangeTimeToApproval {
-	a.extra.VcsRepositoryName = attr.AttrVcsRepositoryName()
+func (a ChangeTimeToApproval) WithRepositoryName(attr interface{ VcsRepositoryName() AttrRepositoryName }) ChangeTimeToApproval {
+	a.extra.AttrRepositoryName = attr.VcsRepositoryName()
 	return a
 }
-func (a ChangeTimeToApproval) WithVcsProviderName(attr interface{ AttrVcsProviderName() AttrProviderName }) ChangeTimeToApproval {
-	a.extra.VcsProviderName = attr.AttrVcsProviderName()
+func (a ChangeTimeToApproval) WithProviderName(attr interface{ VcsProviderName() AttrProviderName }) ChangeTimeToApproval {
+	a.extra.AttrProviderName = attr.VcsProviderName()
 	return a
 }
-func (a ChangeTimeToApproval) WithVcsRefBaseRevision(attr interface{ AttrVcsRefBaseRevision() AttrRefBaseRevision }) ChangeTimeToApproval {
-	a.extra.VcsRefBaseRevision = attr.AttrVcsRefBaseRevision()
+func (a ChangeTimeToApproval) WithRefBaseRevision(attr interface{ VcsRefBaseRevision() AttrRefBaseRevision }) ChangeTimeToApproval {
+	a.extra.AttrRefBaseRevision = attr.VcsRefBaseRevision()
 	return a
 }
-func (a ChangeTimeToApproval) WithVcsRefHeadRevision(attr interface{ AttrVcsRefHeadRevision() AttrRefHeadRevision }) ChangeTimeToApproval {
-	a.extra.VcsRefHeadRevision = attr.AttrVcsRefHeadRevision()
+func (a ChangeTimeToApproval) WithRefHeadRevision(attr interface{ VcsRefHeadRevision() AttrRefHeadRevision }) ChangeTimeToApproval {
+	a.extra.AttrRefHeadRevision = attr.VcsRefHeadRevision()
 	return a
 }
 
 type ChangeTimeToApprovalExtra struct {
-	// The group owner within the version control system.
-	VcsOwnerName AttrOwnerName `otel:"vcs.owner.name"`
-	// The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.
-	VcsRefBaseName AttrRefBaseName `otel:"vcs.ref.base.name"`
-	// The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.
-	VcsRepositoryName AttrRepositoryName `otel:"vcs.repository.name"`
-	// The name of the version control system provider.
-	VcsProviderName AttrProviderName `otel:"vcs.provider.name"`
-	// The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.
-	VcsRefBaseRevision AttrRefBaseRevision `otel:"vcs.ref.base.revision"`
-	// The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.
-	VcsRefHeadRevision AttrRefHeadRevision `otel:"vcs.ref.head.revision"`
+	// The group owner within the version control system
+	AttrOwnerName AttrOwnerName `otel:"vcs.owner.name"` // The name of the [reference] such as **branch** or **tag** in the repository
+	//
+	// [reference]: https://git-scm.com/docs/gitglossary#def_ref
+	AttrRefBaseName    AttrRefBaseName    `otel:"vcs.ref.base.name"`   // The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub
+	AttrRepositoryName AttrRepositoryName `otel:"vcs.repository.name"` // The name of the version control system provider
+	AttrProviderName   AttrProviderName   `otel:"vcs.provider.name"`   // The revision, literally [revised version], The revision most often refers to a commit object in Git, or a revision number in SVN
+	//
+	// [revised version]: https://www.merriam-webster.com/dictionary/revision
+	AttrRefBaseRevision AttrRefBaseRevision `otel:"vcs.ref.base.revision"` // The revision, literally [revised version], The revision most often refers to a commit object in Git, or a revision number in SVN
+	//
+	// [revised version]: https://www.merriam-webster.com/dictionary/revision
+	AttrRefHeadRevision AttrRefHeadRevision `otel:"vcs.ref.head.revision"`
 }
 
-func (a ChangeTimeToApprovalExtra) AttrVcsOwnerName() AttrOwnerName     { return a.VcsOwnerName }
-func (a ChangeTimeToApprovalExtra) AttrVcsRefBaseName() AttrRefBaseName { return a.VcsRefBaseName }
-func (a ChangeTimeToApprovalExtra) AttrVcsRepositoryName() AttrRepositoryName {
-	return a.VcsRepositoryName
+func (a ChangeTimeToApprovalExtra) VcsOwnerName() AttrOwnerName     { return a.AttrOwnerName }
+func (a ChangeTimeToApprovalExtra) VcsRefBaseName() AttrRefBaseName { return a.AttrRefBaseName }
+func (a ChangeTimeToApprovalExtra) VcsRepositoryName() AttrRepositoryName {
+	return a.AttrRepositoryName
 }
-func (a ChangeTimeToApprovalExtra) AttrVcsProviderName() AttrProviderName { return a.VcsProviderName }
-func (a ChangeTimeToApprovalExtra) AttrVcsRefBaseRevision() AttrRefBaseRevision {
-	return a.VcsRefBaseRevision
+func (a ChangeTimeToApprovalExtra) VcsProviderName() AttrProviderName { return a.AttrProviderName }
+func (a ChangeTimeToApprovalExtra) VcsRefBaseRevision() AttrRefBaseRevision {
+	return a.AttrRefBaseRevision
 }
-func (a ChangeTimeToApprovalExtra) AttrVcsRefHeadRevision() AttrRefHeadRevision {
-	return a.VcsRefHeadRevision
+func (a ChangeTimeToApprovalExtra) VcsRefHeadRevision() AttrRefHeadRevision {
+	return a.AttrRefHeadRevision
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -184,7 +182,6 @@ State {
                 "requirement_level": "opt_in",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "[GitHub](https://github.com)",
@@ -320,7 +317,6 @@ State {
                     "requirement_level": "opt_in",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "[GitHub](https://github.com)",
@@ -526,6 +522,8 @@ State {
             "type": "metric",
             "unit": "s",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -633,6 +631,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -719,7 +718,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

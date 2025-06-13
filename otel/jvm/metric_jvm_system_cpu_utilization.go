@@ -6,37 +6,32 @@ import (
 
 // Recent CPU utilization for the whole system as reported by the JVM.
 type SystemCpuUtilization struct {
-	*prometheus.GaugeVec
-	extra SystemCpuUtilizationExtra
+	prometheus.Gauge
 }
 
 func NewSystemCpuUtilization() SystemCpuUtilization {
-	labels := []string{}
-	return SystemCpuUtilization{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "jvm",
-		Name:      "system_cpu_utilization",
-		Help:      "Recent CPU utilization for the whole system as reported by the JVM.",
-	}, labels)}
+	return SystemCpuUtilization{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "jvm_system_cpu_utilization",
+		Help: "Recent CPU utilization for the whole system as reported by the JVM.",
+	})}
 }
 
-func (m SystemCpuUtilization) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m SystemCpuUtilization) Register(regs ...prometheus.Registerer) SystemCpuUtilization {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type SystemCpuUtilizationExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SystemCpuUtilizationExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "system.cpu.utilization",
         "Type": "SystemCpuUtilization",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Recent CPU utilization for the whole system as reported by the JVM.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

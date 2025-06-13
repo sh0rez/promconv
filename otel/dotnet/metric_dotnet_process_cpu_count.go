@@ -6,37 +6,32 @@ import (
 
 // The number of processors available to the process.
 type ProcessCpuCount struct {
-	*prometheus.GaugeVec
-	extra ProcessCpuCountExtra
+	prometheus.Gauge
 }
 
 func NewProcessCpuCount() ProcessCpuCount {
-	labels := []string{}
-	return ProcessCpuCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "dotnet",
-		Name:      "process_cpu_count",
-		Help:      "The number of processors available to the process.",
-	}, labels)}
+	return ProcessCpuCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "dotnet_process_cpu_count",
+		Help: "The number of processors available to the process.",
+	})}
 }
 
-func (m ProcessCpuCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m ProcessCpuCount) Register(regs ...prometheus.Registerer) ProcessCpuCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ProcessCpuCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ProcessCpuCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "process.cpu.count",
         "Type": "ProcessCpuCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "The number of processors available to the process.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

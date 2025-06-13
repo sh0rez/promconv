@@ -8,186 +8,247 @@ package tls
 // [registered TLS Cipher Suits]: https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#table-tls-parameters-4
 type AttrCipher string // tls.cipher
 
-func (AttrCipher) Development() {}
-func (AttrCipher) Recommended() {}
+func (AttrCipher) Development()    {}
+func (AttrCipher) Recommended()    {}
+func (AttrCipher) Key() string     { return "tls_cipher" }
+func (a AttrCipher) Value() string { return string(a) }
 
 // PEM-encoded stand-alone certificate offered by the client. This is usually mutually-exclusive of `client.certificate_chain` since this value also exists in that list
 type AttrClientCertificate string // tls.client.certificate
 
-func (AttrClientCertificate) Development() {}
-func (AttrClientCertificate) Recommended() {}
+func (AttrClientCertificate) Development()    {}
+func (AttrClientCertificate) Recommended()    {}
+func (AttrClientCertificate) Key() string     { return "tls_client_certificate" }
+func (a AttrClientCertificate) Value() string { return string(a) }
 
 // Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain
 type AttrClientCertificateChain string // tls.client.certificate_chain
 
-func (AttrClientCertificateChain) Development() {}
-func (AttrClientCertificateChain) Recommended() {}
+func (AttrClientCertificateChain) Development()    {}
+func (AttrClientCertificateChain) Recommended()    {}
+func (AttrClientCertificateChain) Key() string     { return "tls_client_certificate_chain" }
+func (a AttrClientCertificateChain) Value() string { return string(a) }
 
 // Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash
 type AttrClientHashMd5 string // tls.client.hash.md5
 
-func (AttrClientHashMd5) Development() {}
-func (AttrClientHashMd5) Recommended() {}
+func (AttrClientHashMd5) Development()    {}
+func (AttrClientHashMd5) Recommended()    {}
+func (AttrClientHashMd5) Key() string     { return "tls_client_hash_md5" }
+func (a AttrClientHashMd5) Value() string { return string(a) }
 
 // Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash
 type AttrClientHashSha1 string // tls.client.hash.sha1
 
-func (AttrClientHashSha1) Development() {}
-func (AttrClientHashSha1) Recommended() {}
+func (AttrClientHashSha1) Development()    {}
+func (AttrClientHashSha1) Recommended()    {}
+func (AttrClientHashSha1) Key() string     { return "tls_client_hash_sha1" }
+func (a AttrClientHashSha1) Value() string { return string(a) }
 
 // Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash
 type AttrClientHashSha256 string // tls.client.hash.sha256
 
-func (AttrClientHashSha256) Development() {}
-func (AttrClientHashSha256) Recommended() {}
+func (AttrClientHashSha256) Development()    {}
+func (AttrClientHashSha256) Recommended()    {}
+func (AttrClientHashSha256) Key() string     { return "tls_client_hash_sha256" }
+func (a AttrClientHashSha256) Value() string { return string(a) }
 
 // Distinguished name of [subject] of the issuer of the x.509 certificate presented by the client
 //
 // [subject]: https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6
 type AttrClientIssuer string // tls.client.issuer
 
-func (AttrClientIssuer) Development() {}
-func (AttrClientIssuer) Recommended() {}
+func (AttrClientIssuer) Development()    {}
+func (AttrClientIssuer) Recommended()    {}
+func (AttrClientIssuer) Key() string     { return "tls_client_issuer" }
+func (a AttrClientIssuer) Value() string { return string(a) }
 
 // A hash that identifies clients based on how they perform an SSL/TLS handshake
 type AttrClientJa3 string // tls.client.ja3
 
-func (AttrClientJa3) Development() {}
-func (AttrClientJa3) Recommended() {}
+func (AttrClientJa3) Development()    {}
+func (AttrClientJa3) Recommended()    {}
+func (AttrClientJa3) Key() string     { return "tls_client_ja3" }
+func (a AttrClientJa3) Value() string { return string(a) }
 
 // Date/Time indicating when client certificate is no longer considered valid
 type AttrClientNotAfter string // tls.client.not_after
 
-func (AttrClientNotAfter) Development() {}
-func (AttrClientNotAfter) Recommended() {}
+func (AttrClientNotAfter) Development()    {}
+func (AttrClientNotAfter) Recommended()    {}
+func (AttrClientNotAfter) Key() string     { return "tls_client_not_after" }
+func (a AttrClientNotAfter) Value() string { return string(a) }
 
 // Date/Time indicating when client certificate is first considered valid
 type AttrClientNotBefore string // tls.client.not_before
 
-func (AttrClientNotBefore) Development() {}
-func (AttrClientNotBefore) Recommended() {}
+func (AttrClientNotBefore) Development()    {}
+func (AttrClientNotBefore) Recommended()    {}
+func (AttrClientNotBefore) Key() string     { return "tls_client_not_before" }
+func (a AttrClientNotBefore) Value() string { return string(a) }
 
 // Deprecated, use `server.address` instead
 type AttrClientServerName string // tls.client.server_name
 
-func (AttrClientServerName) Development() {}
-func (AttrClientServerName) Recommended() {}
+func (AttrClientServerName) Development()    {}
+func (AttrClientServerName) Recommended()    {}
+func (AttrClientServerName) Key() string     { return "tls_client_server_name" }
+func (a AttrClientServerName) Value() string { return string(a) }
 
 // Distinguished name of subject of the x.509 certificate presented by the client
 type AttrClientSubject string // tls.client.subject
 
-func (AttrClientSubject) Development() {}
-func (AttrClientSubject) Recommended() {}
+func (AttrClientSubject) Development()    {}
+func (AttrClientSubject) Recommended()    {}
+func (AttrClientSubject) Key() string     { return "tls_client_subject" }
+func (a AttrClientSubject) Value() string { return string(a) }
 
 // Array of ciphers offered by the client during the client hello
 type AttrClientSupportedCiphers string // tls.client.supported_ciphers
 
-func (AttrClientSupportedCiphers) Development() {}
-func (AttrClientSupportedCiphers) Recommended() {}
+func (AttrClientSupportedCiphers) Development()    {}
+func (AttrClientSupportedCiphers) Recommended()    {}
+func (AttrClientSupportedCiphers) Key() string     { return "tls_client_supported_ciphers" }
+func (a AttrClientSupportedCiphers) Value() string { return string(a) }
 
 // String indicating the curve used for the given cipher, when applicable
 type AttrCurve string // tls.curve
 
-func (AttrCurve) Development() {}
-func (AttrCurve) Recommended() {}
+func (AttrCurve) Development()    {}
+func (AttrCurve) Recommended()    {}
+func (AttrCurve) Key() string     { return "tls_curve" }
+func (a AttrCurve) Value() string { return string(a) }
 
 // Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel
 type AttrEstablished string // tls.established
 
-func (AttrEstablished) Development() {}
-func (AttrEstablished) Recommended() {}
+func (AttrEstablished) Development()    {}
+func (AttrEstablished) Recommended()    {}
+func (AttrEstablished) Key() string     { return "tls_established" }
+func (a AttrEstablished) Value() string { return string(a) }
 
 // String indicating the protocol being tunneled. Per the values in the [IANA registry], this string should be lower case
 //
 // [IANA registry]: https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
 type AttrNextProtocol string // tls.next_protocol
 
-func (AttrNextProtocol) Development() {}
-func (AttrNextProtocol) Recommended() {}
+func (AttrNextProtocol) Development()    {}
+func (AttrNextProtocol) Recommended()    {}
+func (AttrNextProtocol) Key() string     { return "tls_next_protocol" }
+func (a AttrNextProtocol) Value() string { return string(a) }
 
 // Normalized lowercase protocol name parsed from original string of the negotiated [SSL/TLS protocol version]
 //
 // [SSL/TLS protocol version]: https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values
 type AttrProtocolName string // tls.protocol.name
 
-func (AttrProtocolName) Development() {}
-func (AttrProtocolName) Recommended() {}
+func (AttrProtocolName) Development()    {}
+func (AttrProtocolName) Recommended()    {}
+func (AttrProtocolName) Key() string     { return "tls_protocol_name" }
+func (a AttrProtocolName) Value() string { return string(a) }
+
+const ProtocolNameSsl AttrProtocolName = "ssl"
+const ProtocolNameTLS AttrProtocolName = "tls"
 
 // Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version]
 //
 // [SSL/TLS protocol version]: https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values
 type AttrProtocolVersion string // tls.protocol.version
 
-func (AttrProtocolVersion) Development() {}
-func (AttrProtocolVersion) Recommended() {}
+func (AttrProtocolVersion) Development()    {}
+func (AttrProtocolVersion) Recommended()    {}
+func (AttrProtocolVersion) Key() string     { return "tls_protocol_version" }
+func (a AttrProtocolVersion) Value() string { return string(a) }
 
 // Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation
 type AttrResumed string // tls.resumed
 
-func (AttrResumed) Development() {}
-func (AttrResumed) Recommended() {}
+func (AttrResumed) Development()    {}
+func (AttrResumed) Recommended()    {}
+func (AttrResumed) Key() string     { return "tls_resumed" }
+func (a AttrResumed) Value() string { return string(a) }
 
 // PEM-encoded stand-alone certificate offered by the server. This is usually mutually-exclusive of `server.certificate_chain` since this value also exists in that list
 type AttrServerCertificate string // tls.server.certificate
 
-func (AttrServerCertificate) Development() {}
-func (AttrServerCertificate) Recommended() {}
+func (AttrServerCertificate) Development()    {}
+func (AttrServerCertificate) Recommended()    {}
+func (AttrServerCertificate) Key() string     { return "tls_server_certificate" }
+func (a AttrServerCertificate) Value() string { return string(a) }
 
 // Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain
 type AttrServerCertificateChain string // tls.server.certificate_chain
 
-func (AttrServerCertificateChain) Development() {}
-func (AttrServerCertificateChain) Recommended() {}
+func (AttrServerCertificateChain) Development()    {}
+func (AttrServerCertificateChain) Recommended()    {}
+func (AttrServerCertificateChain) Key() string     { return "tls_server_certificate_chain" }
+func (a AttrServerCertificateChain) Value() string { return string(a) }
 
 // Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash
 type AttrServerHashMd5 string // tls.server.hash.md5
 
-func (AttrServerHashMd5) Development() {}
-func (AttrServerHashMd5) Recommended() {}
+func (AttrServerHashMd5) Development()    {}
+func (AttrServerHashMd5) Recommended()    {}
+func (AttrServerHashMd5) Key() string     { return "tls_server_hash_md5" }
+func (a AttrServerHashMd5) Value() string { return string(a) }
 
 // Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash
 type AttrServerHashSha1 string // tls.server.hash.sha1
 
-func (AttrServerHashSha1) Development() {}
-func (AttrServerHashSha1) Recommended() {}
+func (AttrServerHashSha1) Development()    {}
+func (AttrServerHashSha1) Recommended()    {}
+func (AttrServerHashSha1) Key() string     { return "tls_server_hash_sha1" }
+func (a AttrServerHashSha1) Value() string { return string(a) }
 
 // Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash
 type AttrServerHashSha256 string // tls.server.hash.sha256
 
-func (AttrServerHashSha256) Development() {}
-func (AttrServerHashSha256) Recommended() {}
+func (AttrServerHashSha256) Development()    {}
+func (AttrServerHashSha256) Recommended()    {}
+func (AttrServerHashSha256) Key() string     { return "tls_server_hash_sha256" }
+func (a AttrServerHashSha256) Value() string { return string(a) }
 
 // Distinguished name of [subject] of the issuer of the x.509 certificate presented by the client
 //
 // [subject]: https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6
 type AttrServerIssuer string // tls.server.issuer
 
-func (AttrServerIssuer) Development() {}
-func (AttrServerIssuer) Recommended() {}
+func (AttrServerIssuer) Development()    {}
+func (AttrServerIssuer) Recommended()    {}
+func (AttrServerIssuer) Key() string     { return "tls_server_issuer" }
+func (a AttrServerIssuer) Value() string { return string(a) }
 
 // A hash that identifies servers based on how they perform an SSL/TLS handshake
 type AttrServerJa3s string // tls.server.ja3s
 
-func (AttrServerJa3s) Development() {}
-func (AttrServerJa3s) Recommended() {}
+func (AttrServerJa3s) Development()    {}
+func (AttrServerJa3s) Recommended()    {}
+func (AttrServerJa3s) Key() string     { return "tls_server_ja3s" }
+func (a AttrServerJa3s) Value() string { return string(a) }
 
 // Date/Time indicating when server certificate is no longer considered valid
 type AttrServerNotAfter string // tls.server.not_after
 
-func (AttrServerNotAfter) Development() {}
-func (AttrServerNotAfter) Recommended() {}
+func (AttrServerNotAfter) Development()    {}
+func (AttrServerNotAfter) Recommended()    {}
+func (AttrServerNotAfter) Key() string     { return "tls_server_not_after" }
+func (a AttrServerNotAfter) Value() string { return string(a) }
 
 // Date/Time indicating when server certificate is first considered valid
 type AttrServerNotBefore string // tls.server.not_before
 
-func (AttrServerNotBefore) Development() {}
-func (AttrServerNotBefore) Recommended() {}
+func (AttrServerNotBefore) Development()    {}
+func (AttrServerNotBefore) Recommended()    {}
+func (AttrServerNotBefore) Key() string     { return "tls_server_not_before" }
+func (a AttrServerNotBefore) Value() string { return string(a) }
 
 // Distinguished name of subject of the x.509 certificate presented by the server
 type AttrServerSubject string // tls.server.subject
 
-func (AttrServerSubject) Development() {}
-func (AttrServerSubject) Recommended() {}
+func (AttrServerSubject) Development()    {}
+func (AttrServerSubject) Recommended()    {}
+func (AttrServerSubject) Key() string     { return "tls_server_subject" }
+func (a AttrServerSubject) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -392,7 +453,6 @@ func (AttrServerSubject) Recommended() {}
                     "root_namespace": "tls",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -659,6 +719,7 @@ func (AttrServerSubject) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

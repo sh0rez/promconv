@@ -6,37 +6,32 @@ import (
 
 // Deprecated, use `otel.sdk.span.ended` instead.
 type SdkSpanEndedCount struct {
-	*prometheus.CounterVec
-	extra SdkSpanEndedCountExtra
+	prometheus.Counter
 }
 
 func NewSdkSpanEndedCount() SdkSpanEndedCount {
-	labels := []string{}
-	return SdkSpanEndedCount{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "otel",
-		Name:      "sdk_span_ended_count",
-		Help:      "Deprecated, use `otel.sdk.span.ended` instead.",
-	}, labels)}
+	return SdkSpanEndedCount{Counter: prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "otel_sdk_span_ended_count",
+		Help: "Deprecated, use `otel.sdk.span.ended` instead.",
+	})}
 }
 
-func (m SdkSpanEndedCount) With(extra interface {
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m SdkSpanEndedCount) Register(regs ...prometheus.Registerer) SdkSpanEndedCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type SdkSpanEndedCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkSpanEndedCountExtra",
         "Instr": "Counter",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "sdk.span.ended.count",
         "Type": "SdkSpanEndedCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Deprecated, use `otel.sdk.span.ended` instead.",
@@ -179,6 +173,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -265,7 +260,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strings"
 
@@ -20,9 +21,16 @@ func ExampleInstrument() {
 	mux.Handle("/metrics", promhttp.Handler())
 
 	handler := Instrument(Register(prometheus.DefaultRegisterer), mux)
+	done := make(chan struct{})
 	go func() {
-		log.Fatalln(http.ListenAndServe(":4242", handler))
+		l, err := net.Listen("tcp", ":4242")
+		if err != nil {
+			log.Fatalln(err)
+		}
+		close(done)
+		log.Fatalln(http.Serve(l, handler))
 	}()
+	<-done
 
 	if _, err := http.Get("http://localhost:4242/hello/prometheus"); err != nil {
 		log.Fatalln(err)
@@ -35,6 +43,12 @@ func ExampleInstrument() {
 
 	sc := bufio.NewScanner(res.Body)
 	for sc.Scan() {
+		if strings.HasPrefix(sc.Text(), "http_server_request_duration_sum") {
+			if x, _, ok := strings.Cut(sc.Text(), "} "); ok {
+				fmt.Printf("%s} <unstable>\n", x)
+				continue
+			}
+		}
 		if strings.HasPrefix(sc.Text(), "http_") {
 			fmt.Println(sc.Text())
 		}
@@ -68,7 +82,7 @@ func ExampleInstrument() {
 	// http_server_request_duration_bucket{error_type="",http_request_method="GET",http_response_status_code="200",http_route="/hello/{name}",network_protocol_name="http",network_protocol_version="1.1",server_address="127.0.0.1",server_port="4242",url_scheme="",user_agent_synthetic_type="",le="5"} 1
 	// http_server_request_duration_bucket{error_type="",http_request_method="GET",http_response_status_code="200",http_route="/hello/{name}",network_protocol_name="http",network_protocol_version="1.1",server_address="127.0.0.1",server_port="4242",url_scheme="",user_agent_synthetic_type="",le="10"} 1
 	// http_server_request_duration_bucket{error_type="",http_request_method="GET",http_response_status_code="200",http_route="/hello/{name}",network_protocol_name="http",network_protocol_version="1.1",server_address="127.0.0.1",server_port="4242",url_scheme="",user_agent_synthetic_type="",le="+Inf"} 1
-	// http_server_request_duration_sum{error_type="",http_request_method="GET",http_response_status_code="200",http_route="/hello/{name}",network_protocol_name="http",network_protocol_version="1.1",server_address="127.0.0.1",server_port="4242",url_scheme="",user_agent_synthetic_type=""} 1.4625e-05
+	// http_server_request_duration_sum{error_type="",http_request_method="GET",http_response_status_code="200",http_route="/hello/{name}",network_protocol_name="http",network_protocol_version="1.1",server_address="127.0.0.1",server_port="4242",url_scheme="",user_agent_synthetic_type=""} <unstable>
 	// http_server_request_duration_count{error_type="",http_request_method="GET",http_response_status_code="200",http_route="/hello/{name}",network_protocol_name="http",network_protocol_version="1.1",server_address="127.0.0.1",server_port="4242",url_scheme="",user_agent_synthetic_type=""} 1
 	// http_server_response_body_size_bucket{error_type="",http_request_method="GET",http_response_status_code="200",http_route="/hello/{name}",network_protocol_name="http",network_protocol_version="1.1",server_address="127.0.0.1",server_port="4242",url_scheme="",user_agent_synthetic_type="",le="0.005"} 0
 	// http_server_response_body_size_bucket{error_type="",http_request_method="GET",http_response_status_code="200",http_route="/hello/{name}",network_protocol_name="http",network_protocol_version="1.1",server_address="127.0.0.1",server_port="4242",url_scheme="",user_agent_synthetic_type="",le="0.01"} 0

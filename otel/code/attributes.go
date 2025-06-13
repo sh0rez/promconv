@@ -3,32 +3,42 @@ package code
 // Deprecated, use `code.column.number`
 type AttrColumn string // code.column
 
-func (AttrColumn) Development() {}
-func (AttrColumn) Recommended() {}
+func (AttrColumn) Development()    {}
+func (AttrColumn) Recommended()    {}
+func (AttrColumn) Key() string     { return "code_column" }
+func (a AttrColumn) Value() string { return string(a) }
 
 // The column number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity
 type AttrColumnNumber string // code.column.number
 
-func (AttrColumnNumber) Stable()      {}
-func (AttrColumnNumber) Recommended() {}
+func (AttrColumnNumber) Stable()         {}
+func (AttrColumnNumber) Recommended()    {}
+func (AttrColumnNumber) Key() string     { return "code_column_number" }
+func (a AttrColumnNumber) Value() string { return string(a) }
 
 // The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity
 type AttrFilePath string // code.file.path
 
-func (AttrFilePath) Stable()      {}
-func (AttrFilePath) Recommended() {}
+func (AttrFilePath) Stable()         {}
+func (AttrFilePath) Recommended()    {}
+func (AttrFilePath) Key() string     { return "code_file_path" }
+func (a AttrFilePath) Value() string { return string(a) }
 
 // Deprecated, use `code.file.path` instead
 type AttrFilepath string // code.filepath
 
-func (AttrFilepath) Development() {}
-func (AttrFilepath) Recommended() {}
+func (AttrFilepath) Development()    {}
+func (AttrFilepath) Recommended()    {}
+func (AttrFilepath) Key() string     { return "code_filepath" }
+func (a AttrFilepath) Value() string { return string(a) }
 
 // Deprecated, use `code.function.name` instead
 type AttrFunction string // code.function
 
-func (AttrFunction) Development() {}
-func (AttrFunction) Recommended() {}
+func (AttrFunction) Development()    {}
+func (AttrFunction) Recommended()    {}
+func (AttrFunction) Key() string     { return "code_function" }
+func (a AttrFunction) Value() string { return string(a) }
 
 // The method or function fully-qualified name without arguments. The value should fit the natural representation of the language runtime, which is also likely the same used within `code.stacktrace` attribute value. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.
 //
@@ -49,34 +59,44 @@ func (AttrFunction) Recommended() {}
 //   - C function: `fopen`
 type AttrFunctionName string // code.function.name
 
-func (AttrFunctionName) Stable()      {}
-func (AttrFunctionName) Recommended() {}
+func (AttrFunctionName) Stable()         {}
+func (AttrFunctionName) Recommended()    {}
+func (AttrFunctionName) Key() string     { return "code_function_name" }
+func (a AttrFunctionName) Value() string { return string(a) }
 
 // The line number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity
 type AttrLineNumber string // code.line.number
 
-func (AttrLineNumber) Stable()      {}
-func (AttrLineNumber) Recommended() {}
+func (AttrLineNumber) Stable()         {}
+func (AttrLineNumber) Recommended()    {}
+func (AttrLineNumber) Key() string     { return "code_line_number" }
+func (a AttrLineNumber) Value() string { return string(a) }
 
 // Deprecated, use `code.line.number` instead
 type AttrLineno string // code.lineno
 
-func (AttrLineno) Development() {}
-func (AttrLineno) Recommended() {}
+func (AttrLineno) Development()    {}
+func (AttrLineno) Recommended()    {}
+func (AttrLineno) Key() string     { return "code_lineno" }
+func (a AttrLineno) Value() string { return string(a) }
 
 // Deprecated, namespace is now included into `code.function.name`
 type AttrNamespace string // code.namespace
 
-func (AttrNamespace) Development() {}
-func (AttrNamespace) Recommended() {}
+func (AttrNamespace) Development()    {}
+func (AttrNamespace) Recommended()    {}
+func (AttrNamespace) Key() string     { return "code_namespace" }
+func (a AttrNamespace) Value() string { return string(a) }
 
 // A stacktrace as a string in the natural representation for the language runtime. The representation is identical to [`exception.stacktrace`]. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Location'. This constraint is imposed to prevent redundancy and maintain data integrity
 //
 // [`exception.stacktrace`]: /docs/exceptions/exceptions-spans.md#stacktrace-representation
 type AttrStacktrace string // code.stacktrace
 
-func (AttrStacktrace) Stable()      {}
-func (AttrStacktrace) Recommended() {}
+func (AttrStacktrace) Stable()         {}
+func (AttrStacktrace) Recommended()    {}
+func (AttrStacktrace) Key() string     { return "code_stacktrace" }
+func (a AttrStacktrace) Value() string { return string(a) }
 
 /* State {
     name: "attr.go.j2",
@@ -313,6 +333,7 @@ func (AttrStacktrace) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

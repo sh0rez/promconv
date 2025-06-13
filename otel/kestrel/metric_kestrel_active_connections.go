@@ -16,69 +16,72 @@ type ActiveConnections struct {
 }
 
 func NewActiveConnections() ActiveConnections {
-	labels := []string{"network_transport", "network_type", "server_address", "server_port"}
+	labels := []string{network.AttrTransport("").Key(), network.AttrType("").Key(), server.AttrAddress("").Key(), server.AttrPort("").Key()}
 	return ActiveConnections{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "kestrel",
-		Name:      "active_connections",
-		Help:      "Number of connections that are currently active on the server.",
+		Name: "kestrel_active_connections",
+		Help: "Number of connections that are currently active on the server.",
 	}, labels)}
 }
 
-func (m ActiveConnections) With(extra interface {
-	AttrNetworkTransport() network.AttrTransport
-	AttrNetworkType() network.AttrType
-	AttrServerAddress() server.AttrAddress
-	AttrServerPort() server.AttrPort
+func (m ActiveConnections) With(extras ...interface {
+	NetworkTransport() network.AttrTransport
+	NetworkType() network.AttrType
+	ServerAddress() server.AttrAddress
+	ServerPort() server.AttrPort
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrNetworkTransport()),
-		string(extra.AttrNetworkType()),
-		string(extra.AttrServerAddress()),
-		string(extra.AttrServerPort()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.NetworkTransport().Value(), extra.NetworkType().Value(), extra.ServerAddress().Value(), extra.ServerPort().Value())
 }
 
-func (a ActiveConnections) WithNetworkTransport(attr interface{ AttrNetworkTransport() network.AttrTransport }) ActiveConnections {
-	a.extra.NetworkTransport = attr.AttrNetworkTransport()
+// Deprecated: Use [ActiveConnections.With] instead
+func (m ActiveConnections) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ActiveConnections) WithNetworkTransport(attr interface{ NetworkTransport() network.AttrTransport }) ActiveConnections {
+	a.extra.AttrNetworkTransport = attr.NetworkTransport()
 	return a
 }
-func (a ActiveConnections) WithNetworkType(attr interface{ AttrNetworkType() network.AttrType }) ActiveConnections {
-	a.extra.NetworkType = attr.AttrNetworkType()
+func (a ActiveConnections) WithNetworkType(attr interface{ NetworkType() network.AttrType }) ActiveConnections {
+	a.extra.AttrNetworkType = attr.NetworkType()
 	return a
 }
-func (a ActiveConnections) WithServerAddress(attr interface{ AttrServerAddress() server.AttrAddress }) ActiveConnections {
-	a.extra.ServerAddress = attr.AttrServerAddress()
+func (a ActiveConnections) WithServerAddress(attr interface{ ServerAddress() server.AttrAddress }) ActiveConnections {
+	a.extra.AttrServerAddress = attr.ServerAddress()
 	return a
 }
-func (a ActiveConnections) WithServerPort(attr interface{ AttrServerPort() server.AttrPort }) ActiveConnections {
-	a.extra.ServerPort = attr.AttrServerPort()
+func (a ActiveConnections) WithServerPort(attr interface{ ServerPort() server.AttrPort }) ActiveConnections {
+	a.extra.AttrServerPort = attr.ServerPort()
 	return a
 }
 
 type ActiveConnectionsExtra struct {
-	// [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
-	NetworkTransport network.AttrTransport `otel:"network.transport"`
-	// [OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.
-	NetworkType network.AttrType `otel:"network.type"`
-	// Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-	ServerAddress server.AttrAddress `otel:"server.address"`
-	// Server port number.
-	ServerPort server.AttrPort `otel:"server.port"`
+	// [OSI transport layer] or [inter-process communication method]
+	//
+	// [OSI transport layer]: https://wikipedia.org/wiki/Transport_layer
+	// [inter-process communication method]: https://wikipedia.org/wiki/Inter-process_communication
+	AttrNetworkTransport network.AttrTransport `otel:"network.transport"` // [OSI network layer] or non-OSI equivalent
+	//
+	// [OSI network layer]: https://wikipedia.org/wiki/Network_layer
+	AttrNetworkType   network.AttrType   `otel:"network.type"`   // Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name
+	AttrServerAddress server.AttrAddress `otel:"server.address"` // Server port number
+	AttrServerPort    server.AttrPort    `otel:"server.port"`
 }
 
-func (a ActiveConnectionsExtra) AttrNetworkTransport() network.AttrTransport {
-	return a.NetworkTransport
+func (a ActiveConnectionsExtra) NetworkTransport() network.AttrTransport {
+	return a.AttrNetworkTransport
 }
-func (a ActiveConnectionsExtra) AttrNetworkType() network.AttrType     { return a.NetworkType }
-func (a ActiveConnectionsExtra) AttrServerAddress() server.AttrAddress { return a.ServerAddress }
-func (a ActiveConnectionsExtra) AttrServerPort() server.AttrPort       { return a.ServerPort }
+func (a ActiveConnectionsExtra) NetworkType() network.AttrType     { return a.AttrNetworkType }
+func (a ActiveConnectionsExtra) ServerAddress() server.AttrAddress { return a.AttrServerAddress }
+func (a ActiveConnectionsExtra) ServerPort() server.AttrPort       { return a.AttrServerPort }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -104,7 +107,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "TCP",
@@ -162,7 +164,6 @@ State {
                 },
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "IPv4",
@@ -213,6 +214,32 @@ State {
         "ctx": {
             "attributes": [
                 {
+                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
+                    "examples": [
+                        "example.com",
+                        "10.1.2.80",
+                        "/tmp/my.sock",
+                    ],
+                    "name": "server.address",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "string",
+                },
+                {
+                    "brief": "Server port number.",
+                    "examples": [
+                        80,
+                        8080,
+                        443,
+                    ],
+                    "name": "server.port",
+                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
+                    "requirement_level": "recommended",
+                    "stability": "stable",
+                    "type": "int",
+                },
+                {
                     "brief": "[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.",
                     "examples": [
                         "ipv4",
@@ -225,7 +252,6 @@ State {
                     },
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "IPv4",
@@ -257,7 +283,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "TCP",
@@ -301,32 +326,6 @@ State {
                             },
                         ],
                     },
-                },
-                {
-                    "brief": "Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.",
-                    "examples": [
-                        "example.com",
-                        "10.1.2.80",
-                        "/tmp/my.sock",
-                    ],
-                    "name": "server.address",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "string",
-                },
-                {
-                    "brief": "Server port number.",
-                    "examples": [
-                        80,
-                        8080,
-                        443,
-                    ],
-                    "name": "server.port",
-                    "note": "When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.\n",
-                    "requirement_level": "recommended",
-                    "stability": "stable",
-                    "type": "int",
                 },
             ],
             "brief": "Number of connections that are currently active on the server.",
@@ -394,6 +393,8 @@ State {
             "type": "metric",
             "unit": "{connection}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -501,6 +502,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -587,7 +589,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

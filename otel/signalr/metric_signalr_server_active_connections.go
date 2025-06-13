@@ -11,51 +11,55 @@ type ServerActiveConnections struct {
 }
 
 func NewServerActiveConnections() ServerActiveConnections {
-	labels := []string{"signalr_connection_status", "signalr_transport"}
+	labels := []string{AttrConnectionStatus("").Key(), AttrTransport("").Key()}
 	return ServerActiveConnections{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "signalr",
-		Name:      "server_active_connections",
-		Help:      "Number of connections that are currently active on the server.",
+		Name: "signalr_server_active_connections",
+		Help: "Number of connections that are currently active on the server.",
 	}, labels)}
 }
 
-func (m ServerActiveConnections) With(extra interface {
-	AttrSignalrConnectionStatus() AttrConnectionStatus
-	AttrSignalrTransport() AttrTransport
+func (m ServerActiveConnections) With(extras ...interface {
+	SignalrConnectionStatus() AttrConnectionStatus
+	SignalrTransport() AttrTransport
 }) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrSignalrConnectionStatus()),
-		string(extra.AttrSignalrTransport()),
-	)
+	extra := extras[0]
+
+	return m.GaugeVec.WithLabelValues(extra.SignalrConnectionStatus().Value(), extra.SignalrTransport().Value())
 }
 
-func (a ServerActiveConnections) WithSignalrConnectionStatus(attr interface{ AttrSignalrConnectionStatus() AttrConnectionStatus }) ServerActiveConnections {
-	a.extra.SignalrConnectionStatus = attr.AttrSignalrConnectionStatus()
+// Deprecated: Use [ServerActiveConnections.With] instead
+func (m ServerActiveConnections) WithLabelValues(lvs ...string) prometheus.Gauge {
+	return m.GaugeVec.WithLabelValues(lvs...)
+}
+
+func (a ServerActiveConnections) WithConnectionStatus(attr interface{ SignalrConnectionStatus() AttrConnectionStatus }) ServerActiveConnections {
+	a.extra.AttrConnectionStatus = attr.SignalrConnectionStatus()
 	return a
 }
-func (a ServerActiveConnections) WithSignalrTransport(attr interface{ AttrSignalrTransport() AttrTransport }) ServerActiveConnections {
-	a.extra.SignalrTransport = attr.AttrSignalrTransport()
+func (a ServerActiveConnections) WithTransport(attr interface{ SignalrTransport() AttrTransport }) ServerActiveConnections {
+	a.extra.AttrTransport = attr.SignalrTransport()
 	return a
 }
 
 type ServerActiveConnectionsExtra struct {
-	// SignalR HTTP connection closure status.
-	SignalrConnectionStatus AttrConnectionStatus `otel:"signalr.connection.status"`
-	// [SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)
-	SignalrTransport AttrTransport `otel:"signalr.transport"`
+	// SignalR HTTP connection closure status
+	AttrConnectionStatus AttrConnectionStatus `otel:"signalr.connection.status"` // [SignalR transport type]
+	//
+	// [SignalR transport type]: https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md
+	AttrTransport AttrTransport `otel:"signalr.transport"`
 }
 
-func (a ServerActiveConnectionsExtra) AttrSignalrConnectionStatus() AttrConnectionStatus {
-	return a.SignalrConnectionStatus
+func (a ServerActiveConnectionsExtra) SignalrConnectionStatus() AttrConnectionStatus {
+	return a.AttrConnectionStatus
 }
-func (a ServerActiveConnectionsExtra) AttrSignalrTransport() AttrTransport { return a.SignalrTransport }
+func (a ServerActiveConnectionsExtra) SignalrTransport() AttrTransport { return a.AttrTransport }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -80,7 +84,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "The connection was closed normally.",
@@ -119,7 +122,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "stable",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": "ServerSentEvents protocol",
@@ -161,7 +163,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "The connection was closed normally.",
@@ -200,7 +201,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "stable",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "ServerSentEvents protocol",
@@ -271,6 +271,8 @@ State {
             "type": "metric",
             "unit": "{connection}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -378,6 +380,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -464,7 +467,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

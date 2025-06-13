@@ -5,28 +5,46 @@ package test
 // [test case]: https://wikipedia.org/wiki/Test_case
 type AttrCaseName string // test.case.name
 
-func (AttrCaseName) Development() {}
-func (AttrCaseName) Recommended() {}
+func (AttrCaseName) Development()    {}
+func (AttrCaseName) Recommended()    {}
+func (AttrCaseName) Key() string     { return "test_case_name" }
+func (a AttrCaseName) Value() string { return string(a) }
 
 // The status of the actual test case result from test execution
 type AttrCaseResultStatus string // test.case.result.status
 
-func (AttrCaseResultStatus) Development() {}
-func (AttrCaseResultStatus) Recommended() {}
+func (AttrCaseResultStatus) Development()    {}
+func (AttrCaseResultStatus) Recommended()    {}
+func (AttrCaseResultStatus) Key() string     { return "test_case_result_status" }
+func (a AttrCaseResultStatus) Value() string { return string(a) }
+
+const CaseResultStatusPass AttrCaseResultStatus = "pass"
+const CaseResultStatusFail AttrCaseResultStatus = "fail"
 
 // The human readable name of a [test suite]
 //
 // [test suite]: https://wikipedia.org/wiki/Test_suite
 type AttrSuiteName string // test.suite.name
 
-func (AttrSuiteName) Development() {}
-func (AttrSuiteName) Recommended() {}
+func (AttrSuiteName) Development()    {}
+func (AttrSuiteName) Recommended()    {}
+func (AttrSuiteName) Key() string     { return "test_suite_name" }
+func (a AttrSuiteName) Value() string { return string(a) }
 
 // The status of the test suite run
 type AttrSuiteRunStatus string // test.suite.run.status
 
-func (AttrSuiteRunStatus) Development() {}
-func (AttrSuiteRunStatus) Recommended() {}
+func (AttrSuiteRunStatus) Development()    {}
+func (AttrSuiteRunStatus) Recommended()    {}
+func (AttrSuiteRunStatus) Key() string     { return "test_suite_run_status" }
+func (a AttrSuiteRunStatus) Value() string { return string(a) }
+
+const SuiteRunStatusSuccess AttrSuiteRunStatus = "success"
+const SuiteRunStatusFailure AttrSuiteRunStatus = "failure"
+const SuiteRunStatusSkipped AttrSuiteRunStatus = "skipped"
+const SuiteRunStatusAborted AttrSuiteRunStatus = "aborted"
+const SuiteRunStatusTimedOut AttrSuiteRunStatus = "timed_out"
+const SuiteRunStatusInProgress AttrSuiteRunStatus = "in_progress"
 
 /* State {
     name: "attr.go.j2",
@@ -59,7 +77,6 @@ func (AttrSuiteRunStatus) Recommended() {}
                     "root_namespace": "test",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "pass",
@@ -106,7 +123,6 @@ func (AttrSuiteRunStatus) Recommended() {}
                     "root_namespace": "test",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": "success",
@@ -269,6 +285,7 @@ func (AttrSuiteRunStatus) Recommended() {}
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",

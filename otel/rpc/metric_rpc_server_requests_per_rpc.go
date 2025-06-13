@@ -6,37 +6,32 @@ import (
 
 // Measures the number of messages received per RPC.
 type ServerRequestsPerRpc struct {
-	*prometheus.HistogramVec
-	extra ServerRequestsPerRpcExtra
+	prometheus.Histogram
 }
 
 func NewServerRequestsPerRpc() ServerRequestsPerRpc {
-	labels := []string{}
-	return ServerRequestsPerRpc{HistogramVec: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "rpc",
-		Name:      "server_requests_per_rpc",
-		Help:      "Measures the number of messages received per RPC.",
-	}, labels)}
+	return ServerRequestsPerRpc{Histogram: prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name: "rpc_server_requests_per_rpc",
+		Help: "Measures the number of messages received per RPC.",
+	})}
 }
 
-func (m ServerRequestsPerRpc) With(extra interface {
-}) prometheus.Observer {
-	if extra == nil {
-		extra = m.extra
+func (m ServerRequestsPerRpc) Register(regs ...prometheus.Registerer) ServerRequestsPerRpc {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type ServerRequestsPerRpcExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "ServerRequestsPerRpcExtra",
         "Instr": "Histogram",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "server.requests_per_rpc",
         "Type": "ServerRequestsPerRpc",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Measures the number of messages received per RPC.",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

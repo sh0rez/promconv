@@ -11,42 +11,44 @@ type ContextSwitches struct {
 }
 
 func NewContextSwitches() ContextSwitches {
-	labels := []string{"process_context_switch_type"}
+	labels := []string{AttrContextSwitchType("").Key()}
 	return ContextSwitches{CounterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "process",
-		Name:      "context_switches",
-		Help:      "Number of times the process has been context switched.",
+		Name: "process_context_switches",
+		Help: "Number of times the process has been context switched.",
 	}, labels)}
 }
 
-func (m ContextSwitches) With(extra interface {
-	AttrProcessContextSwitchType() AttrContextSwitchType
-}) prometheus.Counter {
-	if extra == nil {
-		extra = m.extra
+func (m ContextSwitches) With(extras ...interface{ ProcessContextSwitchType() AttrContextSwitchType }) prometheus.Counter {
+	if extras == nil {
+		extras = append(extras, m.extra)
 	}
-	return m.WithLabelValues(
-		string(extra.AttrProcessContextSwitchType()),
-	)
+	extra := extras[0]
+
+	return m.CounterVec.WithLabelValues(extra.ProcessContextSwitchType().Value())
 }
 
-func (a ContextSwitches) WithProcessContextSwitchType(attr interface{ AttrProcessContextSwitchType() AttrContextSwitchType }) ContextSwitches {
-	a.extra.ProcessContextSwitchType = attr.AttrProcessContextSwitchType()
+// Deprecated: Use [ContextSwitches.With] instead
+func (m ContextSwitches) WithLabelValues(lvs ...string) prometheus.Counter {
+	return m.CounterVec.WithLabelValues(lvs...)
+}
+
+func (a ContextSwitches) WithContextSwitchType(attr interface{ ProcessContextSwitchType() AttrContextSwitchType }) ContextSwitches {
+	a.extra.AttrContextSwitchType = attr.ProcessContextSwitchType()
 	return a
 }
 
 type ContextSwitchesExtra struct {
-	// Specifies whether the context switches for this data point were voluntary or involuntary.
-	ProcessContextSwitchType AttrContextSwitchType `otel:"process.context_switch_type"`
+	// Specifies whether the context switches for this data point were voluntary or involuntary
+	AttrContextSwitchType AttrContextSwitchType `otel:"process.context_switch_type"`
 }
 
-func (a ContextSwitchesExtra) AttrProcessContextSwitchType() AttrContextSwitchType {
-	return a.ProcessContextSwitchType
+func (a ContextSwitchesExtra) ProcessContextSwitchType() AttrContextSwitchType {
+	return a.AttrContextSwitchType
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "vec.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
@@ -67,7 +69,6 @@ State {
                 "requirement_level": "recommended",
                 "stability": "development",
                 "type": {
-                    "allow_custom_values": none,
                     "members": [
                         {
                             "brief": none,
@@ -97,7 +98,6 @@ State {
                     "requirement_level": "recommended",
                     "stability": "development",
                     "type": {
-                        "allow_custom_values": none,
                         "members": [
                             {
                                 "brief": none,
@@ -151,6 +151,8 @@ State {
             "type": "metric",
             "unit": "{context_switch}",
         },
+        "for_each_attr": <macro for_each_attr>,
+        "module": "shorez.de/promconv/otel",
     },
     env: Environment {
         globals: {
@@ -258,6 +260,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -344,7 +347,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "vec.go.j2",
         ],
     },
 }

@@ -6,37 +6,32 @@ import (
 
 // Deprecated, use `otel.sdk.exporter.span.inflight` instead.
 type SdkExporterSpanInflightCount struct {
-	*prometheus.GaugeVec
-	extra SdkExporterSpanInflightCountExtra
+	prometheus.Gauge
 }
 
 func NewSdkExporterSpanInflightCount() SdkExporterSpanInflightCount {
-	labels := []string{}
-	return SdkExporterSpanInflightCount{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "otel",
-		Name:      "sdk_exporter_span_inflight_count",
-		Help:      "Deprecated, use `otel.sdk.exporter.span.inflight` instead.",
-	}, labels)}
+	return SdkExporterSpanInflightCount{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "otel_sdk_exporter_span_inflight_count",
+		Help: "Deprecated, use `otel.sdk.exporter.span.inflight` instead.",
+	})}
 }
 
-func (m SdkExporterSpanInflightCount) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m SdkExporterSpanInflightCount) Register(regs ...prometheus.Registerer) SdkExporterSpanInflightCount {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type SdkExporterSpanInflightCountExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "SdkExporterSpanInflightCountExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "sdk.exporter.span.inflight.count",
         "Type": "SdkExporterSpanInflightCount",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Deprecated, use `otel.sdk.exporter.span.inflight` instead.",
@@ -179,6 +173,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -265,7 +260,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }

@@ -6,37 +6,32 @@ import (
 
 // Number of desired replica pods in this statefulset
 type StatefulsetDesiredPods struct {
-	*prometheus.GaugeVec
-	extra StatefulsetDesiredPodsExtra
+	prometheus.Gauge
 }
 
 func NewStatefulsetDesiredPods() StatefulsetDesiredPods {
-	labels := []string{}
-	return StatefulsetDesiredPods{GaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "k8s",
-		Name:      "statefulset_desired_pods",
-		Help:      "Number of desired replica pods in this statefulset",
-	}, labels)}
+	return StatefulsetDesiredPods{Gauge: prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8s_statefulset_desired_pods",
+		Help: "Number of desired replica pods in this statefulset",
+	})}
 }
 
-func (m StatefulsetDesiredPods) With(extra interface {
-}) prometheus.Gauge {
-	if extra == nil {
-		extra = m.extra
+func (m StatefulsetDesiredPods) Register(regs ...prometheus.Registerer) StatefulsetDesiredPods {
+	if regs == nil {
+		prometheus.DefaultRegisterer.MustRegister(m)
 	}
-	return m.WithLabelValues()
-}
-
-type StatefulsetDesiredPodsExtra struct {
+	for _, reg := range regs {
+		reg.MustRegister(m)
+	}
+	return m
 }
 
 /*
 State {
-    name: "metric.go.j2",
+    name: "scalar.go.j2",
     current_block: None,
     auto_escape: None,
     ctx: {
-        "AttrExtra": "StatefulsetDesiredPodsExtra",
         "Instr": "Gauge",
         "InstrMap": {
             "counter": "Counter",
@@ -46,7 +41,6 @@ State {
         },
         "Name": "statefulset.desired_pods",
         "Type": "StatefulsetDesiredPods",
-        "attributes": [],
         "ctx": {
             "attributes": [],
             "brief": "Number of desired replica pods in this statefulset",
@@ -175,6 +169,7 @@ State {
             "ansi_white",
             "ansi_yellow",
             "attr",
+            "attribute_id",
             "attribute_namespace",
             "attribute_registry_file",
             "attribute_registry_namespace",
@@ -261,7 +256,7 @@ State {
             "urlencode",
         ],
         templates: [
-            "metric.go.j2",
+            "scalar.go.j2",
         ],
     },
 }
